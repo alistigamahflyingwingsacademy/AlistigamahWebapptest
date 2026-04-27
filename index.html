@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School System</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+.modal{display:none}
+.modal.active{display:flex}
+</style>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- NAV -->
+<nav class="bg-blue-900 text-white p-4 flex justify-between">
+<h1>School System</h1>
+<div>
+<button onclick="openModal('loginModal')" class="bg-white text-blue-900 px-3 py-1">Login</button>
+</div>
+</nav>
+
+<!-- LANDING -->
+<section class="text-center py-10 bg-blue-700 text-white">
+<h2>School Management System</h2>
+</section>
+
+<!-- LOGIN -->
+<div id="loginModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center">
+<div class="bg-white p-6 w-80">
+<input id="email" placeholder="Email" class="border p-2 w-full mb-2">
+<input id="password" type="password" placeholder="Password" class="border p-2 w-full mb-2">
+<button onclick="login()" class="bg-blue-600 text-white w-full py-2">Login</button>
+</div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
+<div class="bg-blue-900 text-white p-4 flex justify-between">
+<span id="role"></span>
+<button onclick="logout()">Logout</button>
+</div>
+
+<div class="flex">
+<div class="w-64 bg-gray-800 text-white min-h-screen p-4" id="menu"></div>
+<div class="flex-1 p-6" id="content"></div>
+</div>
+</div>
+
+<script>
+// SUPABASE
+const supabase = window.supabase.createClient(
+"https://rvapvxozkpuhnqiwfrzq.supabase.co",
+"sb_publishable_ftEV8Br0ZBr78QDF3NJGVw_W5F-0e8i"
+);
+
+// LOGIN
+async function login(){
+let email = emailInput.value;
+let password = passwordInput.value;
+
+const {data,error} = await supabase.auth.signInWithPassword({email,password});
+if(error){alert(error.message);return;}
+
+const {data:profile} = await supabase.from('profiles')
+.select('role').eq('id',data.user.id).single();
+
+localStorage.setItem("role",profile.role);
+init();
+}
+
+// INIT
+function init(){
+document.querySelector("nav").style.display="none";
+document.querySelector("section").style.display="none";
+dashboard.classList.remove("hidden");
+
+let role = localStorage.getItem("role");
+roleDisplay.innerText = role;
+
+renderMenu(role);
+loadAnnouncement();
+}
+
+// MENU
+function renderMenu(role){
+menu.innerHTML="";
+
+const items=[
+"Students","Staff","Fees","Results","Attendance","Parent","Export"
+];
+
+items.forEach(i=>{
+let b=document.createElement("button");
+b.innerText=i;
+b.className="block w-full text-left p-2 hover:bg-gray-700";
+b.onclick=()=>load(i);
+menu.appendChild(b);
+});
+}
+
+// LOAD MODULE
+function load(name){
+if(name==="Students") loadStudents();
+if(name==="Staff") loadStaff();
+if(name==="Fees") loadFees();
+if(name==="Results") loadResults();
+if(name==="Attendance") loadAttendance();
+if(name==="Parent") loadParent();
+}
+
+// STUDENTS
+async function loadStudents(){
+content.innerHTML=`<h2>Students</h2>
+<button onclick="addStudent()">Add</button>
+<table id="st"></table>`;
+
+const {data}=await supabase.from('students').select('*');
+
+let html="";
+data.forEach(s=>{
+html+=`<tr>
+<td>${s.name}</td>
+<td>${s.class}</td>
+<td>
+<button onclick="delStudent('${s.id}')">X</button>
+</td></tr>`;
+});
+st.innerHTML=html;
+}
+
+async function addStudent(){
+let name=prompt("Name");
+let cls=prompt("Class");
+await supabase.from('students').insert([{name,class:cls,status:"active"}]);
+loadStudents();
+}
+
+async function delStudent(id){
+await supabase.from('students').delete().eq('id',id);
+loadStudents();
+}
+
+// STAFF
+async function loadStaff(){
+content.innerHTML=`<h2>Staff</h2><button onclick="addStaff()">Add</button><table id="sf"></table>`;
+const {data}=await supabase.from('teachers').select('*');
+
+let html="";
+data.forEach(s=>{
+html+=`<tr><td>${s.name}</td><td>${s.role}</td>
+<td><button onclick="delStaff('${s.id}')">X</button></td></tr>`;
+});
+sf.innerHTML=html;
+}
+
+async function addStaff(){
+let name=prompt("Name");
+let role=prompt("Role");
+await supabase.from('teachers').insert([{name,role}]);
+loadStaff();
+}
+
+async function delStaff(id){
+await supabase.from('teachers').delete().eq('id',id);
+loadStaff();
+}
+
+// FEES
+async function loadFees(){
+content.innerHTML=`<h2>Fees</h2><button onclick="pay()">Record Payment</button><table id="fees"></table>`;
+
+const {data}=await supabase.from('fee_transactions').select('*');
+
+let html="";
+data.forEach(f=>{
+html+=`<tr><td>${f.student_id}</td><td>${f.amount}</td></tr>`;
+});
+fees.innerHTML=html;
+}
+
+async function pay(){
+let id=prompt("Student ID");
+let amount=prompt("Amount");
+
+await supabase.from('fee_transactions').insert([{student_id:id,amount}]);
+
+alert("Recorded");
+loadFees();
+}
+
+// RESULTS
+async function loadResults(){
+content.innerHTML=`<h2>Results</h2><button onclick="addResult()">Add</button><table id="rs"></table>`;
+
+const {data}=await supabase.from('student_results').select('*');
+
+let html="";
+data.forEach(r=>{
+html+=`<tr><td>${r.student_id}</td><td>${r.score}</td></tr>`;
+});
+rs.innerHTML=html;
+}
+
+async function addResult(){
+let id=prompt("Student ID");
+let score=prompt("Score");
+
+await supabase.from('student_results').insert([{student_id:id,score}]);
+loadResults();
+}
+
+// ATTENDANCE
+async function loadAttendance(){
+content.innerHTML=`<h2>Attendance</h2><button onclick="mark()">Mark</button>`;
+
+const {data}=await supabase.from('attendance').select('*');
+content.innerHTML+=JSON.stringify(data);
+}
+
+async function mark(){
+let id=prompt("Student ID");
+await supabase.from('attendance').insert([{student_id:id,status:"present"}]);
+}
+
+// PARENT
+async function loadParent(){
+let id=prompt("Student ID");
+
+const {data:results}=await supabase.from('student_results').select('*').eq('student_id',id);
+const {data:fees}=await supabase.from('fee_transactions').select('*').eq('student_id',id);
+
+content.innerHTML=`<h2>Parent View</h2>
+<h3>Results</h3>${JSON.stringify(results)}
+<h3>Fees</h3>${JSON.stringify(fees)}`;
+}
+
+// EXPORT
+async function loadExport(){
+const {data}=await supabase.from('students').select('*');
+let csv="name,class\n";
+data.forEach(d=>csv+=`${d.name},${d.class}\n`);
+
+let a=document.createElement('a');
+a.href='data:text/csv,'+encodeURIComponent(csv);
+a.download='students.csv';
+a.click();
+}
+
+// ANNOUNCEMENT
+async function loadAnnouncement(){
+const {data}=await supabase.from('site_announcement').select('*').single();
+if(data) alert(data.message);
+}
+
+// LOGOUT
+async function logout(){
+await supabase.auth.signOut();
+location.reload();
+}
+
+// MODAL
+function openModal(id){document.getElementById(id).classList.add("active")}
+</script>
+
+</body>
+</html>

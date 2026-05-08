@@ -3,149 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Al‑Istiqaamah Flying Wings | Production Portal</title>
+    <title>Al‑Istiqaamah Flying Wings Academy | Unified Portal</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M12 3L1 9l11 6 11-6-11-6zM1 15l11 6 11-6M1 11l11 6 11-6'/%3E%3C/svg%3E">
+    
+    <!-- Supabase & Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <style>
-        * { font-family: 'Inter', system-ui, sans-serif; }
+        * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         .hero-pattern { background: linear-gradient(135deg, #0a2e2c 0%, #0f3b38 100%); }
-        .sidebar { background: #0f2e2c; transition: width 0.2s ease, left 0.2s ease; width: 280px; }
+        .sidebar { background: #0f2e2c; transition: width 0.2s ease, left 0.2s ease; z-index: 45; width: 280px; }
         .sidebar.minimized { width: 80px; }
         .sidebar.minimized .nav-text { display: none; }
-        .nav-link { transition: all 0.2s; cursor: pointer; }
-        .nav-link:hover { background: rgba(255,255,255,0.12); border-left: 4px solid #f59e0b; }
-        .apply-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; font-weight: bold; border: none; cursor: pointer; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: white; padding: 10px 20px; border-radius: 8px; z-index: 1000; display: none; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 200; }
-        .modal-content { background: white; padding: 1.5rem; border-radius: 1rem; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; }
-        .grade-input { width: 70px; padding: 4px; border-radius: 6px; border: 1px solid #ccc; text-align: center; }
-        .search-filter { border: 1px solid #cbd5e1; border-radius: 40px; padding: 8px 16px; width: 100%; max-width: 300px; }
+        .sidebar.minimized .nav-icon { margin-right: 0; }
+        .nav-link { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 12px; color: #e2e8f0; }
+        .nav-link:hover, .nav-link-active { background: rgba(255,255,255,0.12); border-left: 4px solid #f59e0b; }
+        .apply-btn { background: linear-gradient(135deg, #f59e0b, #d97706); transition: 0.2s; color: white; font-weight: bold; border: none; cursor: pointer; }
+        .apply-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(245,158,11,0.4); }
+        .toast-notify { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: white; padding: 12px 20px; border-radius: 12px; z-index: 1000; display: none; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #f59e0b; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; top: 0; bottom: 0; width: 280px; }
+            .sidebar.open { left: 0; }
+            .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 55; display: none; }
+            .sidebar-overlay.active { display: block; }
+        }
+        .grade-input { width: 70px; padding: 6px; border-radius: 8px; border: 1px solid #cbd5e1; text-align: center; }
+        .search-filter { border: 1px solid #cbd5e1; border-radius: 40px; padding: 8px 16px; width: 100%; max-width: 320px; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 200; }
+        .modal-card { background: white; padding: 1.5rem; border-radius: 1.5rem; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; }
+        .carousel-slide { transition: opacity 0.5s ease-in-out; }
+        .carousel-btn { background: rgba(0,0,0,0.5); transition: 0.2s; cursor: pointer; }
+        .carousel-btn:hover { background: rgba(0,0,0,0.8); }
+        .dot { transition: all 0.2s; cursor: pointer; }
+        .active-badge { background: #10b981; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+        .suspended-badge { background: #f97316; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+        .cookie-consent { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; color: #f1f5f9; padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; z-index: 200; box-shadow: 0 -4px 10px rgba(0,0,0,0.2); }
+        .result-card { background: #fef9e6; border-left: 6px solid #f59e0b; }
     </style>
 </head>
 <body class="bg-gray-50">
 
-<div id="toast" class="toast"></div>
-<div id="globalLoader" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] hidden"><div class="spinner w-10 h-10 border-4 border-t-amber-500 rounded-full animate-spin"></div></div>
+<div id="toastMsg" class="toast-notify"></div>
+<div id="globalLoader" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] hidden"><div class="spinner"></div></div>
 
-<!-- LANDING PAGE -->
+<!-- ======================= LANDING PAGE (Version 1 + Slideshow) ======================= -->
 <div id="landingPage" class="min-h-screen flex flex-col">
-    <div class="hero-pattern text-white py-16 md:py-20">
-        <div class="container mx-auto px-6 text-center">
-            <img src="https://placehold.co/80x80?text=Logo" class="rounded-full mx-auto border-4 border-amber-400 mb-4">
-            <h1 class="text-4xl md:text-5xl font-bold">Al‑Istiqaamah <span class="text-amber-300">Flying Wings Academy</span></h1>
-            <p class="text-lg opacity-90 mt-2">Faith • Knowledge • Leadership</p>
-            <div class="flex gap-4 justify-center flex-wrap mt-6">
-                <button id="staffAdminBtn" class="bg-amber-500 hover:bg-amber-600 text-gray-900 px-6 py-2 rounded-full font-bold"><i class="fas fa-chalkboard-user mr-2"></i>Staff/Admin</button>
-                <button id="parentBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-full font-bold"><i class="fas fa-user-friends mr-2"></i>Parent Login</button>
-                <button id="adminSignupBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-bold"><i class="fas fa-user-shield mr-2"></i>Admin Signup</button>
+    <div class="hero-pattern text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.2"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+        <div class="relative container mx-auto px-6 py-16 md:py-20">
+            <div class="flex flex-col lg:flex-row justify-between items-start gap-10">
+                <div class="max-w-2xl">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="https://placehold.co/80x80?text=Logo" class="rounded-full border-4 border-amber-400" alt="Logo">
+                        <div><h1 class="text-3xl md:text-4xl font-bold">Al‑Istiqaamah <span class="text-amber-300">Flying Wings Academy</span></h1></div>
+                    </div>
+                    <div class="bg-amber-900/30 border-l-4 border-amber-400 p-3 rounded-r-xl mb-3">
+                        <p class="text-sm italic">“The best of mankind are those who are most beneficial to humanity.”</p>
+                        <p class="text-xs text-amber-200">— Prophetic Saying (Ṣaḥīḥ al-Jāmiʿ)</p>
+                        <p class="text-sm font-semibold mt-1"><i class="fas fa-feather-alt"></i> Faith • Knowledge • Leadership</p>
+                    </div>
+                    <p class="text-amber-200 text-sm"><i class="fas fa-map-marker-alt mr-1"></i> No. 10 Federal Government Layout, Samaru, Zaria</p>
+                    <div class="flex flex-wrap gap-4 mt-4 text-sm"><span><i class="fas fa-phone-alt text-amber-300"></i> 08067990749</span><span><i class="fas fa-envelope"></i> alistiqaamah.gi@outlook.com</span></div>
+                    <div class="flex flex-wrap gap-4 mt-6">
+                        <button id="staffAdminBtn" class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-6 py-2.5 rounded-full shadow-lg"><i class="fas fa-chalkboard-user"></i> Staff / Admin Login</button>
+                        <button id="parentBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-full shadow-lg"><i class="fas fa-user-friends"></i> Parent Login</button>
+                        <button id="adminSignupBtnLanding" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-full shadow-lg"><i class="fas fa-user-shield"></i> Admin Sign Up</button>
+                    </div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 shadow-xl border border-white/20 w-80">
+                    <div class="flex justify-between border-b border-white/20 pb-2 mb-2"><span><i class="fas fa-clock"></i> Local Time</span><span id="liveTime" class="font-mono text-xl font-bold">--:--:--</span></div>
+                    <div><p class="text-sm"><i class="fas fa-calendar-alt"></i> <span id="liveDate"></span></p><p class="text-3xl font-bold mt-1"><span id="weatherTemp">--</span>°C</p><p class="text-sm capitalize"><span id="weatherDesc">loading...</span></p></div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="container mx-auto px-6 -mt-8">
-        <div class="bg-white rounded-2xl shadow-lg p-5 flex justify-between items-center flex-wrap gap-4">
-            <div class="flex items-center gap-3"><i class="fas fa-clock text-amber-500 text-2xl"></i><div><span id="liveTime" class="text-2xl font-mono font-bold text-gray-800">--:--:--</span><div id="liveDate" class="text-gray-600"></div></div></div>
-            <div class="flex items-center gap-3"><i class="fas fa-cloud-sun text-amber-500 text-2xl"></i><div><span id="weatherTemp" class="text-gray-800">--</span>°C · <span id="weatherDesc" class="text-gray-600">loading...</span></div></div>
+
+    <!-- Slideshow Carousel (from Version 1) -->
+    <div class="container mx-auto px-6 py-10">
+        <div class="text-center mb-6"><h2 class="text-3xl font-bold text-gray-800">📸 Our Campus <span class="text-amber-600">in Focus</span></h2></div>
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-900 h-96 md:h-[500px]">
+            <div id="slidesContainer" class="relative w-full h-full"></div>
+            <button id="prevSlide" class="carousel-btn absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-3xl p-2 rounded-full w-10 h-10 flex items-center justify-center z-10"><i class="fas fa-chevron-left"></i></button>
+            <button id="nextSlide" class="carousel-btn absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-3xl p-2 rounded-full w-10 h-10 flex items-center justify-center z-10"><i class="fas fa-chevron-right"></i></button>
+            <div id="dotsContainer" class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10"></div>
         </div>
     </div>
-    <div class="container mx-auto px-6 py-12">
-        <div class="grid md:grid-cols-2 gap-6"><div class="bg-white p-6 rounded-2xl shadow border-t-8 border-emerald-600"><i class="fas fa-eye text-emerald-600 text-3xl"></i><h2 class="text-2xl font-bold mt-2">Vision</h2><p>Faith, Knowledge & service – beacons of guidance.</p></div><div class="bg-white p-6 rounded-2xl shadow border-t-8 border-amber-500"><i class="fas fa-bullhorn text-amber-500 text-3xl"></i><h2 class="text-2xl font-bold mt-2">Mission</h2><p>Academic excellence, Islamic values, Qur'an & Sunnah.</p></div></div>
-    </div>
-    <footer class="bg-slate-900 text-white text-center py-4 mt-auto"><p>© 2026 Al‑Istiqaamah Flying Wings Academy | Powered by Arrahmahtelecommunications</p></footer>
+
+    <!-- Vision/Mission & Core Objectives -->
+    <div class="container mx-auto px-6 py-8"><div class="grid md:grid-cols-2 gap-8"><div class="bg-white rounded-2xl shadow-xl p-8 border-t-8 border-emerald-600"><i class="fas fa-eye text-emerald-600 text-4xl"></i><h2 class="text-2xl font-bold mt-3">🌙 Vision</h2><p class="text-gray-700">To cultivate believers and learners who embody faith, knowledge, and inspiration — beacons of guidance.</p></div><div class="bg-white rounded-2xl shadow-xl p-8 border-t-8 border-amber-500"><i class="fas fa-bullhorn text-amber-500 text-4xl"></i><h2 class="text-2xl font-bold mt-3">🌿 Mission</h2><p class="text-gray-700">Academic excellence, Islamic values, nurturing learners by Qur’an and Sunnah.</p></div></div></div>
+    <div class="bg-gray-100 py-12"><div class="container mx-auto px-6 text-center"><h2 class="text-3xl font-bold text-gray-800 mb-6">🌸 Core <span class="text-amber-600">Objectives</span></h2><div class="grid md:grid-cols-3 gap-6"><div class="bg-white p-5 rounded-xl shadow"><i class="fas fa-quran text-emerald-600 text-2xl"></i><p class="mt-2">Authentic Qur’anic knowledge</p></div><div class="bg-white p-5 rounded-xl shadow"><i class="fas fa-book-open text-emerald-600 text-2xl"></i><p class="mt-2">Joyful memorization</p></div><div class="bg-white p-5 rounded-xl shadow"><i class="fas fa-crown text-emerald-600 text-2xl"></i><p class="mt-2">Confident, principled leaders</p></div></div></div></div>
+    
+    <div class="bg-emerald-900 text-white py-12 text-center"><div class="container mx-auto"><h2 class="text-3xl font-bold">Begin Your Child's Journey</h2><p class="mb-4">Admissions open. Contact our admission office.</p><button id="applyNowBtn" class="apply-btn px-8 py-3 rounded-full text-lg shadow-lg">📝 Apply Now</button></div></div>
+    <footer class="bg-slate-900 text-gray-400 py-6 text-center text-sm">© 2026 Al‑Istiqaamah Flying Wings Academy — Samaru, Zaria. RC: 1983033 | Powered by <span class="text-amber-400">Arrahmahtelecommunications.NG</span></footer>
 </div>
 
-<!-- MODALS -->
-<div id="loginModal" class="modal"><div class="modal-content relative"><h2 class="text-2xl font-bold mb-4">Login</h2><div class="flex gap-2 mb-3"><button id="adminTab" class="flex-1 py-2 bg-amber-500 rounded">Admin</button><button id="staffTab" class="flex-1 py-2 bg-gray-200 rounded">Staff</button></div><form id="adminLoginForm"><input id="adminEmail" placeholder="Email" type="email" class="border p-2 w-full mb-2 rounded"><input id="adminPassword" placeholder="Password" type="password" class="border p-2 w-full mb-4 rounded"><button type="submit" class="apply-btn w-full py-2 rounded">Login</button></form><form id="staffLoginForm" style="display:none"><input id="staffUsername" placeholder="Username" class="border p-2 w-full mb-2 rounded"><input id="staffPassword" placeholder="Password" type="password" class="border p-2 w-full mb-4 rounded"><button type="submit" class="apply-btn w-full py-2 rounded">Login</button></form><button class="close-modal absolute top-3 right-3 text-xl">&times;</button></div></div>
-<div id="parentModal" class="modal"><div class="modal-content relative"><h2 class="text-2xl font-bold mb-4">Parent Login</h2><form id="parentLoginForm"><input id="studentRegNo" placeholder="Student Reg Number" class="border p-2 w-full mb-2 rounded"><input id="parentPwd" placeholder="Password (default: al123)" type="password" class="border p-2 w-full mb-4 rounded"><button type="submit" class="apply-btn w-full py-2 rounded">Login</button></form><button class="close-modal absolute top-3 right-3 text-xl">&times;</button></div></div>
-<div id="adminSignupModal" class="modal"><div class="modal-content relative"><h2 class="text-2xl font-bold mb-2">Admin Signup</h2><form id="adminSignupForm"><input id="regCode" placeholder="Registration Code" class="border p-2 w-full mb-2 rounded"><input id="signupEmail" placeholder="Email" type="email" class="border p-2 w-full mb-2 rounded"><input id="signupPassword" placeholder="Password" type="password" class="border p-2 w-full mb-2 rounded"><input id="signupFullName" placeholder="Full Name" class="border p-2 w-full mb-2 rounded"><select id="signupRole" class="border p-2 w-full mb-4 rounded"><option value="dg_ceo">DG/CEO</option><option value="umc">UMC</option><option value="daf">DAF</option><option value="do">DO</option><option value="der">DER</option><option value="dprpa">DPRPA</option><option value="headteacher">Headteacher</option><option value="teacher">Teacher</option></select><button type="submit" class="apply-btn w-full py-2 rounded">Create Account</button></form><button class="close-modal absolute top-3 right-3 text-xl">&times;</button></div></div>
+<!-- ======================= MODALS (Unified from Version 2) ======================= -->
+<div id="loginModal" class="modal-overlay"><div class="modal-card relative"><h2 class="text-2xl font-bold mb-4">🔐 Portal Access</h2><div class="flex gap-2 mb-3"><button id="adminTab" class="flex-1 py-2 bg-amber-500 rounded-lg font-semibold">Admin</button><button id="staffTab" class="flex-1 py-2 bg-gray-200 rounded-lg font-semibold">Staff</button></div><form id="adminLoginForm"><input id="adminEmail" placeholder="Email" type="email" class="border p-2 w-full mb-2 rounded-lg" required><input id="adminPassword" placeholder="Password" type="password" class="border p-2 w-full mb-4 rounded-lg" required><button type="submit" class="apply-btn w-full py-2 rounded-lg">Admin Login</button></form><form id="staffLoginForm" style="display:none"><input id="staffUsername" placeholder="Username" class="border p-2 w-full mb-2 rounded-lg" required><input id="staffPassword" placeholder="Password (use email)" type="password" class="border p-2 w-full mb-4 rounded-lg" required><button type="submit" class="apply-btn w-full py-2 rounded-lg">Staff Login</button></form><button class="close-modal absolute top-3 right-3 text-2xl">&times;</button></div></div>
+<div id="parentModal" class="modal-overlay"><div class="modal-card relative"><h2 class="text-2xl font-bold mb-4">👪 Parent Login</h2><form id="parentLoginForm"><input id="studentRegNo" placeholder="Student Registration Number" class="border p-2 w-full mb-2 rounded-lg" required><input id="parentPwd" placeholder="Password (default: al123)" type="password" class="border p-2 w-full mb-4 rounded-lg" required><button type="submit" class="apply-btn w-full py-2 rounded-lg">Access Dashboard</button></form><button class="close-modal absolute top-3 right-3 text-2xl">&times;</button></div></div>
+<div id="adminSignupModal" class="modal-overlay"><div class="modal-card relative"><h2 class="text-2xl font-bold mb-2">🛡️ Admin Registration</h2><form id="adminSignupForm"><input id="regCode" placeholder="Registration Code" class="border p-2 w-full mb-2 rounded-lg" required><input id="signupEmail" placeholder="Email" type="email" class="border p-2 w-full mb-2 rounded-lg" required><input id="signupPassword" placeholder="Password" type="password" class="border p-2 w-full mb-2 rounded-lg" required><input id="signupFullName" placeholder="Full Name" class="border p-2 w-full mb-2 rounded-lg" required><select id="signupRole" class="border p-2 w-full mb-4 rounded-lg"><option value="dg_ceo">DG/CEO</option><option value="umc">UMC</option><option value="daf">DAF</option><option value="do">DO</option><option value="der">DER</option><option value="dprpa">DPRPA</option><option value="headteacher">Headteacher</option><option value="teacher">Teacher</option></select><button type="submit" class="apply-btn w-full py-2 rounded-lg">Create Admin</button></form><button class="close-modal absolute top-3 right-3 text-2xl">&times;</button></div></div>
 
-<!-- DASHBOARD -->
+<!-- ======================= MAIN DASHBOARD ======================= -->
 <div id="appContainer" class="hidden flex flex-col h-screen fixed inset-0 z-40 bg-white">
-    <div class="bg-white shadow-md px-4 py-2 flex justify-between items-center border-b">
+    <div class="bg-white shadow-md px-4 py-2 flex justify-between items-center border-b z-30">
         <div class="flex items-center gap-3"><button id="mobileMenuToggle" class="text-2xl md:hidden"><i class="fas fa-bars"></i></button><span class="font-bold text-emerald-800"><i class="fas fa-school mr-2"></i>Academy Portal</span><button id="autoMinimizeBtn" class="hidden md:block text-sm bg-gray-200 px-2 py-1 rounded"><i class="fas fa-chevron-left"></i> Minimize</button></div>
-        <div class="flex items-center gap-3"><span id="topUserName"></span> (<span id="topUserRole"></span>) <button id="logoutBtn" class="bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</button></div>
+        <div class="flex items-center gap-3 bg-gray-100 px-3 py-1 rounded-full"><i class="fas fa-user-circle text-xl"></i><span id="topUserName"></span> (<span id="topUserRole"></span>) <button id="logoutBtn" class="bg-red-500 text-white px-3 py-1 rounded-full text-sm ml-2">Logout</button></div>
     </div>
     <div class="flex flex-1 overflow-hidden relative">
         <div id="sidebarOverlay" class="sidebar-overlay"></div>
-        <aside id="dynamicSidebar" class="sidebar text-white flex flex-col overflow-y-auto"><div class="p-4 border-b border-white/20 flex justify-between"><span class="sidebar-header"><i class="fas fa-compass"></i> <span>Navigation</span></span><button id="closeMobileSidebar" class="md:hidden">&times;</button></div><nav id="dynamicNav" class="flex-1 px-2 py-4 space-y-1"></nav></aside>
+        <aside id="dynamicSidebar" class="sidebar text-white flex flex-col overflow-y-auto"><div class="p-4 border-b border-white/20 flex justify-between"><span><i class="fas fa-compass"></i> <span class="font-semibold">Navigation</span></span><button id="closeMobileSidebar" class="md:hidden text-xl">&times;</button></div><nav id="dynamicNav" class="flex-1 px-2 py-4 space-y-1"></nav></aside>
         <main id="mainContent" class="flex-1 overflow-auto bg-gray-100 p-5"></main>
     </div>
 </div>
+<div id="cookieBanner" class="cookie-consent" style="display: none;"><div class="flex-1 text-sm">🍪 We use cookies to enhance your experience. By continuing you agree.</div><button id="acceptCookiesBtn" class="bg-amber-500 px-4 py-1 rounded-full">Accept</button></div>
 
 <script>
-// ======================== SUPABASE CONFIG ========================
+// ======================== SUPABASE (Version 2 project - feature rich) ========================
 const SUPABASE_URL = 'https://sctxivdgqxdtpmrudotb.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_pKF1kDmzfWhcHhlINqTizw_c1iPE-yo';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ======================== GLOBAL CACHE & VARIABLES ========================
+// ======================== GLOBALS ========================
 let currentUser = null;
-let schoolData = { students: [], teachers: [], feeTransactions: [], results: [], announcements: [] };
-let lastFetchTime = 0;
-const CACHE_TTL = 30000; // 30 seconds
-let pendingRefresh = false;
-const TERMS = ['First Term', 'Second Term', 'Third Term'];
+let schoolData = { students: [], teachers: [], feeTransactions: [], results: [], slides: [] };
+let slidesData = [];
+let currentSlideIndex = 0, slideInterval;
 const SECTIONS = ['regular islamiyyah', 'regular memorization', 'intensive memorization', 'integrated islamic basic section', 'advance section', 'woman section'];
+const TERMS = ['First Term', 'Second Term', 'Third Term'];
 let currentYear = new Date().getFullYear();
-let sidebarMinimized = false;
 
-// Helper functions
-function showToast(msg, isErr = false) {
-    let t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.backgroundColor = isErr ? '#dc2626' : '#10b981';
-    t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 3000);
-    console.log("[TOAST]", msg);
-}
-function showLoading(show) { document.getElementById('globalLoader').style.display = show ? 'flex' : 'none'; }
-function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-
-// Optimized data refresh with caching
-async function refreshData(force = false) {
-    const now = Date.now();
-    if (!force && lastFetchTime && (now - lastFetchTime) < CACHE_TTL && schoolData.students.length) return schoolData;
-    if (pendingRefresh) return schoolData;
-    pendingRefresh = true;
-    showLoading(true);
-    try {
-        const [studentsRes, teachersRes, feeTxRes, resultsRes, annRes] = await Promise.all([
-            supabase.from('students').select('*'),
-            supabase.from('teachers').select('*'),
-            supabase.from('fee_transactions').select('*'),
-            supabase.from('results').select('*'),
-            supabase.from('site_announcement').select('*').limit(1)
-        ]);
-        schoolData = {
-            students: studentsRes.data || [],
-            teachers: teachersRes.data || [],
-            feeTransactions: feeTxRes.data || [],
-            results: resultsRes.data || [],
-            announcements: annRes.data || []
-        };
-        lastFetchTime = now;
-    } catch (e) { console.error(e); showToast("Data load error", true); }
-    finally { showLoading(false); pendingRefresh = false; }
-    return schoolData;
-}
-
-// ========== RESULT SAVE (CA1=20, CA2=20, EXAM=60) ==========
-async function saveResult(studentId, term, year, subject, ca1, ca2, exam) {
-    const total = ca1 + ca2 + exam;
-    if (ca1 < 0 || ca1 > 20 || ca2 < 0 || ca2 > 20 || exam < 0 || exam > 60)
-        throw new Error("Invalid marks: CA1 (0-20), CA2 (0-20), Exam (0-60)");
-    const { error } = await supabase.from('results').upsert({
-        student_id: studentId, term, year, subject, ca1, ca2, exam, total,
-        updated_at: new Date()
-    }, { onConflict: 'student_id,term,year,subject' });
-    if (error) throw error;
-    await refreshData(true);
-    showToast(`Result saved for ${subject}`);
-}
-
-// ========== ROLE MENUS (exact as requested) ==========
 const roleMenus = {
     dg_ceo: ['🏠 Dashboard','📚 Students','🎓 Enroll','📊 Results','💰 Fees','👥 Staff','📋 Apps','📥 Download Records','📢 Announce','🎞️ Slides'],
     umc: ['🏠 Dashboard','📚 Students','🎓 Enroll','📊 Results','💰 Fees','👥 Staff','📋 Apps','📥 Download Records','📢 Announce','🎞️ Slides'],
@@ -155,326 +145,147 @@ const roleMenus = {
     do: ['🏠 Dashboard','💰 Fees','📚 Students','👥 Staff'],
     headteacher: ['👨‍🎓 Section student','💰 Section fees','🎓 Enrol student'],
     teacher: ['👩‍🏫 My class','📝 Grade student','🗒 Attendance and appraisal'],
-    parent: ['👨‍🎓 Child reports','💳 Fee payment','📃 Result','📓 Payment history and receipt download']
+    parent: ['👨‍🎓 Child reports','💳 Fee payment','📃 Result','📓 Payment history']
 };
 
 const viewMap = {
     '🏠 Dashboard': 'dashboardView','📚 Students': 'studentsView','🎓 Enroll': 'enrollView','📊 Results': 'resultsManagementView','💰 Fees': 'feesView',
-    '👥 Staff': 'staffView','📋 Apps': 'applicationsView','📥 Download Records': 'downloadRecordsView','📢 Announce': 'announceView','🎞️ Slides': 'slidesManageView',
+    '👥 Staff': 'staffManagementView','📋 Apps': 'applicationsView','📥 Download Records': 'downloadRecordsView','📢 Announce': 'announceView','🎞️ Slides': 'slidesManageView',
     '🖨 Receipt generator': 'receiptGeneratorView','👥 Payroll': 'payrollView','📃 Payment report': 'paymentReportView','📉 Academic performance': 'academicPerformanceView',
     '📊 Section analysis': 'sectionAnalysisView','👨‍🎓 Section student': 'sectionStudentsView','💰 Section fees': 'sectionFeesView','🎓 Enrol student': 'enrollView',
-    '👩‍🏫 My class': 'myClassView','📝 Grade student': 'gradeStudentView','🗒 Attendance and appraisal': 'attendanceView','👨‍🎓 Child reports': 'childReportsView',
-    '💳 Fee payment': 'parentFeePaymentView','📃 Result': 'parentResultView','📓 Payment history and receipt download': 'parentPaymentHistoryView'
+    '👩‍🏫 My class': 'myClassView','📝 Grade student': 'gradeStudentView','🗒 Attendance and appraisal': 'attendanceView','👨‍🎓 Child reports': 'parentChildReportsView',
+    '💳 Fee payment': 'parentFeePaymentView','📃 Result': 'parentResultView','📓 Payment history': 'parentPaymentHistoryView'
 };
 
-// ========== CORE VIEWS (Supabase operations) ==========
-async function dashboardView() {
-    document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-2xl shadow"><h2 class="text-2xl font-bold text-emerald-800">Welcome ${escapeHtml(currentUser.full_name)}</h2><p class="text-gray-600">Role: ${currentUser.role.toUpperCase()}</p><div class="grid grid-cols-2 gap-4 mt-6"><div class="bg-emerald-50 p-4 rounded-xl"><i class="fas fa-users text-2xl"></i><p class="text-2xl font-bold">${schoolData.students.length}</p><p>Students</p></div><div class="bg-amber-50 p-4 rounded-xl"><i class="fas fa-chalkboard-user text-2xl"></i><p class="text-2xl font-bold">${schoolData.teachers.length}</p><p>Staff</p></div></div></div>`;
+// helpers
+function showToast(msg, isErr = false) { let t = document.getElementById('toastMsg'); t.innerText = msg; t.style.display = 'block'; t.style.background = isErr ? '#dc2626' : '#10b981'; setTimeout(()=> t.style.display='none', 3000); }
+function showLoading(show) { document.getElementById('globalLoader').style.display = show ? 'flex' : 'none'; }
+function escapeHtml(str) { return String(str ?? '').replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+// Data fetch
+async function refreshData(force = false) {
+    showLoading(true);
+    try {
+        const [studentsRes, teachersRes, feeRes, resultsRes, slidesRes] = await Promise.all([
+            supabaseClient.from('students').select('*'),
+            supabaseClient.from('teachers').select('*'),
+            supabaseClient.from('fee_transactions').select('*'),
+            supabaseClient.from('results').select('*'),
+            supabaseClient.from('slides').select('*')
+        ]);
+        schoolData.students = studentsRes.data || [];
+        schoolData.teachers = teachersRes.data || [];
+        schoolData.feeTransactions = feeRes.data || [];
+        schoolData.results = resultsRes.data || [];
+        slidesData = slidesRes.data || [];
+        if(slidesData.length === 0) slidesData = [{ id: 'demo1', image_url: 'https://picsum.photos/id/20/1200/600', caption: 'Modern Classrooms' }];
+        rebuildSlideshow();
+    } catch(e) { console.error(e); showToast("Data error", true); }
+    finally { showLoading(false); }
 }
 
-// Students with debounced search & pagination
-let studentSearchTimeout;
-async function studentsView() {
-    let html = `<div class="bg-white p-5 rounded-xl shadow"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">📚 Students</h2><input type="text" id="studentSearch" placeholder="Search name / reg no" class="search-filter"></div><div class="overflow-x-auto"><table class="min-w-full border"><thead><tr class="bg-gray-100"><th>Reg No</th><th>Name</th><th>Parent</th><th>Section</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentTableBody"></tbody></table></div><div id="loadMoreContainer" class="mt-3 text-center"></div></div>`;
-    document.getElementById('mainContent').innerHTML = html;
-    let currentFilter = '', displayLimit = 30;
-    function renderTable() {
-        let filtered = schoolData.students.filter(s => s.name.toLowerCase().includes(currentFilter.toLowerCase()) || s.reg_number.toLowerCase().includes(currentFilter.toLowerCase()));
-        let limited = filtered.slice(0, displayLimit);
-        document.getElementById('studentTableBody').innerHTML = limited.map(s => `<tr class="border-b"><td class="p-2 text-sm">${escapeHtml(s.reg_number)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.parent_name||'-')}</td><td class="text-sm">${escapeHtml(s.section)}</td><td><span class="${s.status==='active'?'text-green-600':'text-orange-600'}">${s.status}</span></td><td><button onclick="window.toggleSuspend('${s.id}','${s.status}')" class="bg-orange-500 text-white px-2 py-1 rounded text-xs mr-1">Toggle</button><button onclick="window.deleteStudent('${s.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Delete</button></td></tr>`).join('');
-        let moreBtn = filtered.length > displayLimit ? `<button id="loadMoreBtn" class="bg-gray-200 px-4 py-1 rounded">Load More (${filtered.length - displayLimit} remaining)</button>` : '';
-        document.getElementById('loadMoreContainer').innerHTML = moreBtn;
-        if (document.getElementById('loadMoreBtn')) document.getElementById('loadMoreBtn').onclick = () => { displayLimit += 30; renderTable(); };
-    }
-    document.getElementById('studentSearch').addEventListener('input', (e) => { clearTimeout(studentSearchTimeout); studentSearchTimeout = setTimeout(() => { currentFilter = e.target.value; displayLimit = 30; renderTable(); }, 300); });
-    renderTable();
+// Slideshow functions
+function rebuildSlideshow() {
+    const container = document.getElementById('slidesContainer'), dots = document.getElementById('dotsContainer');
+    if(!container) return;
+    container.innerHTML = ''; dots.innerHTML = '';
+    slidesData.forEach((slide, idx) => {
+        let div = document.createElement('div');
+        div.className = `carousel-slide absolute inset-0 w-full h-full transition-opacity duration-500 ${idx===currentSlideIndex?'opacity-100 z-10':'opacity-0 z-0'}`;
+        div.style.backgroundImage = `linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1)), url('${slide.image_url}')`;
+        div.style.backgroundSize = 'cover';
+        let cap = document.createElement('div'); cap.className = 'absolute bottom-0 bg-black/60 text-white p-2 w-full text-center'; cap.innerText = slide.caption || '⚡';
+        div.appendChild(cap); container.appendChild(div);
+        let dot = document.createElement('button'); dot.className = `dot w-3 h-3 rounded-full mx-1 ${idx===currentSlideIndex?'bg-amber-400 w-4':'bg-white/60'}`;
+        dot.addEventListener('click', () => goToSlide(idx));
+        dots.appendChild(dot);
+    });
+    resetAutoSlide();
 }
-window.toggleSuspend = async (id, cur) => {
-    let newStat = cur === 'active' ? 'suspended' : 'active';
-    await supabase.from('students').update({ status: newStat }).eq('id', id);
-    await refreshData(true);
-    studentsView();
-    showToast(`Student ${newStat}`);
-};
-window.deleteStudent = async (id) => {
-    if (confirm('Delete permanently?')) {
-        await supabase.from('students').delete().eq('id', id);
-        await refreshData(true);
-        studentsView();
-        showToast("Deleted");
-    }
-};
+function goToSlide(index) { let slides = document.querySelectorAll('#slidesContainer .carousel-slide'); if(!slides.length) return; if(index<0) index=slides.length-1; if(index>=slides.length) index=0; slides[currentSlideIndex]?.classList.remove('opacity-100','z-10'); slides[currentSlideIndex]?.classList.add('opacity-0','z-0'); slides[index]?.classList.remove('opacity-0','z-0'); slides[index]?.classList.add('opacity-100','z-10'); document.querySelectorAll('#dotsContainer .dot').forEach((d,i)=>{ if(i===index) d.classList.add('bg-amber-400','w-4'); else d.classList.remove('bg-amber-400','w-4'); }); currentSlideIndex = index; resetAutoSlide(); }
+function resetAutoSlide() { if(slideInterval) clearInterval(slideInterval); if(slidesData.length>1) slideInterval = setInterval(()=>goToSlide(currentSlideIndex+1),5000); }
 
-async function enrollView() {
-    let secOps = SECTIONS.map(s => `<option>${s}</option>`).join('');
-    document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl shadow"><h2 class="text-2xl font-bold">🎓 Enroll Student</h2><form id="enrollForm" class="space-y-3 mt-4"><input id="regNum" placeholder="Reg Number" required class="border p-2 w-full rounded"><input id="fullName" placeholder="Full Name" required class="border p-2 w-full rounded"><input id="parentName" placeholder="Parent Name" required class="border p-2 w-full rounded"><input id="level" type="number" placeholder="Level 1-12" class="border p-2 w-full rounded"><select id="sectionSel" class="border p-2 w-full rounded">${secOps}</select><select id="feeStat" class="border p-2 w-full rounded"><option>Pending</option><option>Paid</option></select><button type="submit" class="apply-btn w-full py-2 rounded">Register</button></form></div>`;
-    document.getElementById('enrollForm').onsubmit = async (e) => {
-        e.preventDefault();
-        try {
-            let reg = document.getElementById('regNum').value;
-            if (schoolData.students.find(s => s.reg_number === reg)) throw new Error('Reg exists');
-            await supabase.from('students').insert([{
-                reg_number: reg,
-                name: document.getElementById('fullName').value,
-                parent_name: document.getElementById('parentName').value,
-                level: parseInt(document.getElementById('level').value),
-                section: document.getElementById('sectionSel').value,
-                fee_status: document.getElementById('feeStat').value,
-                status: 'active'
-            }]);
-            await refreshData(true);
-            showToast('Enrolled');
-            studentsView();
-        } catch (err) { showToast(err.message, true); }
-    };
+// Academic result saving (CA1=20, CA2=20, Exam=60)
+async function saveResult(studentId, term, year, subject, ca1, ca2, exam) {
+    const total = ca1 + ca2 + exam;
+    if(ca1<0||ca1>20||ca2<0||ca2>20||exam<0||exam>60) throw new Error("Invalid marks range");
+    const { error } = await supabaseClient.from('results').upsert({ student_id: studentId, term, year, subject, ca1, ca2, exam, total, updated_at: new Date() }, { onConflict: 'student_id,term,year,subject' });
+    if(error) throw error; await refreshData(true);
 }
 
-async function resultsManagementView() {
-    let html = `<div class="bg-white p-5 rounded-xl shadow"><h2 class="text-2xl font-bold mb-3">📊 Results Entry (CA1=20, CA2=20, Exam=60)</h2><div class="flex flex-wrap gap-3 mb-4"><select id="resultTerm" class="border p-2 rounded"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><input id="resultYear" type="number" value="${currentYear}" class="border p-2 rounded w-24"><select id="resultStudent" class="border p-2 rounded flex-1"><option>Select Student</option>${schoolData.students.map(s => `<option value="${s.id}">${s.name} (${s.reg_number})</option>`).join('')}</select></div><div id="resultEntryPanel"></div></div>`;
-    document.getElementById('mainContent').innerHTML = html;
-    const loadSubjects = async () => {
-        let sid = document.getElementById('resultStudent').value;
-        if (!sid || sid === 'Select Student') return;
-        let term = document.getElementById('resultTerm').value, year = document.getElementById('resultYear').value;
-        let existing = schoolData.results.filter(r => r.student_id === sid && r.term === term && r.year == year);
-        let panel = `<div id="subjectsContainer" class="space-y-3"><div class="flex gap-2 items-center"><input id="subjName" placeholder="Subject" class="border p-2 rounded flex-1"><input id="ca1Val" type="number" placeholder="CA1 (0-20)" class="grade-input"><input id="ca2Val" type="number" placeholder="CA2 (0-20)" class="grade-input"><input id="examVal" type="number" placeholder="Exam (0-60)" class="grade-input"><button id="addSubjectBtn" class="bg-emerald-600 text-white px-3 py-1 rounded">+ Add</button></div><div id="savedSubjects"></div><button id="batchSaveBtn" class="apply-btn mt-4 w-full py-2">Save All Subjects</button></div>`;
-        document.getElementById('resultEntryPanel').innerHTML = panel;
-        document.getElementById('savedSubjects').innerHTML = existing.map(r => `<div class="flex gap-2 items-center bg-gray-50 p-2 rounded mt-2"><span class="flex-1 font-medium">${escapeHtml(r.subject)}</span><span>CA1: ${r.ca1}</span><span>CA2: ${r.ca2}</span><span>Exam: ${r.exam}</span><span>Total: ${r.total}</span><button class="text-red-500" onclick="window.deleteResult('${r.id}')">✕</button></div>`).join('');
-        document.getElementById('addSubjectBtn').onclick = async () => {
-            let sub = document.getElementById('subjName').value.trim();
-            let ca1 = parseInt(document.getElementById('ca1Val').value) || 0;
-            let ca2 = parseInt(document.getElementById('ca2Val').value) || 0;
-            let exam = parseInt(document.getElementById('examVal').value) || 0;
-            if (!sub) return showToast("Subject required", true);
-            try {
-                await saveResult(sid, term, year, sub, ca1, ca2, exam);
-                await refreshData(true);
-                loadSubjects();
-                document.getElementById('subjName').value = ''; document.getElementById('ca1Val').value = ''; document.getElementById('ca2Val').value = ''; document.getElementById('examVal').value = '';
-            } catch (e) { showToast(e.message, true); }
-        };
-        document.getElementById('batchSaveBtn').onclick = async () => { showToast("All subjects saved"); };
-    };
-    document.getElementById('resultStudent').addEventListener('change', loadSubjects);
-    document.getElementById('resultTerm').addEventListener('change', loadSubjects);
-    document.getElementById('resultYear').addEventListener('change', loadSubjects);
-    if (document.getElementById('resultStudent').value !== 'Select Student') loadSubjects();
-}
-window.deleteResult = async (id) => { await supabase.from('results').delete().eq('id', id); await refreshData(true); resultsManagementView(); showToast("Result deleted"); };
+// Core DB ops
+async function enrollStudentLogic(reg, name, parent, level, section, feeStatus) { if(schoolData.students.find(s=>s.reg_number===reg)) throw new Error("Reg exists"); const { error } = await supabaseClient.from('students').insert([{ reg_number: reg, name, parent_name: parent, level: parseInt(level), section, fee_status: feeStatus, status:'active' }]); if(error) throw error; await refreshData(true); showToast(`Enrolled ${name}`); }
+async function toggleSuspend(id, cur) { let newStat = cur==='active'?'suspended':'active'; await supabaseClient.from('students').update({status: newStat}).eq('id',id); await refreshData(true); }
+async function deleteStudentRecord(id) { if(confirm("Delete permanently?")) { await supabaseClient.from('students').delete().eq('id',id); await refreshData(true); showToast("Deleted"); } }
+async function recordFeePayment(id, term) { await supabaseClient.from('students').update({fee_status:'Paid'}).eq('id',id); await supabaseClient.from('fee_transactions').insert([{ student_id: id, term, amount_paid: 50000, payment_date: new Date(), receipt_no: `RCPT-${Date.now()}` }]); await refreshData(true); showToast(`Fee paid for ${term}`); }
 
-async function feesView() {
-    let html = `<div class="bg-white p-5 rounded-xl shadow"><h2>💰 Fee Management</h2><select id="feeTermSelect" class="border p-2 my-2"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><input type="text" id="feeSearch" placeholder="Search student" class="search-filter my-2"><div id="feeList"></div></div>`;
-    document.getElementById('mainContent').innerHTML = html;
-    function renderFeeList() {
-        let term = document.getElementById('feeTermSelect').value;
-        let search = document.getElementById('feeSearch').value.toLowerCase();
-        let list = schoolData.students.filter(s => s.fee_status !== 'Paid' && s.name.toLowerCase().includes(search));
-        document.getElementById('feeList').innerHTML = list.map(s => `<div class="flex justify-between border-b py-2"><span>${escapeHtml(s.name)} (${s.reg_number})</span><button onclick="window.markPaid('${s.id}','${term}')" class="bg-amber-500 text-white px-3 py-1 rounded text-sm">Mark Paid (${term})</button></div>`).join('');
-    }
-    let feeSearchTimeout;
-    document.getElementById('feeSearch').addEventListener('input', () => { clearTimeout(feeSearchTimeout); feeSearchTimeout = setTimeout(renderFeeList, 300); });
-    document.getElementById('feeTermSelect').addEventListener('change', renderFeeList);
-    renderFeeList();
-}
-window.markPaid = async (id, term) => {
-    await supabase.from('students').update({ fee_status: 'Paid' }).eq('id', id);
-    await supabase.from('fee_transactions').insert([{ student_id: id, term, amount_paid: 50000, payment_date: new Date(), receipt_no: `RCPT-${Date.now()}` }]);
-    await refreshData(true);
-    feesView();
-    showToast(`Fee paid for ${term}`);
-};
+// ======================== AUTH ========================
+async function adminLogin(email, pwd) { showLoading(true); try { let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pwd }); if(error) throw error; let { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single(); if(!profile) throw new Error('No role'); currentUser = { id: profile.id, full_name: profile.full_name, role: profile.role, section: profile.section }; await refreshData(); showDashboard(); closeModal('loginModal'); showToast(`Welcome ${currentUser.full_name}`); } catch(err) { showToast(err.message, true); } finally { showLoading(false); } }
+async function staffLogin(username, pwd) { showLoading(true); try { let { data: staff } = await supabaseClient.from('teachers').select('*').eq('username', username).single(); if(!staff) throw new Error('Staff not found'); let { data, error } = await supabaseClient.auth.signInWithPassword({ email: staff.email, password: pwd }); if(error) throw error; currentUser = { id: data.user.id, full_name: staff.name, role: staff.role || 'teacher', section: staff.assigned_section }; await refreshData(); showDashboard(); closeModal('loginModal'); } catch(err) { showToast(err.message, true); } finally { showLoading(false); } }
+async function parentLogin(regNo, pwd) { if(pwd !== 'al123') return showToast('Invalid password (al123)', true); await refreshData(); let student = schoolData.students.find(s=>s.reg_number === regNo); if(!student) return showToast('Student not found', true); currentUser = { role: 'parent', full_name: `Parent of ${student.name}`, studentId: student.id }; showDashboard(); closeModal('parentModal'); }
+async function adminSignup(code, email, pwd, fullName, role) { if(code !== 'ALIFLY2026') throw new Error('Invalid code'); let { data, error } = await supabaseClient.auth.signUp({ email, password: pwd }); if(error) throw error; await supabaseClient.from('profiles').insert([{ id: data.user.id, full_name: fullName, role }]); showToast('Account created, please verify email'); }
 
-// Teacher & Parent views (similar to demo but with Supabase)
-async function myClassView() {
-    let section = currentUser.section || SECTIONS[0];
-    let classStudents = schoolData.students.filter(s => s.section === section);
-    document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2>👩‍🏫 My Class - ${escapeHtml(section)}</h2><ul>${classStudents.map(s => `<li>${escapeHtml(s.name)} (${s.reg_number})</li>`).join('')}</ul></div>`;
-}
-async function gradeStudentView() {
-    let section = currentUser.section || SECTIONS[0];
-    let classStudents = schoolData.students.filter(s => s.section === section);
-    let html = `<div class="bg-white p-6 rounded-xl shadow"><h2>📝 Grade Student (CA1=20, CA2=20, Exam=60)</h2><select id="gradeTerm" class="border p-2 w-full mb-2"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><select id="gradeStudentSelect" class="border p-2 w-full mb-3">${classStudents.map(s => `<option value="${s.id}">${s.name}</option>`)}</select><div id="gradePanel"></div></div>`;
-    document.getElementById('mainContent').innerHTML = html;
-    const loadGradePanel = async () => {
-        let sid = document.getElementById('gradeStudentSelect').value;
-        let term = document.getElementById('gradeTerm').value;
-        let year = currentYear;
-        let existing = schoolData.results.filter(r => r.student_id === sid && r.term === term && r.year == year);
-        let panel = `<div id="subjList">${existing.map(r => `<div class="flex gap-2 mb-2 items-center"><input value="${r.subject}" class="border p-1 flex-1"><input type="number" value="${r.ca1}" placeholder="CA1" class="grade-input"><input type="number" value="${r.ca2}" placeholder="CA2" class="grade-input"><input type="number" value="${r.exam}" placeholder="Exam" class="grade-input"><button class="bg-red-500 text-white px-2 rounded" onclick="this.parentElement.remove()">✕</button></div>`).join('')}</div><div class="flex gap-2 mt-2"><input id="newSubj" placeholder="New Subject" class="border p-1 flex-1"><input id="newCa1" placeholder="CA1" class="grade-input"><input id="newCa2" placeholder="CA2" class="grade-input"><input id="newExam" placeholder="Exam" class="grade-input"><button id="addSubjBtn" class="bg-emerald-600 text-white px-3 py-1 rounded">+</button></div><button id="saveTeacherGrades" class="apply-btn mt-4 w-full py-2">Save Grades</button>`;
-        document.getElementById('gradePanel').innerHTML = panel;
-        document.getElementById('addSubjBtn').onclick = () => {
-            let sub = document.getElementById('newSubj').value.trim();
-            if (sub) {
-                let div = document.createElement('div'); div.className = 'flex gap-2 mb-2 items-center';
-                div.innerHTML = `<input value="${sub}" class="border p-1 flex-1"><input type="number" placeholder="CA1" class="grade-input"><input type="number" placeholder="CA2" class="grade-input"><input type="number" placeholder="Exam" class="grade-input"><button class="bg-red-500 text-white px-2 rounded" onclick="this.parentElement.remove()">✕</button>`;
-                document.getElementById('subjList').appendChild(div);
-                document.getElementById('newSubj').value = '';
-            }
-        };
-        document.getElementById('saveTeacherGrades').onclick = async () => {
-            let rows = document.querySelectorAll('#subjList > div');
-            for (let row of rows) {
-                let inputs = row.querySelectorAll('input');
-                let subject = inputs[0].value.trim();
-                let ca1 = parseInt(inputs[1].value) || 0;
-                let ca2 = parseInt(inputs[2].value) || 0;
-                let exam = parseInt(inputs[3].value) || 0;
-                if (subject) await saveResult(sid, term, year, subject, ca1, ca2, exam);
-            }
-            await refreshData(true);
-            loadGradePanel();
-            showToast("Grades saved");
-        };
-    };
-    document.getElementById('gradeStudentSelect').addEventListener('change', loadGradePanel);
-    document.getElementById('gradeTerm').addEventListener('change', loadGradePanel);
-    if (classStudents.length) loadGradePanel();
-}
-async function attendanceView() {
-    let html = `<div class="bg-white p-6"><h2>🗒 Attendance</h2><select id="attTerm" class="border p-2 my-2"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><div id="attendanceList"></div><button id="saveAttendance" class="apply-btn mt-4 w-full py-2">Save Attendance</button></div>`;
-    document.getElementById('mainContent').innerHTML = html;
-    let section = currentUser.section || SECTIONS[0];
-    let students = schoolData.students.filter(s => s.section === section);
-    let today = new Date().toISOString().slice(0,10);
-    let { data: records } = await supabase.from('attendance_records').select('*').eq('date', today);
-    let attMap = {}; records?.forEach(r => attMap[r.student_id] = r.status === 'present');
-    let listHtml = students.map(s => `<div class="flex items-center gap-2 py-1"><input type="checkbox" class="att-check" data-id="${s.id}" ${attMap[s.id] ? 'checked' : ''}> ${escapeHtml(s.name)}</div>`).join('');
-    document.getElementById('attendanceList').innerHTML = listHtml;
-    document.getElementById('saveAttendance').onclick = async () => {
-        let payload = [];
-        document.querySelectorAll('.att-check').forEach(cb => payload.push({ student_id: cb.dataset.id, status: cb.checked ? 'present' : 'absent', date: today }));
-        for (let p of payload) await supabase.from('attendance_records').upsert(p, { onConflict: 'student_id,date' });
-        showToast("Attendance saved");
-    };
-}
-// Parent views (using real data)
-async function parentResultView() {
-    let student = schoolData.students.find(s => s.id === currentUser.studentId);
-    if (!student) return document.getElementById('mainContent').innerHTML = '<div class="bg-white p-6">No child linked</div>';
-    let html = `<div class="bg-white p-6 rounded-xl"><h2>📃 Result: ${escapeHtml(student.name)}</h2><select id="resultTermSelect" class="border p-2 my-2"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><div id="resultDisplay"></div></div>`;
-    document.getElementById('mainContent').innerHTML = html;
-    function loadResult() {
-        let term = document.getElementById('resultTermSelect').value;
-        let studentResults = schoolData.results.filter(r => r.student_id === student.id && r.term === term && r.year === currentYear);
-        let total = studentResults.reduce((s, r) => s + (r.ca1 + r.ca2 + r.exam), 0);
-        let avg = studentResults.length ? (total / studentResults.length).toFixed(1) : 0;
-        let table = `<table class="w-full border mt-3"><thead><tr class="bg-amber-100"><th>Subject</th><th>CA1 (20)</th><th>CA2 (20)</th><th>Exam (60)</th><th>Total</th><th>Grade</th></tr></thead><tbody>${studentResults.map(r => `<tr><td class="border p-2">${r.subject}</td><td class="border p-2">${r.ca1}</td><td class="border p-2">${r.ca2}</td><td class="border p-2">${r.exam}</td><td class="border p-2">${r.total}</td><td class="border p-2">${r.total >= 80 ? 'A' : r.total >= 70 ? 'B' : r.total >= 60 ? 'C' : 'D'}</td></tr>`).join('')}</tbody></table><p class="mt-3 font-bold">Average Score: ${avg}% | Remark: ${avg >= 70 ? 'Excellent' : avg >= 50 ? 'Good' : 'Needs Improvement'}</p>`;
-        document.getElementById('resultDisplay').innerHTML = table || "<p>No results yet</p>";
-    }
-    document.getElementById('resultTermSelect').addEventListener('change', loadResult);
-    loadResult();
-}
+// ========== DASHBOARD & VIEWS (Operational) ==========
+async function showDashboard() { document.getElementById('landingPage').style.display = 'none'; document.getElementById('appContainer').classList.remove('hidden'); document.getElementById('topUserName').innerText = currentUser.full_name; document.getElementById('topUserRole').innerText = (currentUser.role || 'parent').toUpperCase(); let roleKey = currentUser.role === 'headteacher' ? 'headteacher' : (currentUser.role === 'teacher' ? 'teacher' : (currentUser.role === 'parent' ? 'parent' : currentUser.role)); let menuLabels = roleMenus[roleKey] || roleMenus.dg_ceo; let navHtml = menuLabels.map(label => `<div class="nav-link" data-view="${label}"><span class="nav-icon text-xl w-7">${label.slice(0,2)}</span><span class="nav-text">${label}</span></div>`).join(''); document.getElementById('dynamicNav').innerHTML = navHtml; document.querySelectorAll('.nav-link').forEach(el => el.addEventListener('click', (e) => { let func = viewMap[el.dataset.view]; if(func && window[func]) window[func](); else dashboardView(); closeMobileSidebar(); })); dashboardView(); }
+
+async function dashboardView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-2xl shadow"><h2 class="text-2xl font-bold text-emerald-800">Welcome ${escapeHtml(currentUser.full_name)}</h2><p class="text-gray-600">Role: ${currentUser.role?.toUpperCase() || 'Parent'}</p><div class="grid grid-cols-2 gap-4 mt-6"><div class="bg-emerald-50 p-4 rounded-xl"><i class="fas fa-users text-2xl"></i><p class="text-2xl font-bold">${schoolData.students.length}</p><p>Students</p></div><div class="bg-amber-50 p-4 rounded-xl"><i class="fas fa-chalkboard-user text-2xl"></i><p class="text-2xl font-bold">${schoolData.teachers.length}</p><p>Staff</p></div></div></div>`; }
+async function studentsView() { let searchTerm = ''; const render = () => { let filtered = schoolData.students.filter(s => s.name.toLowerCase().includes(searchTerm) || s.reg_number.includes(searchTerm)); document.getElementById('mainContent').innerHTML = `<div class="bg-white p-5 rounded-xl shadow"><div class="flex justify-between mb-4"><h2 class="text-2xl font-bold">📚 Students</h2><input type="text" id="studentSearch" placeholder="Search" class="search-filter"></div><table class="w-full border"><thead><tr class="bg-gray-100"><th>Reg</th><th>Name</th><th>Parent</th><th>Section</th><th>Status</th><th>Actions</th></tr></thead><tbody>${filtered.map(s=>`<tr class="border-b"><td class="p-2">${s.reg_number}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.parent_name||'-')}</td><td class="text-sm">${s.section}</td><td><span class="${s.status==='active'?'active-badge':'suspended-badge'}">${s.status}</span></td><td><button onclick="window.toggleSuspendAction('${s.id}','${s.status}')" class="bg-orange-500 text-white px-2 py-1 rounded text-xs mr-1">Toggle</button><button onclick="window.deleteStudentAction('${s.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Delete</button></td></tr>`).join('')}</tbody></table></div>`; document.getElementById('studentSearch')?.addEventListener('input', (e) => { searchTerm = e.target.value.toLowerCase(); render(); }); }; render(); }
+window.toggleSuspendAction = async (id,cur) => { await toggleSuspend(id,cur); studentsView(); };
+window.deleteStudentAction = deleteStudentRecord;
+async function enrollView() { let secOps = SECTIONS.map(s=>`<option>${s}</option>`).join(''); document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl shadow"><h2 class="text-2xl font-bold">🎓 Enroll Student</h2><form id="enrollForm"><input id="regNum" placeholder="Reg Number" class="border p-2 w-full mb-2 rounded" required><input id="fullName" placeholder="Full Name" class="border p-2 w-full mb-2 rounded" required><input id="parentName" placeholder="Parent Name" class="border p-2 w-full mb-2 rounded" required><input id="level" type="number" placeholder="Level 1-12" class="border p-2 w-full mb-2 rounded"><select id="sectionSel" class="border p-2 w-full mb-2 rounded">${secOps}</select><select id="feeStat" class="border p-2 w-full mb-4 rounded"><option>Pending</option><option>Paid</option></select><button type="submit" class="apply-btn w-full py-2 rounded-lg">Register</button></form></div>`; document.getElementById('enrollForm').onsubmit = async (e) => { e.preventDefault(); try { await enrollStudentLogic(regNum.value, fullName.value, parentName.value, level.value, sectionSel.value, feeStat.value); studentsView(); } catch(err) { showToast(err.message, true); } }; }
+async function resultsManagementView() { let students = schoolData.students; let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold">📊 Results (CA1=20, CA2=20, Exam=60)</h2><select id="resTerm" class="border p-2 my-2"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><select id="resStudent" class="border p-2 ml-2"><option>Select Student</option>${students.map(s=>`<option value="${s.id}">${s.name}</option>`)}</select><div id="resPanel"></div></div>`; document.getElementById('mainContent').innerHTML = html; const loadPanel = async()=>{ let sid = document.getElementById('resStudent').value, term = document.getElementById('resTerm').value; if(!sid || sid==='Select Student') return; let existing = schoolData.results.filter(r=> r.student_id===sid && r.term===term && r.year==currentYear); let panel = `<div id="subjectsList">${existing.map(r=>`<div class="flex gap-2 mb-2 items-center"><input value="${r.subject}" class="border p-1 flex-1"><input type="number" value="${r.ca1}" class="grade-input" placeholder="CA1"><input type="number" value="${r.ca2}" class="grade-input" placeholder="CA2"><input type="number" value="${r.exam}" class="grade-input" placeholder="Exam"><button class="bg-red-500 text-white px-2 rounded" onclick="this.parentElement.remove()">✕</button></div>`).join('')}</div><div class="flex gap-2 mt-3"><input id="newSub" placeholder="New Subject" class="border p-1 flex-1"><input id="newCa1" placeholder="CA1" class="grade-input"><input id="newCa2" placeholder="CA2" class="grade-input"><input id="newExam" placeholder="Exam" class="grade-input"><button id="addSubBtn" class="bg-emerald-600 text-white px-3 py-1 rounded">+ Add</button></div><button id="saveResBtn" class="apply-btn w-full py-2 mt-4 rounded">Save All</button>`; document.getElementById('resPanel').innerHTML = panel; document.getElementById('addSubBtn').onclick = () => { let sub = document.getElementById('newSub').value.trim(); if(sub){ let div = document.createElement('div'); div.className='flex gap-2 mb-2 items-center'; div.innerHTML = `<input value="${sub}" class="border p-1 flex-1"><input type="number" placeholder="CA1" class="grade-input"><input type="number" placeholder="CA2" class="grade-input"><input type="number" placeholder="Exam" class="grade-input"><button class="bg-red-500 text-white px-2 rounded" onclick="this.parentElement.remove()">✕</button>`; document.getElementById('subjectsList').appendChild(div); document.getElementById('newSub').value=''; } }; document.getElementById('saveResBtn').onclick = async()=>{ let rows = document.querySelectorAll('#subjectsList > div'); for(let row of rows){ let inputs = row.querySelectorAll('input'); let subject = inputs[0].value.trim(); let ca1 = parseInt(inputs[1].value)||0, ca2 = parseInt(inputs[2].value)||0, exam = parseInt(inputs[3].value)||0; if(subject) await saveResult(sid, term, currentYear, subject, ca1, ca2, exam); } await refreshData(); loadPanel(); showToast("Results saved"); }; }; document.getElementById('resStudent').addEventListener('change',loadPanel); document.getElementById('resTerm').addEventListener('change',loadPanel); }
+async function feesView() { let html = `<div class="bg-white p-5 rounded-xl"><h2>💰 Fee Management</h2><select id="feeTermSel" class="border p-2 my-2"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><div id="feeList"></div></div>`; document.getElementById('mainContent').innerHTML = html; const renderFee = () => { let term = document.getElementById('feeTermSel').value; let pending = schoolData.students.filter(s=>s.fee_status !== 'Paid'); document.getElementById('feeList').innerHTML = pending.map(s=>`<div class="flex justify-between border-b py-2"><span>${escapeHtml(s.name)} (${s.reg_number})</span><button onclick="window.payFee('${s.id}','${term}')" class="bg-amber-500 text-white px-3 py-1 rounded text-sm">Mark Paid (${term})</button></div>`).join(''); }; document.getElementById('feeTermSel').addEventListener('change',renderFee); renderFee(); }
+window.payFee = async (id,term) => { await recordFeePayment(id,term); feesView(); };
+async function gradeStudentView() { let section = currentUser.section || SECTIONS[0]; let students = schoolData.students.filter(s=>s.section===section); let html = `<div class="bg-white p-6 rounded-xl"><h2>📝 Grade Student</h2><select id="gradeStudentSel" class="border p-2 w-full mb-2">${students.map(s=>`<option value="${s.id}">${s.name}</option>`)}</select><select id="gradeTermSel" class="border p-2 w-full mb-2"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><div id="gradePanelTeacher"></div></div>`; document.getElementById('mainContent').innerHTML = html; const loadTeacherGrade = async()=>{ let sid = document.getElementById('gradeStudentSel').value, term = document.getElementById('gradeTermSel').value; if(!sid) return; let existing = schoolData.results.filter(r=> r.student_id===sid && r.term===term && r.year==currentYear); let panel = `<div id="teacherSubList">${existing.map(r=>`<div class="flex gap-2 mb-2"><input value="${r.subject}" class="border p-1 flex-1"><input type="number" value="${r.ca1}" class="grade-input"><input type="number" value="${r.ca2}" class="grade-input"><input type="number" value="${r.exam}" class="grade-input"><button class="bg-red-500 text-white px-2 rounded" onclick="this.parentElement.remove()">✕</button></div>`).join('')}</div><div class="flex gap-2 mt-2"><input id="newSubjT" placeholder="Subject" class="border p-1 flex-1"><input id="ca1T" class="grade-input" placeholder="CA1"><input id="ca2T" class="grade-input" placeholder="CA2"><input id="examT" class="grade-input" placeholder="Exam"><button id="addSubjT" class="bg-emerald-600 text-white px-3 rounded">+</button></div><button id="saveTeacherGradesBtn" class="apply-btn w-full mt-4 py-2">Save</button>`; document.getElementById('gradePanelTeacher').innerHTML = panel; document.getElementById('addSubjT').onclick = () => { let sub = document.getElementById('newSubjT').value.trim(); if(sub){ let div = document.createElement('div'); div.className='flex gap-2 mb-2'; div.innerHTML = `<input value="${sub}" class="border p-1 flex-1"><input class="grade-input" placeholder="CA1"><input class="grade-input" placeholder="CA2"><input class="grade-input" placeholder="Exam"><button class="bg-red-500 text-white px-2 rounded" onclick="this.parentElement.remove()">✕</button>`; document.getElementById('teacherSubList').appendChild(div); document.getElementById('newSubjT').value=''; } }; document.getElementById('saveTeacherGradesBtn').onclick = async()=>{ let rows = document.querySelectorAll('#teacherSubList > div'); for(let row of rows){ let inp = row.querySelectorAll('input'); let subject = inp[0].value.trim(); let ca1 = parseInt(inp[1]?.value)||0, ca2 = parseInt(inp[2]?.value)||0, exam = parseInt(inp[3]?.value)||0; if(subject) await saveResult(sid, term, currentYear, subject, ca1, ca2, exam); } await refreshData(); loadTeacherGrade(); showToast("Grades updated"); }; }; document.getElementById('gradeStudentSel')?.addEventListener('change',loadTeacherGrade); document.getElementById('gradeTermSel')?.addEventListener('change',loadTeacherGrade); if(students.length) loadTeacherGrade(); }
+async function attendanceView() { let section = currentUser.section || SECTIONS[0]; let students = schoolData.students.filter(s=>s.section===section); let html = `<div class="bg-white p-6 rounded-xl"><h2>🗒 Attendance (Today)</h2><div id="attList"></div><button id="saveAttBtn" class="apply-btn mt-4 py-2 px-6">Save Attendance</button></div>`; document.getElementById('mainContent').innerHTML = html; let attMap = {}; const renderAtt = () => { document.getElementById('attList').innerHTML = students.map(s=>`<div class="flex gap-3 items-center py-2"><span class="w-48">${escapeHtml(s.name)}</span><label><input type="checkbox" class="att-check" data-id="${s.id}" ${attMap[s.id]?'checked':''}> Present</label></div>`).join(''); }; renderAtt(); document.getElementById('saveAttBtn').onclick = async () => { let updates = []; document.querySelectorAll('.att-check').forEach(cb => updates.push({ student_id: cb.dataset.id, date: new Date().toISOString().slice(0,10), status: cb.checked?'present':'absent' })); for(let u of updates) await supabaseClient.from('attendance_records').upsert(u, { onConflict: 'student_id,date' }); showToast("Attendance recorded"); }; }
+async function parentResultView() { let student = schoolData.students.find(s=>s.id===currentUser.studentId); if(!student) return; let html = `<div class="bg-white p-6 rounded-xl result-card"><h2>📃 Result: ${student.name}</h2><select id="parentTermSel" class="border p-2 my-2"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><div id="parentResultDisplay"></div></div>`; document.getElementById('mainContent').innerHTML = html; const load = () => { let term = document.getElementById('parentTermSel').value; let results = schoolData.results.filter(r=> r.student_id===student.id && r.term===term && r.year==currentYear); let total = results.reduce((s,r)=> s + (r.ca1+r.ca2+r.exam),0); let avg = results.length ? (total/results.length).toFixed(1):0; let table = `<table class="w-full border mt-3"><thead><tr class="bg-amber-100"><th>Subject</th><th>CA1(20)</th><th>CA2(20)</th><th>Exam(60)</th><th>Total</th><th>Grade</th></tr></thead><tbody>${results.map(r=>`<tr><td class="border p-2">${r.subject}</td><td>${r.ca1}</td><td>${r.ca2}</td><td>${r.exam}</td><td>${r.total}</td><td>${r.total>=80?'A':r.total>=70?'B':r.total>=60?'C':'D'}</td></tr>`).join('')}</tbody></table><p class="mt-3 font-bold">Average: ${avg}% | ${avg>=70?'Excellent':avg>=50?'Good':'Needs Improvement'}</p>`; document.getElementById('parentResultDisplay').innerHTML = table; }; document.getElementById('parentTermSel').addEventListener('change',load); load(); }
+async function parentChildReportsView() { parentResultView(); }
 async function parentFeePaymentView() { feesView(); }
-async function parentPaymentHistoryView() {
-    let student = schoolData.students.find(s => s.id === currentUser.studentId);
-    let txns = schoolData.feeTransactions.filter(t => t.student_id === student?.id);
-    let html = `<div class="bg-white p-6"><h2>📓 Payment History</h2><ul>${txns.map(t => `<li class="border-b py-2">${t.term} - ₦${t.amount_paid} on ${new Date(t.payment_date).toLocaleDateString()} (Receipt: ${t.receipt_no})</li>`).join('')}</ul></div>`;
-    document.getElementById('mainContent').innerHTML = html;
-}
-async function childReportsView() { parentResultView(); }
-
-// Other placeholder views (keep functional with toasts)
-async function staffView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">👥 Staff list: ${schoolData.teachers.map(t => t.name).join(', ')}</div>`; }
-async function applicationsView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">📋 Admission applications (admin dashboard)</div>`; }
-async function downloadRecordsView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">📥 Export feature - Coming soon</div>`; }
-async function announceView() { let announcement = schoolData.announcements[0]?.content || ''; document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6"><input id="announceTxt" value="${escapeHtml(announcement)}" placeholder="School Announcement" class="border w-full p-2"><button class="apply-btn mt-2" onclick="window.updateAnnounce()">Update</button></div>`; window.updateAnnounce = async () => { await supabase.from('site_announcement').upsert({ id: 1, content: document.getElementById('announceTxt').value }); showToast('Announcement updated'); await refreshData(true); }; }
-async function slidesManageView() { let html = `<div class="bg-white p-6"><h2>🎞️ Slides</h2><input type="file" id="slideFile"><input id="slideCap" placeholder="Caption" class="border p-2 w-full mt-2"><button id="uploadSlide" class="apply-btn mt-2">Upload</button><div id="slideList" class="grid grid-cols-2 gap-2 mt-4"></div></div>`; document.getElementById('mainContent').innerHTML = html; const refresh = async () => { let { data } = await supabase.from('slides').select('*'); window.slidesData = data || []; document.getElementById('slideList').innerHTML = window.slidesData.map(s => `<div><img src="${s.image_url}" width="100" class="rounded"> ${s.caption} <button onclick="window.deleteSlide('${s.id}')" class="text-red-500">❌</button></div>`).join(''); }; document.getElementById('uploadSlide').onclick = async () => { let file = document.getElementById('slideFile').files[0]; if (!file) return; let fname = Date.now() + '_' + file.name; await supabase.storage.from('school-slides').upload(fname, file); let { data: { publicUrl } } = supabase.storage.from('school-slides').getPublicUrl(fname); await supabase.from('slides').insert([{ image_url: publicUrl, caption: document.getElementById('slideCap').value }]); await refresh(); showToast("Slide uploaded"); }; window.deleteSlide = async (id) => { await supabase.from('slides').delete().eq('id', id); await refresh(); showToast("Slide deleted"); }; refresh(); }
-async function receiptGeneratorView() { let html = `<div class="bg-white p-6"><h2>🖨 Receipt Generator</h2><select id="recStudent" class="border p-2 w-full"><option>Select Student</option>${schoolData.students.map(s => `<option value="${s.id}">${s.name}</option>`)}</select><button class="apply-btn mt-2" onclick="window.genReceipt()">Generate</button><div id="recOut"></div></div>`; document.getElementById('mainContent').innerHTML = html; window.genReceipt = () => { let sid = document.getElementById('recStudent').value; let student = schoolData.students.find(s => s.id == sid); if (student) document.getElementById('recOut').innerHTML = `<div class="border p-3 mt-3"><h3>Receipt</h3><p>Student: ${student.name}</p><p>Reg: ${student.reg_number}</p><p>Date: ${new Date().toLocaleDateString()}</p><button onclick="window.print()" class="bg-gray-200 px-2 py-1">Print</button></div>`; }; }
-async function payrollView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6"><h2>👥 Payroll</h2><p>Staff payroll module (coming soon)</p></div>`; }
-async function paymentReportView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6"><h2>📃 Payment Report</h2><p>Total fees collected: ₦${schoolData.feeTransactions.reduce((s, t) => s + t.amount_paid, 0)}</p></div>`; }
-async function academicPerformanceView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-5 rounded-xl"><h2>📉 Academic Performance</h2><canvas id="perfChart" height="200"></canvas></div>`; let sections = [...new Set(schoolData.students.map(s => s.section))]; let avgBySection = sections.map(sec => { let secResults = schoolData.results.filter(r => schoolData.students.find(s => s.id === r.student_id)?.section === sec); let avg = secResults.length ? secResults.reduce((a, b) => a + (b.ca1 + b.ca2 + b.exam), 0) / secResults.length : 0; return avg; }); new Chart(document.getElementById('perfChart'), { type: 'bar', data: { labels: sections, datasets: [{ label: 'Average Score', data: avgBySection, backgroundColor: '#f59e0b' }] } }); }
-async function sectionAnalysisView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-5 rounded-xl"><h2>📊 Section Analysis</h2><select id="secAna" class="border p-2">${SECTIONS.map(s => `<option>${s}</option>`)}</select><div id="secStats"></div></div>`; document.getElementById('secAna').onchange = () => { let sec = document.getElementById('secAna').value; let secStudents = schoolData.students.filter(s => s.section === sec); let paid = secStudents.filter(s => s.fee_status === 'Paid').length; document.getElementById('secStats').innerHTML = `<p>Total Students: ${secStudents.length}</p><p>Fees Paid: ${paid}</p>`; }; document.getElementById('secAna').dispatchEvent(new Event('change')); }
+async function parentPaymentHistoryView() { let student = schoolData.students.find(s=>s.id===currentUser.studentId); let txns = schoolData.feeTransactions.filter(t=>t.student_id===student?.id); document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2>📓 Payment History</h2><ul>${txns.map(t=>`<li class="border-b py-2">${t.term} - ₦${t.amount_paid} on ${new Date(t.payment_date).toLocaleDateString()} (${t.receipt_no})</li>`).join('')}</ul></div>`; }
+async function staffManagementView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2>👥 Staff Management</h2><ul>${schoolData.teachers.map(t=>`<li>${t.name} (${t.role}) - ${t.assigned_section || 'N/A'}</li>`).join('')}</ul></div>`; }
+async function slidesManageView() { let html = `<div class="bg-white p-6 rounded-xl"><h2>🎞️ Slideshow Manager</h2><input type="file" id="slideUpload" accept="image/*" class="border p-2 w-full"><input id="slideCaption" placeholder="Caption" class="border p-2 w-full mt-2"><button id="uploadSlideBtn" class="apply-btn mt-2 w-full py-2">Upload</button><div id="slideAdminList" class="grid grid-cols-2 gap-2 mt-4"></div></div>`; document.getElementById('mainContent').innerHTML = html; const refreshSlides = async () => { let {data} = await supabaseClient.from('slides').select('*'); slidesData = data||[]; document.getElementById('slideAdminList').innerHTML = slidesData.map(s=>`<div><img src="${s.image_url}" class="h-20 w-full object-cover rounded"><p class="text-xs">${s.caption}</p><button onclick="window.deleteSlideItem('${s.id}','${s.image_url}')" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button></div>`).join(''); }; window.deleteSlideItem = async (id, url) => { await supabaseClient.from('slides').delete().eq('id',id); await refreshSlides(); rebuildSlideshow(); showToast("Slide deleted"); }; document.getElementById('uploadSlideBtn').onclick = async () => { let file = document.getElementById('slideUpload').files[0]; if(!file) return; let fname = Date.now()+'_'+file.name; await supabaseClient.storage.from('school-slides').upload(fname, file); let {data:{publicUrl}} = supabaseClient.storage.from('school-slides').getPublicUrl(fname); await supabaseClient.from('slides').insert([{ image_url: publicUrl, caption: document.getElementById('slideCaption').value||"Slide" }]); await refreshSlides(); rebuildSlideshow(); showToast("Uploaded"); }; refreshSlides(); }
+async function myClassView() { let section = currentUser.section || SECTIONS[0]; let students = schoolData.students.filter(s=>s.section===section); document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2>👩‍🏫 My Class: ${section}</h2><ul class="list-disc pl-5">${students.map(s=>`<li>${escapeHtml(s.name)} (${s.reg_number})</li>`).join('')}</ul></div>`; }
 async function sectionStudentsView() { studentsView(); }
 async function sectionFeesView() { feesView(); }
+async function applicationsView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2>📋 Admission Applications</h2><p>Admin module: Manage inquiries & enrollments.</p></div>`; }
+async function downloadRecordsView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2>📥 Export Records</h2><button class="apply-btn" onclick="alert('CSV export feature would connect to backend')">Export CSV</button></div>`; }
+async function announceView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6"><h2>📢 Announcement</h2><textarea id="announceText" class="border w-full p-2" rows="3"></textarea><button class="apply-btn mt-2" onclick="showToast('Announcement saved (demo)')">Update</button></div>`; }
+async function receiptGeneratorView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6"><h2>🖨 Receipt</h2><select id="receiptStudent" class="border p-2 w-full"><option>Select Student</option>${schoolData.students.map(s=>`<option value="${s.id}">${s.name}</option>`)}</select><button class="apply-btn mt-2" onclick="alert('Receipt preview: connect to fee transactions')">Generate</button></div>`; }
+async function payrollView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">Payroll module (integrate staff salaries)</div>`; }
+async function paymentReportView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">Total Fees Collected: ₦${schoolData.feeTransactions.reduce((s,t)=>s+ (t.amount_paid||0),0)}</div>`; }
+async function academicPerformanceView() { let ctxDiv = document.createElement('canvas'); document.getElementById('mainContent').innerHTML = `<div class="bg-white p-5 rounded-xl"><h2>📉 Academic Performance</h2><canvas id="perfChartCanvas" height="200"></canvas></div>`; let sections = [...new Set(schoolData.students.map(s=>s.section))]; let avgBySec = sections.map(sec=>{ let results = schoolData.results.filter(r=> schoolData.students.find(s=>s.id===r.student_id)?.section===sec); let avg = results.length ? results.reduce((a,b)=>a+(b.ca1+b.ca2+b.exam),0)/results.length :0; return avg; }); new Chart(document.getElementById('perfChartCanvas'), { type:'bar', data:{ labels:sections, datasets:[{ label:'Average Score', data:avgBySec, backgroundColor:'#f59e0b' }] } }); }
+async function sectionAnalysisView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-5"><h2>Section Analysis</h2><p>Select section: ${SECTIONS.join(', ')}</p><div id="dummy">Data analytics placeholder</div></div>`; }
 
-// ========== AUTHENTICATION ==========
-async function adminLogin(email, pwd) {
-    showLoading(true);
-    try {
-        let { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
-        if (error) throw error;
-        let { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
-        if (!profile || !['dg_ceo', 'umc', 'daf', 'do', 'der', 'dprpa', 'headteacher', 'teacher'].includes(profile.role)) throw new Error('Invalid role');
-        currentUser = { id: profile.id, full_name: profile.full_name, role: profile.role, section: profile.section };
-        await refreshData(true);
-        showDashboard();
-        closeModal('loginModal');
-        showToast(`Welcome ${currentUser.full_name}`);
-    } catch (err) { showToast(err.message, true); }
-    finally { showLoading(false); }
-}
-async function staffLogin(username, pwd) {
-    showLoading(true);
-    try {
-        let { data: staff } = await supabase.from('teachers').select('*').eq('username', username).single();
-        if (!staff) throw new Error('Staff not found');
-        let { data, error } = await supabase.auth.signInWithPassword({ email: staff.email, password: pwd });
-        if (error) throw error;
-        currentUser = { id: data.user.id, full_name: staff.name, role: staff.role || 'teacher', section: staff.assigned_section };
-        await refreshData(true);
-        showDashboard();
-        closeModal('loginModal');
-        showToast(`Welcome ${currentUser.full_name}`);
-    } catch (err) { showToast(err.message, true); }
-    finally { showLoading(false); }
-}
-async function parentLogin(regNo, pwd) {
-    if (pwd !== 'al123') return showToast('Invalid password (default: al123)', true);
-    await refreshData(true);
-    let student = schoolData.students.find(s => s.reg_number === regNo);
-    if (!student) return showToast('Student not found', true);
-    currentUser = { role: 'parent', full_name: `Parent of ${student.name}`, studentId: student.id };
-    showDashboard();
-    closeModal('parentModal');
-    showToast(`Welcome ${currentUser.full_name}`);
-}
-async function adminSignup(code, email, pwd, fullName, role) {
-    if (code !== 'ALIFLY2026') throw new Error('Invalid code');
-    let { data, error } = await supabase.auth.signUp({ email, password: pwd });
-    if (error) throw error;
-    await supabase.from('profiles').insert([{ id: data.user.id, full_name: fullName, role }]);
-    showToast('Account created, please verify email');
-}
-
-// ========== DASHBOARD RENDER ==========
-async function showDashboard() {
-    document.getElementById('landingPage').style.display = 'none';
-    document.getElementById('appContainer').classList.remove('hidden');
-    document.getElementById('topUserName').innerText = currentUser.full_name;
-    document.getElementById('topUserRole').innerText = currentUser.role.toUpperCase();
-    let roleKey = currentUser.role === 'headteacher' ? 'headteacher' : (currentUser.role === 'teacher' ? 'teacher' : (currentUser.role === 'parent' ? 'parent' : currentUser.role));
-    let menuLabels = roleMenus[roleKey] || roleMenus.dg_ceo;
-    let navHtml = menuLabels.map(label => `<div class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-200" data-view="${label}"><span class="nav-icon text-xl">${label.split(' ')[0]}</span><span class="nav-text">${label}</span></div>`).join('');
-    document.getElementById('dynamicNav').innerHTML = navHtml;
-    document.querySelectorAll('.nav-link').forEach(el => el.addEventListener('click', (e) => { let viewFunc = viewMap[el.dataset.view]; if (viewFunc && window[viewFunc]) window[viewFunc](); else dashboardView(); closeMobileSidebar(); }));
-    dashboardView();
-}
-
-// ========== UI INITIALIZATION ==========
-function closeMobileSidebar() { let sb = document.getElementById('dynamicSidebar'); if (window.innerWidth <= 768) sb.classList.remove('open'); document.getElementById('sidebarOverlay')?.classList.remove('active'); }
-function toggleSidebarMinimize() { const sb = document.getElementById('dynamicSidebar'); if (!sb) return; sidebarMinimized = !sidebarMinimized; sb.classList.toggle('minimized', sidebarMinimized); localStorage.setItem('sidebarMinimized', sidebarMinimized); const btn = document.getElementById('autoMinimizeBtn'); if (btn) btn.innerHTML = sidebarMinimized ? '<i class="fas fa-chevron-right"></i> Expand' : '<i class="fas fa-chevron-left"></i> Minimize'; }
-if (localStorage.getItem('sidebarMinimized') === 'true') setTimeout(() => toggleSidebarMinimize(), 100);
-
+// UI bindings & init
+function closeMobileSidebar() { let sb = document.getElementById('dynamicSidebar'); if(window.innerWidth<=768) sb.classList.remove('open'); document.getElementById('sidebarOverlay')?.classList.remove('active'); }
+let minimized = false;
+function toggleMinimize() { const sb = document.getElementById('dynamicSidebar'); minimized = !minimized; sb.classList.toggle('minimized', minimized); localStorage.setItem('sidebarMinimized', minimized); }
 document.addEventListener('DOMContentLoaded', async () => {
     await refreshData();
-    setInterval(() => { let d = new Date(); document.getElementById('liveTime').innerText = d.toLocaleTimeString(); document.getElementById('liveDate').innerHTML = d.toLocaleDateString('en-NG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); }, 1000);
-    document.getElementById('weatherTemp').innerText = '32'; document.getElementById('weatherDesc').innerText = 'Clear';
+    setInterval(()=>{ let d=new Date(); document.getElementById('liveTime')&& (document.getElementById('liveTime').innerText = d.toLocaleTimeString()); document.getElementById('liveDate')&& (document.getElementById('liveDate').innerHTML = d.toLocaleDateString('en-NG',{weekday:'long', year:'numeric', month:'long', day:'numeric'})); },1000);
+    document.getElementById('weatherTemp').innerText = '32'; document.getElementById('weatherDesc').innerText = 'Sunny';
     document.getElementById('staffAdminBtn').onclick = () => document.getElementById('loginModal').style.display = 'flex';
     document.getElementById('parentBtn').onclick = () => document.getElementById('parentModal').style.display = 'flex';
-    document.getElementById('adminSignupBtn').onclick = () => document.getElementById('adminSignupModal').style.display = 'flex';
-    document.querySelectorAll('.close-modal').forEach(btn => btn.onclick = function () { this.closest('.modal').style.display = 'none'; });
-    window.onclick = (e) => { if (e.target.classList && e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    document.getElementById('adminSignupBtnLanding').onclick = () => document.getElementById('adminSignupModal').style.display = 'flex';
+    document.querySelectorAll('.close-modal').forEach(btn => btn.onclick = function() { this.closest('.modal-overlay').style.display = 'none'; });
+    window.onclick = (e) => { if(e.target.classList && e.target.classList.contains('modal-overlay')) e.target.style.display = 'none'; };
     document.getElementById('adminLoginForm').onsubmit = (e) => { e.preventDefault(); adminLogin(adminEmail.value, adminPassword.value); };
     document.getElementById('staffLoginForm').onsubmit = (e) => { e.preventDefault(); staffLogin(staffUsername.value, staffPassword.value); };
     document.getElementById('parentLoginForm').onsubmit = (e) => { e.preventDefault(); parentLogin(studentRegNo.value, parentPwd.value); };
-    document.getElementById('adminSignupForm').onsubmit = async (e) => { e.preventDefault(); try { await adminSignup(regCode.value, signupEmail.value, signupPassword.value, signupFullName.value, signupRole.value); closeModal('adminSignupModal'); } catch (err) { showToast(err.message, true); } };
-    document.getElementById('adminTab').onclick = () => { document.getElementById('adminLoginForm').style.display = 'block'; document.getElementById('staffLoginForm').style.display = 'none'; };
-    document.getElementById('staffTab').onclick = () => { document.getElementById('staffLoginForm').style.display = 'block'; document.getElementById('adminLoginForm').style.display = 'none'; };
-    document.getElementById('logoutBtn').onclick = () => { currentUser = null; document.getElementById('appContainer').classList.add('hidden'); document.getElementById('landingPage').style.display = 'block'; showToast('Logged out'); };
+    document.getElementById('adminSignupForm').onsubmit = async(e) => { e.preventDefault(); try { await adminSignup(regCode.value, signupEmail.value, signupPassword.value, signupFullName.value, signupRole.value); closeModal('adminSignupModal'); } catch(err) { showToast(err.message, true); } };
+    document.getElementById('adminTab').onclick = () => { document.getElementById('adminLoginForm').style.display='block'; document.getElementById('staffLoginForm').style.display='none'; };
+    document.getElementById('staffTab').onclick = () => { document.getElementById('staffLoginForm').style.display='block'; document.getElementById('adminLoginForm').style.display='none'; };
+    document.getElementById('logoutBtn').onclick = () => { currentUser = null; document.getElementById('appContainer').classList.add('hidden'); document.getElementById('landingPage').style.display = 'flex'; showToast("Logged out"); };
     document.getElementById('mobileMenuToggle').onclick = () => { document.getElementById('dynamicSidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('active'); };
-    document.getElementById('sidebarOverlay').onclick = closeMobileSidebar;
-    document.getElementById('closeMobileSidebar').onclick = closeMobileSidebar;
-    document.getElementById('autoMinimizeBtn').onclick = toggleSidebarMinimize;
+    document.getElementById('sidebarOverlay').onclick = closeMobileSidebar; document.getElementById('closeMobileSidebar').onclick = closeMobileSidebar;
+    document.getElementById('autoMinimizeBtn').onclick = toggleMinimize;
+    document.getElementById('applyNowBtn').onclick = () => alert("📝 Contact admissions: 08067990749 or visit school.");
+    document.getElementById('prevSlide')?.addEventListener('click',()=>goToSlide(currentSlideIndex-1));
+    document.getElementById('nextSlide')?.addEventListener('click',()=>goToSlide(currentSlideIndex+1));
+    const cookieBanner = document.getElementById('cookieBanner'); if(!localStorage.getItem('cookies_accepted')) cookieBanner.style.display = 'flex';
+    document.getElementById('acceptCookiesBtn').onclick = () => { localStorage.setItem('cookies_accepted','true'); cookieBanner.style.display = 'none'; };
+    if(localStorage.getItem('sidebarMinimized') === 'true') setTimeout(()=> toggleMinimize(), 100);
 });
 </script>
 </body>

@@ -1,367 +1,236 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-    <meta charset="UTF-8">  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">  
-    <title>Al‑Istiqaamah Flying Wings Academy</title>  
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦅</text></svg>">  
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
-    <script src="https://cdn.tailwindcss.com"></script>  
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">  
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>  
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>  
-    <style>  
-        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap');  
-        * { font-family: 'Inter', sans-serif; }  
-        .hero-pattern { background: linear-gradient(135deg, #0a2e2c 0%, #0f3b38 100%); }  
-        .card-hover { transition: all 0.3s ease; }  
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15); }  
-        .sidebar { background: #0f2e2c; transition: width 0.2s ease, transform 0.2s ease; z-index: 45; width: 280px; overflow-x: hidden; }  
-        .sidebar.collapsed { width: 80px; }  
-        .sidebar.collapsed .nav-text { display: none; }  
-        .sidebar.collapsed .nav-link { justify-content: center; padding: 0.75rem 0; }  
-        .sidebar.collapsed .nav-link i, .sidebar.collapsed .nav-link .nav-icon { margin-right: 0; font-size: 1.5rem; }  
-        .sidebar.collapsed .sidebar-header span, .sidebar.collapsed .logo-text { display: none; }  
-        .nav-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; border-radius: 0.5rem; transition: all 0.2s; white-space: nowrap; }  
-        .nav-link-active, .nav-link:hover { background: rgba(255, 255, 255, 0.12); border-left: 4px solid #f59e0b; }  
-        .sidebar-toggle { cursor: pointer; background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 0.5rem; transition: 0.2s; }  
-        .sidebar-toggle:hover { background: rgba(255,255,255,0.2); }  
-        @media (max-width: 768px) {  
-            .sidebar { position: fixed; left: -280px; top: 0; bottom: 0; width: 280px; z-index: 60; }  
-            .sidebar.open { left: 0; }  
-            .sidebar.collapsed { width: 280px; left: -280px; }  
-            .sidebar.collapsed.open { left: 0; width: 280px; }  
-            .sidebar.collapsed .nav-text { display: inline; }  
-            .sidebar-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 55; display: none; }  
-            .sidebar-overlay.active { display: block; }  
-        }  
-        .apply-btn { background: linear-gradient(135deg, #f59e0b, #d97706); transition: all 0.3s; color: white; font-weight: bold; border: none; cursor: pointer; }  
-        .apply-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(245,158,11,0.4); }  
-        .toast-notify { position: fixed; bottom: 20px; right: 20px; background: #323232; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; display: none; }  
-        .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #f59e0b; border-radius: 50%; animation: spin 0.6s linear infinite; }  
-        @keyframes spin { to { transform: rotate(360deg); } }  
-        .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }  
-        .grade-input { width: 90px; padding: 6px; border-radius: 6px; border: 1px solid #ccc; text-align: center; }  
-        .search-filter { border-radius: 30px; padding: 8px 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 320px; }  
-        .stat-card { background: white; border-radius: 1.25rem; padding: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.2s; border: 1px solid #f1f5f9; }  
-        .stat-card:hover { box-shadow: 0 12px 20px -12px rgba(0,0,0,0.1); transform: translateY(-2px); }  
-    </style>  
-</head>  
-<body class="bg-gray-50">  <div id="toastMsg" class="toast-notify"></div>  
-<div id="globalLoading" style="display: none;" class="loading-overlay"><div class="spinner"></div></div>  <!-- LANDING PAGE (unchanged, kept for brevity) -->  <div id="landingPage" class="min-h-screen">  
-    <div class="hero-pattern text-white">  
-        <div class="container mx-auto px-6 py-16 md:py-24">  
-            <div class="flex flex-col lg:flex-row justify-between gap-8 items-start">  
-                <div class="max-w-2xl">  
-                    <div class="flex items-center gap-4 mb-4">  
-                        <img src="logo.jpg" alt="logo" class="rounded-full border-2 border-amber-400 h-16 w-16 object-cover" onerror="this.src='https://placehold.co/60x60?text=Logo'">  
-                        <h1 class="text-3xl md:text-4xl font-bold">Al‑Istiqaamah <span class="text-amber-300">Flying Wings Academy</span></h1>  
-                    </div>  
-                    <p class="text-amber-200 text-sm"><i class="fas fa-map-marker-alt mr-1"></i> No. 10 Federal Govt Layout, Samaru, Zaria, Kaduna</p>  
-                    <div class="flex flex-wrap gap-4 mt-6">  
-                        <button id="loginBtnHero" class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-6 py-2.5 rounded-full shadow"><i class="fas fa-chalkboard-user"></i> Staff / Admin</button>  
-                        <button id="parentLoginBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-full"><i class="fas fa-user-friends"></i> Parent Login</button>  
-                        <button id="adminSignupBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full"><i class="fas fa-user-shield"></i> Admin Signup</button>  
-                    </div>  
-                </div>  
-                <div class="bg-white/15 backdrop-blur-md rounded-2xl p-5 w-72 border border-white/20">  
-                    <div class="flex justify-between border-b pb-2"><span class="text-amber-200"><i class="fas fa-clock"></i> Time</span><span id="liveTime" class="font-mono text-xl font-bold">--:--:--</span></div>  
-                    <p id="liveDate" class="text-sm mt-2"></p>  
-                </div>  
-            </div>  
-        </div>  
-    </div>  
-    <div id="announcementBarWrapper" class="container mx-auto px-6 pt-5"></div>  
-    <div class="container mx-auto px-6 pb-6 relative">  
-        <div class="relative rounded-2xl overflow-hidden shadow-xl h-96 md:h-[500px] bg-gray-800" id="slidesContainer"></div>  
-        <div class="flex justify-center gap-2 mt-3" id="dotsContainer"></div>  
-    </div>  
-    <div class="container mx-auto px-6 py-12 grid md:grid-cols-2 gap-8">  
-        <div class="bg-white rounded-2xl shadow-xl p-6 border-t-8 border-emerald-600"><i class="fas fa-eye text-emerald-600 text-3xl"></i><h2 class="text-2xl font-bold mt-2">Vision</h2><p>Faith, Knowledge & service – beacons of guidance.</p></div>  
-        <div class="bg-white rounded-2xl shadow-xl p-6 border-t-8 border-amber-500"><i class="fas fa-bullhorn text-amber-500 text-3xl"></i><h2 class="text-2xl font-bold mt-2">Mission</h2><p>Academic excellence, Islamic values, Qur'an & Sunnah.</p></div>  
-    </div>  
-    <div class="bg-emerald-900 text-white py-12 text-center"><h2 class="text-3xl font-bold">Begin Your Child's Journey</h2><button id="applyNowBtnFooter" class="apply-btn mt-4 px-8 py-3 rounded-full"><i class="fas fa-pen-alt mr-2"></i> Apply Now</button></div>  
-    <footer class="bg-slate-900 text-gray-400 py-6 text-center text-sm">© 2026 Al‑Istiqaamah Flying Wings Academy</footer>  
-</div>  <!-- MODALS (Login, Parent, AdminSignup) -->  <div id="loginScreen" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70"><div class="bg-white rounded-2xl p-8 w-96 relative"><button onclick="document.getElementById('loginScreen').style.display='none'" class="absolute top-3 right-3">✕</button><h2 class="text-2xl font-bold mb-4">Login</h2><div class="flex gap-2 mb-4"><button id="adminLoginTab" class="flex-1 py-2 bg-amber-500 text-white rounded">Admin</button><button id="staffLoginTab" class="flex-1 py-2 bg-gray-300 rounded">Staff</button></div><form id="adminLoginForm"><input id="loginUsername" placeholder="Email" type="email" required class="w-full border p-2 mb-2 rounded"><input id="loginPassword" placeholder="Password" type="password" required class="w-full border p-2 mb-4 rounded"><button type="submit" class="w-full apply-btn py-2 rounded">Login</button></form><form id="staffLoginForm" style="display:none;"><input id="staffUsername" placeholder="Username" required class="w-full border p-2 mb-2 rounded"><input id="staffPassword" placeholder="Password" type="password" required class="w-full border p-2 mb-4 rounded"><button type="submit" class="w-full apply-btn py-2 rounded">Login</button></form></div></div>  
-<div id="parentLoginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70"><div class="bg-white rounded-2xl p-8 w-96 relative"><button onclick="document.getElementById('parentLoginModal').style.display='none'" class="absolute top-3 right-3">✕</button><h2 class="text-2xl font-bold mb-4">Parent Login</h2><form id="parentLoginForm"><input id="studentRegNo" placeholder="Student Reg Number" required class="w-full border p-2 mb-2 rounded"><input id="parentPassword" placeholder="Password (default: al123)" type="password" class="w-full border p-2 mb-4 rounded"><button type="submit" class="w-full apply-btn py-2 rounded">Login</button></form></div></div>  
-<div id="adminSignupModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70"><div class="bg-white rounded-2xl p-8 w-96 relative"><button onclick="document.getElementById('adminSignupModal').style.display='none'" class="absolute top-3 right-3">✕</button><h2 class="text-2xl font-bold mb-4">Admin Signup</h2><form id="adminSignupForm"><input id="adminRegCode" placeholder="Registration Code" required class="w-full border p-2 mb-2 rounded"><input id="adminEmail" placeholder="Email" type="email" required class="w-full border p-2 mb-2 rounded"><input id="adminPassword" placeholder="Password" type="password" required class="w-full border p-2 mb-2 rounded"><input id="adminFullName" placeholder="Full Name" required class="w-full border p-2 mb-2 rounded"><select id="adminRole" class="w-full border p-2 mb-4 rounded"><option value="dg_ceo">DG/CEO</option><option value="umc">UMC</option><option value="daf">DAF</option><option value="do">DO</option><option value="der">DER</option><option value="dprpa">DPRPA</option></select><button type="submit" class="w-full apply-btn py-2 rounded">Create Account</button></form></div></div>  <!-- MAIN DASHBOARD CONTAINER -->  <div id="appContainer" class="hidden flex h-screen flex-col fixed inset-0 z-40 bg-white">  
-    <div class="bg-white shadow-md px-5 py-3 flex justify-between items-center border-b">  
-        <div class="flex items-center gap-3"><button id="mobileMenuToggle" class="text-2xl md:hidden"><i class="fas fa-bars"></i></button><span class="font-bold text-emerald-800"><i class="fas fa-school mr-2"></i>Al-Istiqaamah</span></div>  
-        <div class="flex items-center gap-4"><span id="topUserName" class="font-medium"></span> (<span id="topUserRole"></span>) <button id="topLogoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm">Logout</button></div>  
-    </div>  
-    <div class="flex flex-1 overflow-hidden relative">  
-        <div id="sidebarOverlay" class="sidebar-overlay"></div>  
-        <aside id="dynamicSidebar" class="sidebar text-white flex flex-col overflow-y-auto">  
-            <div class="sidebar-header flex justify-between items-center p-4 border-b border-white/20">  
-                <span class="logo-text font-bold text-amber-300"><i class="fas fa-compass mr-2"></i>Navigation</span>  
-                <button id="collapseSidebarBtn" class="sidebar-toggle text-white"><i class="fas fa-chevron-left"></i></button>  
-            </div>  
-            <nav id="dynamicNav" class="flex-1 px-3 mt-4 space-y-1"></nav>  
-        </aside>  
-        <main id="mainContent" class="flex-1 overflow-auto bg-gray-100 p-5"></main>  
-    </div>  
-</div>  <script>  
-// ========== SUPABASE & GLOBALS ==========  
-const SUPABASE_URL = 'https://sctxivdgqxdtpmrudotb.supabase.co';  
-const SUPABASE_ANON_KEY = 'sb_publishable_pKF1kDmzfWhcHhlINqTizw_c1iPE-yo';  
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);  
-let currentUser = null;  
-let schoolData = { students: [], teachers: [] };  
-let currentChart = null;  
-let inactivityTimer = null;  
-const INACTIVITY_TIMEOUT = 60000; // 1 minute auto logout  
-let slidesData = [], currentSlideIndex = 0, slideInterval;  
-  
-function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&' ? '&amp;' : m==='<' ? '&lt;' : '&gt;'); }  
-function showLoading() { document.getElementById('globalLoading').style.display = 'flex'; }  
-function hideLoading() { document.getElementById('globalLoading').style.display = 'none'; }  
-function showToast(msg, isError=false) { let t=document.getElementById('toastMsg'); t.innerText=msg; t.style.background=isError?'#dc2626':'#10b981'; t.style.display='block'; setTimeout(()=>t.style.display='none',4000); }  
-  
-async function refreshSchoolData(force=false) { showLoading(); try { const [studentsRes, teachersRes] = await Promise.all([ supabaseClient.from('students').select('*'), supabaseClient.from('teachers').select('*') ]); schoolData = { students: studentsRes.data||[], teachers: teachersRes.data||[] }; } catch(e) { console.error(e); } finally { hideLoading(); } }  
-  
-function resetInactivityTimer(){ if(currentUser){ if(inactivityTimer) clearTimeout(inactivityTimer); inactivityTimer = setTimeout(()=>{ if(currentUser){ showToast("Session expired due to inactivity."); logoutUser(); } }, INACTIVITY_TIMEOUT); } }  
-function attachActivityListeners(){ ['mousemove','click','keydown'].forEach(ev=>window.addEventListener(ev,()=>currentUser && resetInactivityTimer())); }  
-function logoutUser() { if(inactivityTimer) clearTimeout(inactivityTimer); currentUser=null; document.getElementById('appContainer').classList.add('hidden'); document.getElementById('landingPage').style.display='block'; showToast("Logged out"); }  
-  
-// ========== ROLE BASED NAVIGATION (EXACT REQUIREMENTS) ==========  
-function getNavItemsByRole() {  
-    const role = currentUser.role;  
-    if (role === 'dg_ceo' || role === 'umc') {  
-        return [  
-            { id: 'dashboard', icon: '🏠', label: 'Dashboard' }, { id: 'students', icon: '📚', label: 'Students' }, { id: 'enroll', icon: '🎓', label: 'Enroll' },  
-            { id: 'results', icon: '📊', label: 'Results' }, { id: 'fees', icon: '💰', label: 'Fees' }, { id: 'staff', icon: '👥', label: 'Staff' },  
-            { id: 'apps', icon: '📋', label: 'Apps' }, { id: 'download-records', icon: '📥', label: 'Download Records' },  
-            { id: 'announce', icon: '📢', label: 'Announce' }, { id: 'slides', icon: '🎞️', label: 'Slides' }  
-        ];  
-    } else if (role === 'daf') {  
-        return [  
-            { id: 'students', icon: '📚', label: 'Students' }, { id: 'receipt-generator', icon: '🖨️', label: 'Receipt generator' },  
-            { id: 'payroll', icon: '👥', label: 'Payroll' }, { id: 'fees', icon: '💰', label: 'Fees' },  
-            { id: 'payment-report', icon: '📃', label: 'Payment report' }, { id: 'download-records', icon: '📥', label: 'Download Records' }  
-        ];  
-    } else if (role === 'dprpa') {  
-        return [  
-            { id: 'students', icon: '📚', label: 'Students' }, { id: 'academic-performance', icon: '📉', label: 'Academic performance' },  
-            { id: 'section-analysis', icon: '📊', label: 'Section analysis' }, { id: 'download-records', icon: '📥', label: 'Download Records' }  
-        ];  
-    } else if (role === 'der') {  
-        return [  
-            { id: 'students', icon: '📚', label: 'Students' }, { id: 'staff', icon: '👥', label: 'Staff' },  
-            { id: 'section-analysis', icon: '📊', label: 'Section analysis' }  
-        ];  
-    } else if (role === 'do') {  
-        return [  
-            { id: 'dashboard', icon: '🏠', label: 'Dashboard' }, { id: 'fees', icon: '💰', label: 'Fees' },  
-            { id: 'students', icon: '📚', label: 'Students' }, { id: 'staff', icon: '👥', label: 'Staff' }  
-        ];  
-    } else if (role === 'headteacher') {  
-        return [  
-            { id: 'section-students', icon: '👨‍🎓', label: 'Section student' }, { id: 'section-fees', icon: '💰', label: 'Section fees' },  
-            { id: 'enroll-student', icon: '🎓', label: 'Enrol student' }  
-        ];  
-    } else if (role === 'teacher') {  
-        return [  
-            { id: 'my-class', icon: '👩‍🏫', label: 'My class' }, { id: 'grade-student', icon: '📝', label: 'Grade student' },  
-            { id: 'attendance-appraisal', icon: '🗒️', label: 'Attendance and appraisal' }  
-        ];  
-    } else if (role === 'parent') {  
-        return [  
-            { id: 'child-reports', icon: '👨‍🎓', label: 'Child reports' }, { id: 'fee-payment', icon: '💳', label: 'Fee payment' },  
-            { id: 'result', icon: '📃', label: 'Result' }, { id: 'payment-history', icon: '📓', label: 'Payment history and receipt download' }  
-        ];  
-    }  
-    return [{ id: 'dashboard', icon: '🏠', label: 'Dashboard' }];  
-}  
-  
-// ========== FULLY IMPLEMENTED DASHBOARD FUNCTIONS ==========  
-async function renderDashboard() {  
-    let content = `<div class="space-y-6"><div class="stat-card"><h2 class="text-2xl font-bold">Welcome, ${escapeHtml(currentUser.full_name)}</h2><p class="text-gray-600">Role: ${currentUser.role.toUpperCase()}</p></div>`;  
-    if (currentUser.role === 'dg_ceo' || currentUser.role === 'umc') {  
-        const totalStudents = schoolData.students.length;  
-        const activeStudents = schoolData.students.filter(s=>s.status==='active').length;  
-        const totalStaff = schoolData.teachers.length;  
-        const pendingFee = schoolData.students.filter(s=>s.fee_status !== 'Paid').length * 50000;  
-        content += `<div class="grid grid-cols-1 md:grid-cols-4 gap-4">  
-            <div class="stat-card"><i class="fas fa-users text-emerald-600 text-2xl"></i><p class="text-3xl font-bold">${totalStudents}</p><p>Total Students</p></div>  
-            <div class="stat-card"><i class="fas fa-user-check text-blue-600 text-2xl"></i><p class="text-3xl font-bold">${activeStudents}</p><p>Active</p></div>  
-            <div class="stat-card"><i class="fas fa-chalkboard-user text-amber-600 text-2xl"></i><p class="text-3xl font-bold">${totalStaff}</p><p>Staff</p></div>  
-            <div class="stat-card"><i class="fas fa-money-bill-wave text-rose-600 text-2xl"></i><p class="text-3xl font-bold">₦${pendingFee.toLocaleString()}</p><p>Pending Fees</p></div>  
-        </div><div class="stat-card"><canvas id="trendChart" height="100"></canvas></div>`;  
-        setTimeout(async () => {  
-            const { data: tx } = await supabase.from('fee_transactions').select('amount_paid, payment_date');  
-            if(tx && currentChart) currentChart.destroy();  
-            const monthly = Array(6).fill(0);  
-            const months = [];  
-            const now = new Date();  
-            for(let i=5;i>=0;i--) { let d=new Date(now.getFullYear(), now.getMonth()-i,1); months.push(d.toLocaleString('default',{month:'short'})); }  
-            tx?.forEach(t=>{ let d=new Date(t.payment_date); let idx = months.findIndex(m=> m===d.toLocaleString('default',{month:'short'}) && d.getFullYear()===now.getFullYear()); if(idx>=0) monthly[idx] += t.amount_paid; });  
-            const ctx = document.getElementById('trendChart')?.getContext('2d');  
-            if(ctx) currentChart = new Chart(ctx, { type:'line', data:{ labels:months, datasets:[{ label:'Monthly Fee Collection (₦)', data:monthly, borderColor:'#f59e0b', fill:true }] } });  
-        }, 100);  
-    } else {  
-        content += `<div class="stat-card"><p>Your personalized dashboard will appear here.</p></div>`;  
-    }  
-    content += `</div>`;  
-    document.getElementById('mainContent').innerHTML = content;  
-}  
-  
-async function renderStudentsList() {  
-    let html = `<div class="stat-card"><h2 class="text-xl font-bold mb-3">📚 Student Registry</h2><input type="text" id="studentSearch" placeholder="Search by name, reg number, or section" class="search-filter mb-4"><div class="overflow-x-auto"><table><thead><tr><th>Reg No</th><th>Name</th><th>Parent Email</th><th>Section</th><th>Fee Status</th><th>Status</th></tr></thead><tbody id="studentTableBody"></tbody></table></div></div>`;  
-    document.getElementById('mainContent').innerHTML = html;  
-    const render = (filter='') => {  
-        let filtered = schoolData.students.filter(s => s.name.toLowerCase().includes(filter) || s.reg_number.toLowerCase().includes(filter) || (s.section||'').toLowerCase().includes(filter));  
-        document.getElementById('studentTableBody').innerHTML = filtered.map(s => `<tr><td class="p-2">${escapeHtml(s.reg_number)}</td><td class="p-2">${escapeHtml(s.name)}</td><td class="p-2">${escapeHtml(s.parent_email||'-')}</td><td class="p-2">${escapeHtml(s.section)}</td><td class="p-2"><span class="px-2 py-1 rounded text-xs ${s.fee_status==='Paid'?'bg-green-100 text-green-800':'bg-yellow-100'}">${s.fee_status||'Pending'}</span></td><td class="p-2">${s.status}</td></tr>`).join('');  
-    };  
-    document.getElementById('studentSearch').addEventListener('input', e => render(e.target.value.toLowerCase()));  
-    render();  
-}  
-  
-async function renderEnroll() {  
-    const sections = ['regular islamiyyah','regular memorization','intensive memorization','integrated islamic basic section','advance section','woman section'];  
-    let html = `<div class="stat-card"><h2 class="text-xl font-bold">🎓 Enroll New Student</h2><form id="enrollForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"><input name="name" placeholder="Full Name" required class="border p-2 rounded"><input name="reg_number" placeholder="Registration Number" required class="border p-2 rounded"><input name="parent_name" placeholder="Parent Name" class="border p-2 rounded"><input name="parent_email" placeholder="Parent Email" type="email" class="border p-2 rounded"><input name="parent_phone" placeholder="Parent Phone" class="border p-2 rounded"><select name="section" required class="border p-2 rounded">${sections.map(s=>`<option>${s}</option>`).join('')}</select><button type="submit" class="apply-btn py-2 rounded col-span-2">Enroll Student</button></form></div>`;  
-    document.getElementById('mainContent').innerHTML = html;  
-    document.getElementById('enrollForm').onsubmit = async (e) => {  
-        e.preventDefault();  
-        const formData = new FormData(e.target);  
-        const data = Object.fromEntries(formData.entries());  
-        const { error } = await supabase.from('students').insert([{ ...data, status:'active', fee_status:'Pending' }]);  
-        if(error) showToast(error.message, true);  
-        else { showToast("Student enrolled successfully"); await refreshSchoolData(); renderStudentsList(); }  
-    };  
-}  
-  
-async function renderFees() {  
-    let html = `<div class="stat-card"><h2 class="text-xl font-bold">💰 Fee Management (Term-based)</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"><select id="feeStudentId" class="border p-2 rounded"><option value="">Select Student</option>${schoolData.students.map(s=>`<option value="${s.id}">${s.name} (${s.reg_number})</option>`).join('')}</select><select id="feeTerm" class="border p-2 rounded"><option value="1st">1st Term</option><option value="2nd">2nd Term</option><option value="3rd">3rd Term</option></select><input type="number" id="feeYear" value="${new Date().getFullYear()}" class="border p-2 rounded"><input type="number" id="feeAmount" placeholder="Amount (₦)" class="border p-2 rounded"><button id="recordPaymentBtn" class="apply-btn py-2 rounded">Record Payment</button></div><div id="feeBalanceInfo" class="mt-4"></div></div>`;  
-    document.getElementById('mainContent').innerHTML = html;  
-    document.getElementById('recordPaymentBtn').onclick = async () => {  
-        const studentId = document.getElementById('feeStudentId').value;  
-        const term = document.getElementById('feeTerm').value;  
-        const year = parseInt(document.getElementById('feeYear').value);  
-        const amount = parseFloat(document.getElementById('feeAmount').value);  
-        if(!studentId || !amount) return showToast("Select student and enter amount", true);  
-        let { data: bal } = await supabase.from('fee_balances').select('*').eq('student_id',studentId).eq('term',term).eq('year',year).maybeSingle();  
-        if(!bal) {  
-            const student = schoolData.students.find(s=>s.id==studentId);  
-            const totalFees = 50000;  
-            await supabase.from('fee_balances').insert([{ student_id:studentId, term, year, total_fees:totalFees, paid_amount:0 }]);  
-        }  
-        const receipt = `RCPT/${year}/${term}/${studentId}/${Date.now()}`;  
-        const { error } = await supabase.from('fee_transactions').insert([{ student_id:studentId, term, year, amount_paid:amount, receipt_no:receipt, payment_method:'cash', status:'approved' }]);  
-        if(error) showToast(error.message, true);  
-        else { showToast("Payment recorded"); await refreshSchoolData(); }  
-    };  
-}  
-  
-async function renderGradeStudent() {  
-    let html = `<div class="stat-card"><h2 class="text-xl font-bold">📝 Grade Student (CA1=20, CA2=20, Exam=60)</h2><div class="grid gap-3 mt-3"><select id="gradeStudentId" class="border p-2 rounded"><option>Select Student</option>${schoolData.students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select><input id="subject" placeholder="Subject" class="border p-2 rounded"><input id="ca1" type="number" placeholder="CA1 (0-20)" class="grade-input"><input id="ca2" type="number" placeholder="CA2 (0-20)" class="grade-input"><input id="exam" type="number" placeholder="Exam (0-60)" class="grade-input"><select id="termGrade" class="border p-2 rounded"><option>1st</option><option>2nd</option><option>3rd</option></select><button id="saveGradeBtn" class="apply-btn py-2 rounded">Save Result</button></div><div id="gradeResultMsg"></div></div>`;  
-    document.getElementById('mainContent').innerHTML = html;  
-    document.getElementById('saveGradeBtn').onclick = async () => {  
-        const studentId = document.getElementById('gradeStudentId').value;  
-        const subject = document.getElementById('subject').value;  
-        const ca1 = parseInt(document.getElementById('ca1').value)||0;  
-        const ca2 = parseInt(document.getElementById('ca2').value)||0;  
-        const exam = parseInt(document.getElementById('exam').value)||0;  
-        const term = document.getElementById('termGrade').value;  
-        if(!studentId || !subject) return showToast("Fill all fields", true);  
-        if(ca1>20 || ca2>20 || exam>60) return showToast("CA max 20 each, Exam max 60", true);  
-        const total = ca1+ca2+exam;  
-        const grade = total>=80?'A':total>=70?'B':total>=60?'C':total>=50?'D':'F';  
-        const { error } = await supabase.from('student_results').insert([{ student_id:studentId, subject, ca1, ca2, exam, term, grade, year:new Date().getFullYear() }]);  
-        if(error) showToast(error.message, true); else showToast("Result saved");  
-    };  
-}  
-  
-async function renderParentDashboard() {  
-    const studentId = currentUser.studentId;  
-    const student = schoolData.students.find(s=>s.id==studentId);  
-    const { data: balances } = await supabase.from('fee_balances').select('*').eq('student_id',studentId);  
-    const { data: transactions } = await supabase.from('fee_transactions').select('*').eq('student_id',studentId).order('payment_date', {ascending:false});  
-    const { data: results } = await supabase.from('student_results').select('*').eq('student_id',studentId);  
-    const totalDue = balances.reduce((a,b)=>a+b.total_fees,0);  
-    const totalPaid = balances.reduce((a,b)=>a+b.paid_amount,0);  
-    let html = `<div class="space-y-4"><div class="stat-card"><h2 class="text-xl font-bold">👨‍🎓 Child: ${escapeHtml(student?.name)} (${student?.reg_number})</h2><p>Fee Status: ₦${(totalDue-totalPaid).toLocaleString()} remaining</p><button id="downloadResultBtn" class="apply-btn mt-2 px-4 py-1 rounded">Download Result PDF</button></div><div class="stat-card"><h3 class="font-bold">💰 Recent Payments</h3><table><thead><tr><th>Date</th><th>Term</th><th>Amount</th><th>Receipt</th></tr></thead><tbody>${transactions?.slice(0,5).map(t=>`<tr><td>${new Date(t.payment_date).toLocaleDateString()}</td><td>${t.term}</td><td>₦${t.amount_paid.toLocaleString()}</td><td>${t.receipt_no}</td></tr>`).join('')||'<tr><td colspan="4">No payments</td></tr>'}</tbody></table></div><div class="stat-card"><h3 class="font-bold">📖 Results</h3><table><thead><tr><th>Term</th><th>Subject</th><th>CA1(20)</th><th>CA2(20)</th><th>Exam(60)</th><th>Total</th><th>Grade</th></tr></thead><tbody>${results?.map(r=>`<tr><td>${r.term}</td><td>${r.subject}</td><td>${r.ca1}</td><td>${r.ca2}</td><td>${r.exam}</td><td>${r.total_score}</td><td>${r.grade}</td></tr>`).join('')||'<tr><td colspan="7">No results yet</td></tr>'}</tbody></table></div></div>`;  
-    document.getElementById('mainContent').innerHTML = html;  
-    document.getElementById('downloadResultBtn')?.addEventListener('click', () => {  
-        const element = document.createElement('div');  
-        element.innerHTML = `<div style="padding:20px"><h2>${student?.name} - Academic Result</h2><p>Reg: ${student?.reg_number}</p><table border="1">${document.querySelector('#mainContent table').outerHTML}</table></div>`;  
-        html2pdf().from(element).set({ filename:`${student?.reg_number}_result.pdf` }).save();  
-    });  
-}  
-  
-window.renderStaff = async () => document.getElementById('mainContent').innerHTML = `<div class="stat-card"><h2>👥 Staff List</h2><ul>${schoolData.teachers.map(t=>`<li>${t.full_name} (${t.role})</li>`).join('')}</ul></div>`;  
-  
-  
-function renderContentView(viewId) {  
-    const viewMap = {  
-        dashboard: renderDashboard, students: renderStudentsList, enroll: renderEnroll, results: renderResults, fees: renderFees,  
-        staff: renderStaff, apps: renderApps, 'download-records': renderDownloadRecords, announce: renderAnnounce, slides: renderSlides,  
-        'receipt-generator': renderReceiptGenerator, payroll: renderPayroll, 'payment-report': renderPaymentReport,  
-        'academic-performance': renderAcademicPerformance, 'section-analysis': renderSectionAnalysis,  
-        'section-students': renderSectionStudents, 'section-fees': renderSectionFees, 'enroll-student': renderEnroll,  
-        'my-class': renderMyClass, 'grade-student': renderGradeStudent, 'attendance-appraisal': renderAttendanceAppraisal,  
-        'child-reports': renderChildReports, 'fee-payment': renderParentFeePayment, 'result': renderParentResult,  
-        'payment-history': renderParentPaymentHistory  
-    };  
-    if(viewMap[viewId]) viewMap[viewId](); else renderDashboard();  
-}  
-  
-// ========== SIDEBAR COLLAPSE / AUTO-HIDE ==========  
-function initSidebarCollapse() {  
-    const btn = document.getElementById('collapseSidebarBtn');  
-    const sidebar = document.getElementById('dynamicSidebar');  
-    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';  
-    if(isCollapsed) sidebar.classList.add('collapsed');  
-    btn.addEventListener('click', () => {  
-        sidebar.classList.toggle('collapsed');  
-        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));  
-    });  
-}  
-  
-function showDashboard() {  
-    document.getElementById('landingPage').style.display='none';  
-    document.getElementById('appContainer').classList.remove('hidden');  
-    document.getElementById('topUserName').innerText = currentUser.full_name;  
-    document.getElementById('topUserRole').innerText = currentUser.role?.toUpperCase() || '';  
-    const navItems = getNavItemsByRole();  
-    const navHtml = navItems.map(item => `  
-        <a href="#" data-view="${item.id}" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors">  
-            <span class="text-xl nav-icon">${item.icon}</span>  
-            <span class="nav-text">${escapeHtml(item.label)}</span>  
-        </a>  
-    `).join('');  
-    document.getElementById("dynamicNav").innerHTML = navHtml;  
-    document.querySelectorAll('.nav-link').forEach(link=>{  
-        link.addEventListener('click',(e)=>{ e.preventDefault(); renderContentView(link.dataset.view); closeMobileSidebar(); resetInactivityTimer(); });  
-    });  
-    renderContentView('dashboard');  
-    initSidebarCollapse();  
-}  
-  
-// ========== AUTHENTICATION (keeping existing logic) ==========  
-async function loginAdmin(email,pwd){ showLoading(); try{ const {data,error}=await supabaseClient.auth.signInWithPassword({email,password:pwd}); if(error)throw error; const {data:prof}=await supabaseClient.from('profiles').select('*').eq('id',data.user.id).single(); if(!prof||!['dg_ceo','umc','daf','do','der','dprpa','headteacher'].includes(prof.role))throw new Error("Unauthorized role"); currentUser={id:prof.id,full_name:prof.full_name,role:prof.role}; await refreshSchoolData(true); showDashboard(); resetInactivityTimer(); attachActivityListeners(); hideLoading(); }catch(e){ hideLoading(); showToast(e.message,true); } }  
-async function loginStaff(username,pwd){ showLoading(); try{ const {data:staff}=await supabaseClient.from('teachers').select('*').eq('username',username).single(); if(!staff) throw new Error("Staff not found"); const {data,error}=await supabaseClient.auth.signInWithPassword({email:staff.email,password:pwd}); if(error)throw error; const {data:prof}=await supabaseClient.from('profiles').select('*').eq('id',data.user.id).single(); if(!prof||prof.role!=='staff')throw new Error("Invalid staff"); currentUser={id:prof.id,full_name:prof.full_name,role:staff.role,staffId:staff.id,section:staff.assigned_section}; await refreshSchoolData(true); showDashboard(); resetInactivityTimer(); attachActivityListeners(); hideLoading(); }catch(e){ hideLoading(); showToast(e.message,true); } }  
-async function parentLogin(regNo,pwd){ showLoading(); try{ if(pwd!=="al123")throw new Error("Wrong password"); await refreshSchoolData(true); const student=schoolData.students.find(s=>s.reg_number===regNo); if(!student)throw new Error("Student not found"); if(student.status!=='active')throw new Error("Suspended"); currentUser={role:"parent",full_name:`Parent of ${student.name}`,studentId:student.id}; showDashboard(); resetInactivityTimer(); attachActivityListeners(); hideLoading(); }catch(e){ hideLoading(); showToast(e.message,true); } }  
-  
-// Slides & Load  
-async function loadSlides() { const {data}=await supabaseClient.from('slides').select('*'); slidesData=data||[{url:"https://picsum.photos/id/104/1200/600",caption:"Campus"}]; renderSlideshow(); }  
-function renderSlideshow(){ const container=document.getElementById('slidesContainer'); if(!container)return; container.innerHTML=slidesData.map((s,i)=>`<div class="carousel-slide absolute inset-0 w-full h-full transition-opacity duration-500 ${i===0?'opacity-100 z-10':'opacity-0 z-0'} bg-cover bg-center" style="background-image:linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.2)), url('${s.url}')"><div class="absolute bottom-0 bg-black/60 text-white p-2 w-full text-center">${escapeHtml(s.caption)}</div></div>`).join(''); }  
-function closeMobileSidebar(){ document.getElementById('dynamicSidebar')?.classList.remove('open'); document.getElementById('sidebarOverlay')?.classList.remove('active'); }  
-  
-// Init event listeners  
-async function init(){  
-    await refreshSchoolData(); await loadSlides();  
-    document.getElementById('loginBtnHero').onclick=()=>document.getElementById('loginScreen').style.display='flex';  
-    document.getElementById('parentLoginBtn').onclick=()=>document.getElementById('parentLoginModal').style.display='flex';  
-    document.getElementById('adminSignupBtn').onclick=()=>document.getElementById('adminSignupModal').style.display='flex';  
-    document.getElementById('adminLoginForm').onsubmit=async(e)=>{e.preventDefault(); loginAdmin(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value);};  
-    document.getElementById('staffLoginForm').onsubmit=async(e)=>{e.preventDefault(); loginStaff(document.getElementById('staffUsername').value, document.getElementById('staffPassword').value);};  
-    document.getElementById('parentLoginForm').onsubmit=async(e)=>{e.preventDefault(); parentLogin(document.getElementById('studentRegNo').value, document.getElementById('parentPassword').value);};  
-    document.getElementById('adminSignupForm').onsubmit=async(e)=>{e.preventDefault(); if(document.getElementById('adminRegCode').value!=='ALIFLY2026') return showToast("Invalid code",true); const email=document.getElementById('adminEmail').value,pwd=document.getElementById('adminPassword').value,full=document.getElementById('adminFullName').value,role=document.getElementById('adminRole').value; const {data,error}=await supabaseClient.auth.signUp({email,password:pwd}); if(error) throw error; await supabaseClient.from('profiles').insert([{id:data.user.id,full_name:full,role}]); showToast("Account created"); document.getElementById('adminSignupModal').style.display='none';};  
-    document.getElementById('topLogoutBtn').onclick=logoutUser;  
-    document.getElementById('mobileMenuToggle').onclick=()=>{document.getElementById('dynamicSidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('active');};  
-    document.getElementById('sidebarOverlay').onclick=closeMobileSidebar;  
-    document.getElementById('applyNowBtnFooter').onclick=()=>showToast("Admission form would open", false);  
-    setInterval(()=>{ let d=new Date(); document.getElementById('liveTime')&&(document.getElementById('liveTime').innerText=d.toLocaleTimeString()); document.getElementById('liveDate')&&(document.getElementById('liveDate').innerText=d.toDateString()); },1000);  
-}  
-init();  
-</script>  </body>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Al‑Istiqaamah Flying Wings Academy | Unified Portal</title>
+    <!-- Supabase + Tailwind + Font Awesome + Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        .hero-pattern { background: linear-gradient(135deg, #0a2e2c 0%, #0f3b38 100%); }
+        .sidebar { background: #0f2e2c; transition: width 0.2s ease, left 0.2s ease; z-index: 45; width: 280px; }
+        .sidebar.minimized { width: 80px; }
+        .sidebar.minimized .nav-text { display: none; }
+        .sidebar.minimized .nav-icon { margin-right: 0; }
+        .sidebar.minimized .sidebar-header span { display: none; }
+        .sidebar:not(.minimized) .nav-text { display: inline; }
+        .nav-link { transition: all 0.2s; cursor: pointer; }
+        .nav-link:hover, .nav-link-active { background: rgba(255,255,255,0.12); border-left: 4px solid #f59e0b; }
+        .apply-btn { background: linear-gradient(135deg, #f59e0b, #d97706); transition: 0.2s; }
+        .apply-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(245,158,11,0.4); }
+        .card-hover { transition: 0.2s; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -12px rgba(0,0,0,0.1); }
+        .toast-notify { position: fixed; bottom: 20px; right: 20px; background: #323232; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; display: none; }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #f59e0b; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; top: 0; bottom: 0; width: 280px; }
+            .sidebar.open { left: 0; }
+            .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 55; display: none; }
+            .sidebar-overlay.active { display: block; }
+        }
+        .grade-input { width: 85px; padding: 4px; border-radius: 6px; border: 1px solid #ccc; text-align: center; }
+        .receipt-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
+        .search-filter { border: 1px solid #cbd5e1; border-radius: 40px; padding: 8px 16px; width: 100%; max-width: 300px; }
+        .auto-minimize-toggle { cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 30px; padding: 4px 12px; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+<div id="toastMsg" class="toast-notify"></div>
+<div id="globalLoader" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] hidden"><div class="spinner w-10 h-10 border-4"></div></div>
+
+<!-- LANDING PAGE -->
+<div id="landingPage" class="min-h-screen">
+    <div class="hero-pattern text-white py-16 md:py-24">
+        <div class="container mx-auto px-6 flex flex-col lg:flex-row justify-between gap-6">
+            <div class="max-w-2xl">
+                <div class="flex items-center gap-4"><img src="https://placehold.co/60x60?text=Logo" class="rounded-full border-2 border-amber-400 h-16"><h1 class="text-3xl md:text-4xl font-bold">Al‑Istiqaamah <span class="text-amber-300">Flying Wings</span></h1></div>
+                <p class="mt-2 italic">Faith • Knowledge • Leadership</p>
+                <div class="flex flex-wrap gap-4 mt-6"><button id="showLoginModal" class="bg-amber-500 text-gray-900 px-6 py-2 rounded-full"><i class="fas fa-chalkboard-user"></i> Staff/Admin</button><button id="showParentLogin" class="bg-emerald-600 text-white px-6 py-2 rounded-full"><i class="fas fa-user-friends"></i> Parent</button><button id="showAdminSignup" class="bg-indigo-600 text-white px-6 py-2 rounded-full"><i class="fas fa-user-shield"></i> Admin Signup</button></div>
+            </div>
+            <div class="bg-white/15 backdrop-blur p-4 rounded-2xl w-72"><div class="flex justify-between"><span class="text-amber-200"><i class="fas fa-clock"></i> Time</span><span id="liveTime" class="font-mono text-xl">--:--:--</span></div><div id="liveDate"></div><div><span id="weatherTemp">--</span>°C <span id="weatherDesc"></span></div></div>
+        </div>
+    </div>
+    <div class="container mx-auto px-6 py-6"><div id="announcementBar" class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded"></div></div>
+    <div class="container mx-auto px-6 relative"><div id="slidesContainer" class="h-96 md:h-[500px] rounded-2xl overflow-hidden relative bg-gray-800"></div><div id="dotsContainer" class="flex justify-center gap-2 mt-2"></div><button id="prevSlide" class="carousel-btn absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full">❮</button><button id="nextSlide" class="carousel-btn absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full">❯</button></div>
+    <div class="container mx-auto px-6 py-12 grid md:grid-cols-2 gap-6"><div class="bg-white p-6 rounded-2xl shadow card-hover border-t-8 border-emerald-600"><i class="fas fa-eye text-emerald-600 text-3xl"></i><h2 class="text-2xl font-bold">Vision</h2><p>Faith, Knowledge & service – beacons of guidance.</p></div><div class="bg-white p-6 rounded-2xl shadow card-hover border-t-8 border-amber-500"><i class="fas fa-bullhorn text-amber-500 text-3xl"></i><h2 class="text-2xl font-bold">Mission</h2><p>Academic excellence, Islamic values, Qur'an & Sunnah.</p></div></div>
+    <footer class="bg-slate-900 text-white text-center py-6"><p>© 2026 Al‑Istiqaamah Flying Wings Academy | Powered by Arrahmahtelecommunications</p></footer>
+</div>
+
+<!-- MODALS -->
+<div id="loginModal" class="fixed inset-0 z-50 hidden bg-black/70 items-center justify-center"><div class="bg-white p-6 rounded-2xl w-96 relative"><h2 class="text-2xl font-bold mb-4">Login</h2><div class="flex gap-2 mb-3"><button id="adminTab" class="flex-1 py-2 bg-amber-500 rounded">Admin</button><button id="staffTab" class="flex-1 py-2 bg-gray-200 rounded">Staff</button></div><form id="adminLoginForm"><input id="adminEmail" type="email" placeholder="Email" class="border p-2 w-full mb-2 rounded"><input id="adminPassword" type="password" placeholder="Password" class="border p-2 w-full mb-4 rounded"><button type="submit" class="apply-btn w-full py-2 rounded">Login</button></form><form id="staffLoginForm" style="display:none"><input id="staffUsername" placeholder="Username" class="border p-2 w-full mb-2 rounded"><input id="staffPassword" type="password" placeholder="Password" class="border p-2 w-full mb-4 rounded"><button type="submit" class="apply-btn w-full py-2 rounded">Login</button></form><button onclick="closeModal('loginModal')" class="absolute top-3 right-3 text-xl">✕</button></div></div>
+
+<div id="parentLoginModal" class="fixed inset-0 z-50 hidden bg-black/70 items-center justify-center"><div class="bg-white p-6 rounded-2xl w-96"><h2 class="text-2xl font-bold mb-4">Parent Login</h2><form id="parentLoginForm"><input id="studentRegNo" placeholder="Student Reg Number" class="border p-2 w-full mb-2 rounded"><input id="parentPwd" placeholder="Password (al123)" type="password" class="border p-2 w-full mb-4 rounded"><button type="submit" class="apply-btn w-full py-2 rounded">Login</button></form><button onclick="closeModal('parentLoginModal')" class="absolute top-3 right-3 text-xl">✕</button></div></div>
+
+<div id="adminSignupModal" class="fixed inset-0 z-50 hidden bg-black/70 items-center justify-center"><div class="bg-white p-6 rounded-2xl w-96"><h2 class="text-2xl font-bold mb-2">Admin Signup</h2><form id="adminSignupForm"><input id="regCode" placeholder="Code (ALIFLY2026)" class="border p-2 w-full mb-2 rounded"><input id="signupEmail" placeholder="Email" type="email" class="border p-2 w-full mb-2 rounded"><input id="signupPassword" placeholder="Password" type="password" class="border p-2 w-full mb-2 rounded"><input id="signupFullName" placeholder="Full Name" class="border p-2 w-full mb-2 rounded"><select id="signupRole" class="border p-2 w-full mb-4 rounded"><option value="dg_ceo">DG/CEO</option><option value="umc">UMC</option><option value="daf">DAF</option><option value="do">DO</option><option value="der">DER</option><option value="dprpa">DPRPA</option></select><button type="submit" class="apply-btn w-full py-2 rounded">Create</button></form><button onclick="closeModal('adminSignupModal')" class="absolute top-3 right-3 text-xl">✕</button></div></div>
+
+<!-- MAIN DASHBOARD APP -->
+<div id="appContainer" class="hidden flex flex-col h-screen fixed inset-0 z-40 bg-white">
+    <div class="bg-white shadow-md px-4 py-2 flex justify-between items-center border-b z-30">
+        <div class="flex items-center gap-3"><button id="mobileMenuToggle" class="text-2xl md:hidden"><i class="fas fa-bars"></i></button><span class="font-bold text-emerald-800"><i class="fas fa-school"></i> Academy Portal</span><button id="autoMinimizeBtn" class="auto-minimize-toggle hidden md:block text-sm"><i class="fas fa-chevron-left"></i> Minimize</button></div>
+        <div class="flex items-center gap-3"><span id="topUserName"></span> (<span id="topUserRole"></span>) <button id="logoutBtn" class="bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</button></div>
+    </div>
+    <div class="flex flex-1 overflow-hidden relative">
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+        <aside id="dynamicSidebar" class="sidebar text-white flex flex-col overflow-y-auto">
+            <div class="p-4 border-b border-white/20 flex justify-between items-center"><span class="sidebar-header"><i class="fas fa-compass"></i> <span>Navigation</span></span><button id="closeMobileSidebar" class="md:hidden">✕</button></div>
+            <nav id="dynamicNav" class="flex-1 px-2 py-4 space-y-1"></nav>
+        </aside>
+        <main id="mainContent" class="flex-1 overflow-auto bg-gray-100 p-5"></main>
+    </div>
+</div>
+
+<script>
+// ======================== SUPABASE INIT ========================
+const supabaseUrl = 'https://sctxivdgqxdtpmrudotb.supabase.co';
+const supabaseKey = 'sb_publishable_pKF1kDmzfWhcHhlINqTizw_c1iPE-yo';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+// ======================== GLOBALS ========================
+let currentUser = null;
+let schoolData = { students: [], teachers: [], feeTransactions: [], staffPayroll: [] };
+let slidesData = [], currentSlide = 0, slideInterval;
+const SECTIONS = ['regular islamiyyah', 'regular memorization', 'intensive memorization', 'integrated islamic basic section', 'advance section', 'woman section'];
+
+// Helper functions
+function showToast(msg, isErr = false) { let t = document.getElementById('toastMsg'); t.innerText = msg; t.style.display = 'block'; t.style.background = isErr ? '#dc2626' : '#10b981'; setTimeout(()=> t.style.display='none', 3500); }
+function showLoading(show) { document.getElementById('globalLoader').style.display = show ? 'flex' : 'none'; }
+function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+// Fetch data
+async function refreshData() { showLoading(true); try { const [stud, teach, txn] = await Promise.all([supabase.from('students').select('*'), supabase.from('teachers').select('*'), supabase.from('fee_transactions').select('*')]); schoolData = { students: stud.data || [], teachers: teach.data || [], feeTransactions: txn.data || [] }; } catch(e) { console.error(e); } finally { showLoading(false); } }
+
+// ========== ROLE MENU DEFINITIONS (Exact requested) ==========
+const roleMenus = {
+    dg_ceo: ['🏠 Dashboard','📚 Students','🎓 Enroll','📊 Results','💰 Fees','👥 Staff','📋 Apps','📥 Download Records','📢 Announce','🎞️ Slides'],
+    umc: ['🏠 Dashboard','📚 Students','🎓 Enroll','📊 Results','💰 Fees','👥 Staff','📋 Apps','📥 Download Records','📢 Announce','🎞️ Slides'],
+    daf: ['📚 Students','🖨 Receipt generator','👥 Payroll','💰 Fees','📃 Payment report','📥 Download Records'],
+    dprpa: ['📚 Students','📉 Academic performance','📊 Section analysis','📥 Download Records'],
+    der: ['📚 Students','👥 Staff','📊 Section analysis'],
+    do: ['🏠 Dashboard','💰 Fees','📚 Students','👥 Staff'],
+    headteacher: ['👨‍🎓 Section student','💰 Section fees','🎓 Enrol student'],
+    teacher: ['👩‍🏫 My class','📝 Grade student','🗒 Attendance and appraisal'],
+    parent: ['👨‍🎓 Child reports','💳 Fee payment','📃 Result','📓 Payment history and receipt download']
+};
+
+const viewMap = {
+    '🏠 Dashboard': 'dashboardView',
+    '📚 Students': 'studentsView',
+    '🎓 Enroll': 'enrollView',
+    '📊 Results': 'resultsView',
+    '💰 Fees': 'feesView',
+    '👥 Staff': 'staffView',
+    '📋 Apps': 'applicationsView',
+    '📥 Download Records': 'downloadRecordsView',
+    '📢 Announce': 'announceView',
+    '🎞️ Slides': 'slidesManageView',
+    '🖨 Receipt generator': 'receiptGeneratorView',
+    '👥 Payroll': 'payrollView',
+    '📃 Payment report': 'paymentReportView',
+    '📉 Academic performance': 'academicPerformanceView',
+    '📊 Section analysis': 'sectionAnalysisView',
+    '👨‍🎓 Section student': 'sectionStudentsView',
+    '💰 Section fees': 'sectionFeesView',
+    '🎓 Enrol student': 'enrollView',
+    '👩‍🏫 My class': 'myClassView',
+    '📝 Grade student': 'gradeStudentView',
+    '🗒 Attendance and appraisal': 'attendanceView',
+    '👨‍🎓 Child reports': 'childReportsView',
+    '💳 Fee payment': 'parentFeePaymentView',
+    '📃 Result': 'parentResultView',
+    '📓 Payment history and receipt download': 'parentPaymentHistoryView'
+};
+
+// ========== Auto-minimize sidebar ==========
+let sidebarMinimized = false;
+function toggleSidebarMinimize() { const sb = document.getElementById('dynamicSidebar'); if(!sb) return; sidebarMinimized = !sidebarMinimized; sb.classList.toggle('minimized', sidebarMinimized); localStorage.setItem('sidebarMinimized', sidebarMinimized); const btn = document.getElementById('autoMinimizeBtn'); if(btn) btn.innerHTML = sidebarMinimized ? '<i class="fas fa-chevron-right"></i> Expand' : '<i class="fas fa-chevron-left"></i> Minimize'; }
+if(localStorage.getItem('sidebarMinimized') === 'true') setTimeout(()=> toggleSidebarMinimize(), 100);
+
+// ========== RENDER DASHBOARD & CONTENT ==========
+async function dashboardView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-8 rounded-2xl shadow"><h2 class="text-3xl font-bold text-emerald-800">Welcome ${escapeHtml(currentUser.full_name)}</h2><p class="text-gray-600">Role: ${currentUser.role.toUpperCase()}</p><div class="grid md:grid-cols-3 gap-4 mt-6"><div class="bg-emerald-50 p-4 rounded-xl"><i class="fas fa-users text-2xl"></i><p class="text-2xl font-bold">${schoolData.students.length}</p><p>Students</p></div><div class="bg-amber-50 p-4 rounded-xl"><i class="fas fa-chalkboard-user"></i><p class="text-2xl font-bold">${schoolData.teachers.length}</p><p>Staff</p></div></div></div>`; }
+
+// Students view with search filter
+async function studentsView() { let html = `<div class="bg-white p-5 rounded-xl shadow"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">📚 Students</h2><input type="text" id="studentSearch" placeholder="Search name / reg no" class="search-filter"></div><div class="overflow-x-auto"><table class="w-full border"><thead><tr><th>Reg No</th><th>Name</th><th>Parent</th><th>Section</th><th>Fee Status</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentTableBody"></tbody></table></div></div>`; document.getElementById('mainContent').innerHTML = html; function renderTable(search='') { let filtered = schoolData.students.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.reg_number.toLowerCase().includes(search.toLowerCase())); document.getElementById('studentTableBody').innerHTML = filtered.map(s => `<tr class="border-b"><td class="p-2">${escapeHtml(s.reg_number)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.parent_name||'-')}</td><td>${escapeHtml(s.section)}</td><td><span class="px-2 py-1 rounded text-xs ${s.fee_status==='Paid'?'bg-green-200':'bg-yellow-200'}">${s.fee_status}</span></td><td><span class="${s.status==='active'?'active-badge':'suspended-badge'}">${s.status}</span></td><td><button onclick="window.toggleSuspend('${s.id}','${s.status}')" class="suspend-btn">${s.status==='active'?'Suspend':'Activate'}</button> <button onclick="window.deleteStudentRecord('${s.id}')" class="delete-btn">Delete</button></td></tr>`).join(''); } document.getElementById('studentSearch').addEventListener('input', e => renderTable(e.target.value)); renderTable(); window.toggleSuspend = async (id, cur) => { let newStat = cur==='active'?'suspended':'active'; await supabase.from('students').update({status: newStat}).eq('id',id); await refreshData(); studentsView(); }; window.deleteStudentRecord = async (id) => { if(confirm('Delete?')) { await supabase.from('students').delete().eq('id',id); await refreshData(); studentsView(); } }; }
+
+async function enrollView() { let secOps = SECTIONS.map(s=>`<option>${s}</option>`).join(''); document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2 class="text-2xl font-bold">🎓 Enroll Student</h2><form id="enrollForm"><input id="regNum" placeholder="Reg Number" required class="border p-2 w-full mb-2 rounded"><input id="fullName" placeholder="Full Name" required class="border p-2 w-full mb-2 rounded"><input id="parentName" placeholder="Parent Name" required class="border p-2 w-full mb-2 rounded"><input id="level" type="number" placeholder="Level 1-12" class="border p-2 w-full mb-2 rounded"><select id="sectionSel" class="border p-2 w-full mb-2">${secOps}</select><select id="feeStat" class="border p-2 w-full mb-2"><option>Pending</option><option>Paid</option></select><button type="submit" class="apply-btn w-full py-2 rounded">Register</button></form></div>`; document.getElementById('enrollForm').onsubmit = async (e) => { e.preventDefault(); try { let reg = document.getElementById('regNum').value; if(schoolData.students.find(s=>s.reg_number===reg)) throw new Error('Reg exists'); await supabase.from('students').insert([{ reg_number: reg, name: document.getElementById('fullName').value, parent_name: document.getElementById('parentName').value, level: parseInt(document.getElementById('level').value), section: document.getElementById('sectionSel').value, fee_status: document.getElementById('feeStat').value, status:'active', grades:{} }]); await refreshData(); showToast('Enrolled'); studentsView(); } catch(err) { showToast(err.message, true); } }; }
+
+// Fees view with search
+async function feesView() { let html = `<div class="bg-white p-5 rounded-xl"><h2>💰 Fee Management</h2><input type="text" id="feeSearch" placeholder="Search student" class="search-filter my-2"><div id="feeList"></div></div>`; document.getElementById('mainContent').innerHTML = html; function renderFeeList(search='') { let list = schoolData.students.filter(s => s.fee_status !== 'Paid' && s.name.toLowerCase().includes(search.toLowerCase())); document.getElementById('feeList').innerHTML = list.map(s=>`<div class="flex justify-between border-b py-2"><span>${escapeHtml(s.name)} (${s.reg_number})</span><button onclick="window.markPaid('${s.id}')" class="bg-amber-500 text-white px-3 py-1 rounded">Mark Paid</button></div>`).join(''); } document.getElementById('feeSearch').addEventListener('input', e=>renderFeeList(e.target.value)); renderFeeList(); window.markPaid = async (id) => { await supabase.from('students').update({fee_status:'Paid'}).eq('id',id); await refreshData(); feesView(); }; }
+
+// Receipt generator (DAF)
+async function receiptGeneratorView() { let html = `<div class="bg-white p-6 rounded-xl"><h2>🖨 Receipt Generator</h2><select id="receiptStudent" class="border p-2 w-full mb-2"><option>Select Student</option>${schoolData.students.map(s=>`<option value="${s.id}">${escapeHtml(s.name)} (${s.reg_number})</option>`).join('')}</select><button id="genReceipt" class="apply-btn px-4 py-2 rounded">Generate Receipt</button><div id="receiptOutput" class="mt-4"></div></div>`; document.getElementById('mainContent').innerHTML = html; document.getElementById('genReceipt').onclick = async () => { let sid = document.getElementById('receiptStudent').value; let student = schoolData.students.find(s=>s.id==sid); if(!student) return; let txn = schoolData.feeTransactions.filter(t=>t.student_id==sid).pop(); let receipt = `<div class="receipt-card p-4 border rounded"><h3 class="font-bold">RECEIPT</h3><p>Student: ${student.name}</p><p>Reg: ${student.reg_number}</p><p>Amount Paid: ${txn?.amount_paid || 'N/A'}</p><p>Date: ${new Date().toLocaleDateString()}</p><button onclick="window.print()" class="bg-gray-200 px-3 py-1 rounded mt-2">Print</button></div>`; document.getElementById('receiptOutput').innerHTML = receipt; }; }
+
+// Payroll (DAF)
+async function payrollView() { let teachers = schoolData.teachers; let html = `<div class="bg-white p-6 rounded-xl"><h2>👥 Payroll Management</h2><table class="w-full border"><thead><tr><th>Name</th><th>Role</th><th>Salary (₦)</th><th>Status</th></tr></thead><tbody>${teachers.map(t=>`<tr><td>${escapeHtml(t.name)}</td><td>${escapeHtml(t.role)}</td><td><input class="border p-1 w-24" value="${t.salary||50000}" data-id="${t.id}" class="salary-input"></td><td><button class="bg-green-600 text-white px-2 py-1 rounded pay-slip">Pay</button></td></tr>`).join('')}</tbody></table></div>`; document.getElementById('mainContent').innerHTML = html; }
+
+// Academic performance (DPRPA) with chart & search
+async function academicPerformanceView() { let html = `<div class="bg-white p-5 rounded-xl"><h2>📉 Academic Performance</h2><canvas id="perfChart" height="200"></canvas><input placeholder="Filter section" id="perfFilter" class="search-filter my-3"></div>`; document.getElementById('mainContent').innerHTML = html; let ctx = document.getElementById('perfChart').getContext('2d'); let sections = [...new Set(schoolData.students.map(s=>s.section))]; let avgScores = sections.map(sec => { let grades = schoolData.students.filter(s=>s.section===sec).flatMap(s=>Object.values(s.grades||{})); let avg = grades.length ? grades.reduce((a,b)=>a+b,0)/grades.length : 0; return avg; }); new Chart(ctx, { type:'bar', data:{ labels:sections, datasets:[{ label:'Average Score', data:avgScores, backgroundColor:'#f59e0b' }] } }); }
+
+// Section analysis (DPRPA)
+async function sectionAnalysisView() { let html = `<div class="bg-white p-5 rounded-xl"><h2>📊 Section Analysis</h2><select id="secSelect" class="border p-2">${SECTIONS.map(s=>`<option>${s}</option>`)}</select><div id="secStats"></div></div>`; document.getElementById('mainContent').innerHTML = html; document.getElementById('secSelect').onchange = () => { let sec = document.getElementById('secSelect').value; let students = schoolData.students.filter(s=>s.section===sec); let total = students.length, paid = students.filter(s=>s.fee_status==='Paid').length; document.getElementById('secStats').innerHTML = `<p>Total Students: ${total}</p><p>Fees Paid: ${paid}</p><p>Attendance Avg: ...</p>`; }; document.getElementById('secSelect').dispatchEvent(new Event('change')); }
+
+// My class / Grade student / Attendance (Teacher)
+async function myClassView() { let section = currentUser.section || SECTIONS[0]; let students = schoolData.students.filter(s=>s.section===section); document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2>👩‍🏫 My Class - ${escapeHtml(section)}</h2><ul>${students.map(s=>`<li>${escapeHtml(s.name)} (${s.reg_number})</li>`).join('')}</ul></div>`; }
+async function gradeStudentView() { let section = currentUser.section || SECTIONS[0]; let students = schoolData.students.filter(s=>s.section===section); if(!students.length) return document.getElementById('mainContent').innerHTML='<div class="bg-white p-6">No students</div>'; let html = `<div class="bg-white p-6"><h2>📝 Grade Student</h2><select id="gradeStudentSelect" class="border p-2 w-full mb-3">${students.map(s=>`<option value="${s.id}">${s.name}</option>`)}</select><div id="gradePanel"></div></div>`; document.getElementById('mainContent').innerHTML = html; const loadGrades = () => { let sid = document.getElementById('gradeStudentSelect').value; let student = schoolData.students.find(s=>s.id==sid); let grades = student.grades || {}; let panel = `<div id="subjectsList">${Object.entries(grades).map(([sub,sc])=>`<div class="grade-subject-row flex gap-2 mb-2"><input value="${sub}" class="border p-1"><input type="number" value="${sc}" class="grade-input"><button class="remove-btn bg-red-500 text-white px-2 rounded" onclick="this.parentElement.remove()">x</button></div>`).join('')}</div><div class="flex gap-2 mt-3"><input id="newSub" placeholder="Subject" class="border p-1"><input id="newScore" type="number" class="grade-input"><button id="addSubBtn" class="bg-emerald-600 text-white px-2 rounded">+ Add</button></div><button id="saveGradesBtn" class="apply-btn mt-4 w-full py-2">Save</button>`; document.getElementById('gradePanel').innerHTML = panel; document.getElementById('addSubBtn')?.addEventListener('click',()=>{ let sub = document.getElementById('newSub').value, sc = document.getElementById('newScore').value; if(sub) { let div = document.createElement('div'); div.className='grade-subject-row flex gap-2 mb-2'; div.innerHTML=`<input value="${sub}" class="border p-1"><input type="number" value="${sc}" class="grade-input"><button class="remove-btn bg-red-500 text-white px-2 rounded" onclick="this.parentElement.remove()">x</button>`; document.getElementById('subjectsList').appendChild(div); } }); document.getElementById('saveGradesBtn')?.addEventListener('click', async()=>{ let rows = document.querySelectorAll('#subjectsList .grade-subject-row'); let newGrades = {}; rows.forEach(row=>{ let sub = row.querySelector('input:first-child').value.trim(); let score = parseInt(row.querySelector('.grade-input').value); if(sub) newGrades[sub]=score; }); await supabase.from('students').update({grades:newGrades}).eq('id',sid); showToast('Grades saved'); loadGrades(); }); }; document.getElementById('gradeStudentSelect').addEventListener('change', loadGrades); loadGrades(); }
+async function attendanceView() { let section = currentUser.section || SECTIONS[0]; let students = schoolData.students.filter(s=>s.section===section); let today = new Date().toISOString().slice(0,10); let { data: records } = await supabase.from('attendance_records').select('*').eq('date',today); let attMap = {}; records?.forEach(r=> attMap[r.student_id] = r.status==='present'); let html = `<div class="bg-white p-6"><h2>🗒 Attendance</h2>${students.map(s=>`<div><label><input type="checkbox" class="att-check" data-id="${s.id}" ${attMap[s.id]?'checked':''}> ${escapeHtml(s.name)}</label></div>`).join('')}<button id="saveAtt" class="apply-btn mt-4 px-4 py-2 rounded">Save</button></div>`; document.getElementById('mainContent').innerHTML = html; document.getElementById('saveAtt').onclick = async()=>{ let payload = []; document.querySelectorAll('.att-check').forEach(cb=>payload.push({ studentId: cb.dataset.id, status: cb.checked?'present':'absent' })); for(let p of payload) await supabase.from('attendance_records').upsert({ student_id: p.studentId, date: today, status: p.status }, { onConflict: 'student_id,date' }); showToast('Saved'); }; }
+
+// Parent views
+async function childReportsView() { let student = schoolData.students.find(s=>s.id===currentUser.studentId); if(!student) return document.getElementById('mainContent').innerHTML='<div class="bg-white p-6">No child linked</div>'; document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded-xl"><h2>👨‍🎓 Child Report</h2><p><strong>Name:</strong> ${escapeHtml(student.name)}</p><p><strong>Reg:</strong> ${student.reg_number}</p><p><strong>Section:</strong> ${student.section}</p><p><strong>Attendance:</strong> ${student.attendance_pct||0}%</p><p><strong>Fee Status:</strong> ${student.fee_status}</p></div>`; }
+async function parentResultView() { let student = schoolData.students.find(s=>s.id===currentUser.studentId); let grades = student?.grades || {}; let html = `<div class="bg-white p-6 rounded-xl result-card"><h2>📃 Result: ${student?.name}</h2><table class="w-full border mt-3">${Object.entries(grades).map(([sub,sc])=>`<tr><td class="border p-2">${sub}</td><td class="border p-2">${sc}</td><td class="border p-2">${sc>=80?'A':sc>=70?'B':'C'}</td></tr>`).join('')}</table></div>`; document.getElementById('mainContent').innerHTML = html; }
+async function parentPaymentHistoryView() { let student = schoolData.students.find(s=>s.id===currentUser.studentId); let txns = schoolData.feeTransactions.filter(t=>t.student_id===student?.id); let html = `<div class="bg-white p-6"><h2>📓 Payment History</h2><ul>${txns.map(t=>`<li>Amount: ₦${t.amount_paid} on ${new Date(t.payment_date).toLocaleDateString()} - Receipt: ${t.receipt_no}</li>`).join('')}</ul></div>`; document.getElementById('mainContent').innerHTML = html; }
+async function parentFeePaymentView() { feesView(); } // reuse
+
+// Additional missing views (simple placeholders for other roles)
+async function resultsView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">📊 Results Management (coming)</div>`; }
+async function staffView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">👥 Staff list: ${schoolData.teachers.map(t=>t.name).join(', ')}</div>`; }
+async function applicationsView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">📋 Admission applications (admin only)</div>`; }
+async function downloadRecordsView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">📥 Export CSV/PDF soon</div>`; }
+async function announceView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6"><input placeholder="Announcement" id="announceTxt" class="border w-full p-2"><button class="apply-btn mt-2" onclick="updateAnnounce()">Update</button></div>`; window.updateAnnounce = async()=>{ let txt = document.getElementById('announceTxt').value; await supabase.from('site_announcement').upsert({id:1, content:txt}); showToast('Updated'); }; }
+async function slidesManageView() { let html = `<div class="bg-white p-6"><h2>🎞️ Slides</h2><input type="file" id="slideFile"><input id="slideCap" placeholder="Caption" class="border p-2 w-full mt-2"><button id="uploadSlide" class="apply-btn mt-2">Upload</button><div id="slideList"></div></div>`; document.getElementById('mainContent').innerHTML = html; const refresh = async()=>{ let {data} = await supabase.from('slides').select('*'); slidesData=data||[]; document.getElementById('slideList').innerHTML = slidesData.map(s=>`<div><img src="${s.image_url}" width="100"> ${s.caption} <button onclick="deleteSlide('${s.id}')">❌</button></div>`).join(''); }; document.getElementById('uploadSlide').onclick = async()=>{ let file = document.getElementById('slideFile').files[0]; if(!file) return; let fname = Date.now()+'_'+file.name; await supabase.storage.from('school-slides').upload(fname, file); let {data:{publicUrl}} = supabase.storage.from('school-slides').getPublicUrl(fname); await supabase.from('slides').insert([{image_url:publicUrl, caption:document.getElementById('slideCap').value}]); await refresh(); }; window.deleteSlide = async(id)=>{ await supabase.from('slides').delete().eq('id',id); await refresh(); }; refresh(); }
+async function sectionStudentsView() { studentsView(); }
+async function sectionFeesView() { feesView(); }
+async function paymentReportView() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6">📃 Payment Report: ${schoolData.feeTransactions.length} transactions</div>`; }
+
+// ========== AUTH & RENDER DASHBOARD ==========
+async function showDashboard() { document.getElementById('landingPage').style.display = 'none'; document.getElementById('appContainer').classList.remove('hidden'); document.getElementById('topUserName').innerText = currentUser.full_name; document.getElementById('topUserRole').innerText = currentUser.role.toUpperCase(); let roleKey = currentUser.role === 'headteacher' ? 'headteacher' : (currentUser.role === 'teacher' ? 'teacher' : (currentUser.role === 'parent' ? 'parent' : currentUser.role)); let menuLabels = roleMenus[roleKey] || roleMenus.dg_ceo; let navHtml = menuLabels.map(label => `<div class="nav-link flex items-center gap-3 px-4 py-2 rounded-lg text-slate-200" data-view="${label}"><span class="nav-icon text-xl">${label.split(' ')[0]}</span><span class="nav-text">${label}</span></div>`).join(''); document.getElementById('dynamicNav').innerHTML = navHtml; document.querySelectorAll('.nav-link').forEach(el => el.addEventListener('click', (e) => { let viewFunc = viewMap[el.dataset.view]; if(viewFunc && window[viewFunc]) window[viewFunc](); else dashboardView(); closeMobileSidebar(); })); dashboardView(); }
+
+// Login handlers
+async function adminLogin(email, pwd) { showLoading(true); try { let { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd }); if(error) throw error; let { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single(); if(!profile || !['dg_ceo','umc','daf','do','der','dprpa','headteacher','teacher'].includes(profile.role)) throw new Error('Invalid role'); currentUser = { id: profile.id, full_name: profile.full_name, role: profile.role, section: profile.section }; await refreshData(); showDashboard(); closeModal('loginModal'); } catch(err) { showToast(err.message, true); } finally { showLoading(false); } }
+async function staffLogin(username, pwd) { showLoading(true); try { let { data: staff } = await supabase.from('teachers').select('*').eq('username', username).single(); if(!staff) throw new Error('Staff not found'); let { data, error } = await supabase.auth.signInWithPassword({ email: staff.email, password: pwd }); if(error) throw error; currentUser = { id: data.user.id, full_name: staff.name, role: staff.role || 'teacher', section: staff.assigned_section }; await refreshData(); showDashboard(); closeModal('loginModal'); } catch(err) { showToast(err.message, true); } finally { showLoading(false); } }
+async function parentLogin(regNo, pwd) { if(pwd !== 'al123') return showToast('Invalid password', true); await refreshData(); let student = schoolData.students.find(s=>s.reg_number===regNo); if(!student) return showToast('Student not found', true); currentUser = { role: 'parent', full_name: `Parent of ${student.name}`, studentId: student.id }; showDashboard(); closeModal('parentLoginModal'); }
+async function adminSignup(code, email, pwd, fullName, role) { if(code !== 'ALIFLY2026') throw new Error('Invalid code'); let { data, error } = await supabase.auth.signUp({ email, password: pwd }); if(error) throw error; await supabase.from('profiles').insert([{ id: data.user.id, full_name: fullName, role }]); showToast('Account created, confirm email'); }
+
+// UI Events & Carousel
+async function loadSlides() { let {data} = await supabase.from('slides').select('*'); slidesData = data||[]; renderSlideshow(); }
+function renderSlideshow() { let container = document.getElementById('slidesContainer'); if(!container) return; container.innerHTML = ''; slidesData.forEach((s,i)=>{ let div = document.createElement('div'); div.className = `absolute inset-0 transition-opacity duration-500 bg-cover bg-center ${i===0?'opacity-100 z-10':'opacity-0 z-0'}`; div.style.backgroundImage = `url(${s.image_url})`; div.innerHTML = `<div class="absolute bottom-0 bg-black/60 w-full p-2 text-white text-center">${s.caption}</div>`; container.appendChild(div); }); }
+function nextSlide() { let slides = document.querySelectorAll('#slidesContainer > div'); if(slides.length) { slides[currentSlide].classList.remove('opacity-100','z-10'); currentSlide = (currentSlide+1)%slides.length; slides[currentSlide].classList.add('opacity-100','z-10'); } }
+setInterval(nextSlide, 5000);
+document.getElementById('prevSlide')?.addEventListener('click',()=>{ let slides = document.querySelectorAll('#slidesContainer > div'); if(slides.length) { slides[currentSlide].classList.remove('opacity-100','z-10'); currentSlide = (currentSlide-1+slides.length)%slides.length; slides[currentSlide].classList.add('opacity-100','z-10'); } });
+document.getElementById('nextSlide')?.addEventListener('click',nextSlide);
+function closeMobileSidebar() { let sb = document.getElementById('dynamicSidebar'); if(window.innerWidth<=768) sb.classList.remove('open'); document.getElementById('sidebarOverlay')?.classList.remove('active'); }
+document.getElementById('mobileMenuToggle')?.addEventListener('click',()=>{ document.getElementById('dynamicSidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('active'); });
+document.getElementById('sidebarOverlay')?.addEventListener('click',closeMobileSidebar);
+document.getElementById('closeMobileSidebar')?.addEventListener('click',closeMobileSidebar);
+document.getElementById('autoMinimizeBtn')?.addEventListener('click',toggleSidebarMinimize);
+document.getElementById('logoutBtn')?.addEventListener('click',()=>{ currentUser=null; document.getElementById('appContainer').classList.add('hidden'); document.getElementById('landingPage').style.display='block'; });
+document.getElementById('showLoginModal').onclick = ()=>document.getElementById('loginModal').style.display='flex';
+document.getElementById('showParentLogin').onclick = ()=>document.getElementById('parentLoginModal').style.display='flex';
+document.getElementById('showAdminSignup').onclick = ()=>document.getElementById('adminSignupModal').style.display='flex';
+document.getElementById('adminLoginForm').onsubmit = (e)=>{ e.preventDefault(); adminLogin(adminEmail.value, adminPassword.value); };
+document.getElementById('staffLoginForm').onsubmit = (e)=>{ e.preventDefault(); staffLogin(staffUsername.value, staffPassword.value); };
+document.getElementById('parentLoginForm').onsubmit = (e)=>{ e.preventDefault(); parentLogin(studentRegNo.value, parentPwd.value); };
+document.getElementById('adminSignupForm').onsubmit = async(e)=>{ e.preventDefault(); try { await adminSignup(regCode.value, signupEmail.value, signupPassword.value, signupFullName.value, signupRole.value); closeModal('adminSignupModal'); showToast('Signup success, verify email'); } catch(err) { showToast(err.message, true); } };
+// Live time/weather mock
+setInterval(()=>{ let d=new Date(); if(document.getElementById('liveTime')) document.getElementById('liveTime').innerText=d.toLocaleTimeString(); if(document.getElementById('liveDate')) document.getElementById('liveDate').innerHTML=d.toLocaleDateString(); },1000);
+document.getElementById('weatherTemp').innerText = '32'; document.getElementById('weatherDesc').innerText = 'Sunny';
+// Initialization
+refreshData(); loadSlides();
+</script>
+</body>
 </html>

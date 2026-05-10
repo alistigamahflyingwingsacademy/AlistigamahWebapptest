@@ -536,8 +536,297 @@ async function downloadRecordsView() { document.getElementById('mainContent').in
 async function announceView() { let ann = schoolData.announcements[0]?.content || ''; document.getElementById('mainContent').innerHTML = `<div class="card p-6"><textarea id="annText" class="border w-full p-3 rounded-xl h-32">${escapeHtml(ann)}</textarea><button class="apply-btn mt-4 px-6 py-2 rounded-full" onclick="window.updateAnnounce()">Update Announcement</button></div>`; window.updateAnnounce=async()=>{ await supabaseClient.from('site_announcement').upsert({id:1, content:document.getElementById('annText').value}); await refreshData(); showToast("Announcement updated"); }; }
 async function slidesManageView() { let slides = schoolData.slides; let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Slideshow Manager</h2><input type="file" id="slideFile" accept="image/*" class="mb-3"><input id="slideCaption" placeholder="Caption" class="border p-3 w-full rounded-xl mb-3"><button id="uploadSlide" class="apply-btn px-6 py-2 rounded-full">Upload</button><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">${slides.map(s=>`<div class="bg-white rounded-xl shadow p-2"><img src="${s.image_url}" class="h-32 w-full object-cover rounded-lg"><p class="text-sm mt-1">${escapeHtml(s.caption||'')}</p><button onclick="window.deleteSlide('${s.id}')" class="text-red-500 text-sm mt-1">Delete</button></div>`).join('')}</div></div>`;
     document.getElementById('mainContent').innerHTML = html; document.getElementById('uploadSlide').onclick = async()=>{ let file=document.getElementById('slideFile').files[0]; if(!file) return; let path=`slides/${Date.now()}_${file.name}`; await supabaseClient.storage.from('school-slides').upload(path,file); let {data:{publicUrl}}=supabaseClient.storage.from('school-slides').getPublicUrl(path); await supabaseClient.from('slides').insert([{image_url:publicUrl, caption:document.getElementById('slideCaption').value}]); await refreshData(); slidesManageView(); }; window.deleteSlide=async(id)=>{ await supabaseClient.from('slides').delete().eq('id',id); await refreshData(); slidesManageView(); }; }
-async function staffAppraisalReal() { showToast("Staff Appraisal (coming soon)", false); document.getElementById('mainContent').innerHTML = `<div class="card p-6"><h2>Staff Appraisal</h2><p>Module under construction</p></div>`; }
-async function performanceAppraisalView() { showToast("Performance Appraisal", false); }
+async function staffAppraisalView() { if(currentUser.role !== 'dg_ceo') { showToast("Only DG/CEO", true); return; } let staffList = schoolData.teachers; let html = `<div class="bg-white p-5"><h2>Staff Appraisal</h2><select id="staffAppraisalFilter" class="border w-full"><option value="all">All Staff</option>${staffList.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select><div id="staffAppraisalList"></div><button id="newStaffAppraisalBtn" class="apply-btn mt-4 px-4 py-2">+ New Appraisal</button></div>`; document.getElementById('mainContent').innerHTML = html; function renderAppraisals() { let filter = document.getElementById('staffAppraisalFilter').value; let appraisals = filter === 'all' ? schoolData.staffAppraisals : schoolData.staffAppraisals.filter(a => a.staff_id === filter); document.getElementById('staffAppraisalList').innerHTML = appraisals.map(a => { let staff = schoolData.teachers.find(t=>t.id === a.staff_id); return `<div class="border p-3 my-2"><p><strong>${staff?.name}</strong> | Rating: ${a.rating}/5</p><p>${escapeHtml(a.comment)}</p><small>${new Date(a.created_at).toLocaleDateString()}</small></div>`; }).join('') || '<p>No appraisals</p>'; } renderAppraisals(); document.getElementById('staffAppraisalFilter').addEventListener('change', renderAppraisals); document.getElementById('newStaffAppraisalBtn').onclick = () => { let modal = document.createElement('div'); modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]'; modal.innerHTML = `<div class="bg-white p-6 rounded-xl w-96"><h3>Appraise Staff</h3><select id="appraisalStaffSelect" class="border w-full my-2"><option>Select Staff</option>${staffList.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select><input id="appraisalStaffRating" type="number" placeholder="Rating (1-5)" class="border w-full my-2"><textarea id="appraisalStaffComment" placeholder="Comment" class="border w-full my-2" rows="3"></textarea><button id="submitStaffAppraisalBtn" class="apply-btn w-full py-2">Submit</button><button id="closeStaffAppModal" class="bg-gray-400 w-full mt-2 py-2 rounded">Cancel</button></div>`; document.body.appendChild(modal); document.getElementById('submitStaffAppraisalBtn').onclick = async () => { let staffId = document.getElementById('appraisalStaffSelect').value; let rating = parseInt(document.getElementById('appraisalStaffRating').value)||null; let comment = document.getElementById('appraisalStaffComment').value; if(!staffId) return showToast("Select staff", true); try { await saveStaffAppraisal(staffId, comment, rating); modal.remove(); await refreshData(true); staffAppraisalView(); } catch(e) { showToast(e.message, true); } }; document.getElementById('closeStaffAppModal').onclick = () => modal.remove(); }; }
+<!======== PERFORMANCE APPRAISAL FOR DG/CEO ==========
+async function performanceAppraisalView() {
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied. Only DG/CEO and Management Committee can view appraisals.", true);
+        return;
+    }
+    const appraisals = schoolData.dgAppraisals || [];
+    const appraisalOptions = appraisals.map(a => `<option value="${a.id}">${a.appraisal_period} - ${a.date_of_evaluation} (Score: ${a.total_percentage || 0}%)</option>`).join('');
+    let html = `<div class="bg-white p-5 rounded-xl shadow"><h2 class="text-2xl font-bold mb-4">📋 DG/CEO Performance Appraisal</h2><div class="mb-4"><label class="font-bold">Load Previous Appraisal:</label><select id="loadAppraisalSelect" class="border p-2 rounded w-64 ml-2"><option value="">-- New Appraisal --</option>${appraisalOptions}</select><button id="loadAppraisalBtn" class="apply-btn ml-2 px-4 py-2 rounded">Load</button><button id="newAppraisalBtn" class="bg-gray-500 text-white px-4 py-2 rounded ml-2">New</button></div><div id="appraisalFormContainer"></div></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+
+    function getRatingSelect(name, value) {
+        let options = '';
+        for(let i=1; i<=5; i++) options += `<option value="${i}" ${value==i?'selected':''}>${i}</option>`;
+        return `<select name="${name}" class="rating-select border rounded p-1 w-20">${options}</select>`;
+    }
+
+    function renderForm(data) {
+        const isEdit = !!data.id;
+        const leadership = data.leadership || { vision:3, decision_making:3, teamwork:3, strategic_planning:3, crisis_management:3, innovation:3, comments:'' };
+        const administration = data.administration || { compliance:3, supervision:3, board_decisions:3, transparency:3, discipline:3, record_keeping:3, comments:'' };
+        const financial = data.financial || { budget:3, accountability:3, resource_mobilization:3, expenditure_monitoring:3, compliance:3, internal_control:3, comments:'' };
+        const academic = data.academic || { teaching_standards:3, staff_training:3, research:3, academic_monitoring:3, curriculum:3, student_welfare:3, comments:'' };
+        const operations = data.operations || { coordination:3, operational_plans:3, facility_maintenance:3, safety:3, logistics:3, emergency:3, comments:'' };
+        const planning = data.planning || { policy_development:3, monitoring_evaluation:3, data_driven:3, research_effectiveness:3, quality_assurance:3, sustainability:3, comments:'' };
+        const hr = data.hr || { fairness:3, motivation:3, ethics:3, welfare:3, communication:3, conflict_resolution:3, comments:'' };
+        const community = data.community || { stakeholder_relation:3, public_representation:3, partnerships:3, community_engagement:3, reputation:3, media_relations:3, comments:'' };
+        const achievements = data.achievements || ['','','','',''];
+        const challenges = data.challenges || ['','','','',''];
+        const recommendations = data.recommendations || ['','','','',''];
+        const finalRemarks = data.final_remarks || '';
+        
+        let formHtml = `<form id="appraisalForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded">
+                <div><label class="font-bold">School Name:</label><input type="text" name="school_name" class="border w-full p-2 rounded" value="${escapeHtml(data.school_name || '')}" required></div>
+                <div><label class="font-bold">Appraisal Period:</label><input type="text" name="appraisal_period" class="border w-full p-2 rounded" value="${escapeHtml(data.appraisal_period || '')}" required></div>
+                <div><label class="font-bold">Date of Evaluation:</label><input type="date" name="date_of_evaluation" class="border w-full p-2 rounded" value="${data.date_of_evaluation || ''}" required></div>
+                <div><label class="font-bold">Prepared By:</label><input type="text" name="prepared_by" class="border w-full p-2 rounded" value="${escapeHtml(data.prepared_by || currentUser.full_name)}" required></div>
+                <div><label class="font-bold">Position:</label><input type="text" name="evaluator_position" class="border w-full p-2 rounded" value="${escapeHtml(data.evaluator_position || currentUser.role)}" required></div>
+            </div>
+            
+            <!-- Leadership -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold mb-2">1. Leadership & Strategic Management</h3>
+                <table class="w-full border"><thead><tr><th>Indicator</th><th>Rating</th><th>Comments</th></tr></thead>
+                <tbody><tr><td>Provides clear vision and direction</td><td>${getRatingSelect('lead_vision', leadership.vision)}</td><td rowspan="6"><input type="text" name="lead_comments" class="w-full border p-1" value="${escapeHtml(leadership.comments || '')}"></td></tr>
+                <tr><td>Effective decision making</td><td>${getRatingSelect('lead_decision', leadership.decision_making)}</td></tr>
+                <tr><td>Promotes teamwork and collaboration</td><td>${getRatingSelect('lead_teamwork', leadership.teamwork)}</td></tr>
+                <tr><td>Strategic planning and implementation</td><td>${getRatingSelect('lead_strategic', leadership.strategic_planning)}</td></tr>
+                <tr><td>Crisis and conflict management</td><td>${getRatingSelect('lead_crisis', leadership.crisis_management)}</td></tr>
+                <tr><td>Institutional growth and innovation</td><td>${getRatingSelect('lead_innovation', leadership.innovation)}</td></tr>
+                </tbody></table>
+            </div>
+            
+            <!-- Administration -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold mb-2">2. Administration & Governance</h3>
+                <table class="w-full border"><thead><tr><th>Indicator</th><th>Rating</th><th>Comments</th></tr></thead>
+                <tbody><tr><td>Compliance with policies</td><td>${getRatingSelect('admin_compliance', administration.compliance)}</td><td rowspan="6"><input type="text" name="admin_comments" class="w-full border p-1" value="${escapeHtml(administration.comments || '')}"></td></tr>
+                <tr><td>Effective supervision</td><td>${getRatingSelect('admin_supervision', administration.supervision)}</td></tr>
+                <tr><td>Timely board decisions</td><td>${getRatingSelect('admin_board', administration.board_decisions)}</td></tr>
+                <tr><td>Transparency</td><td>${getRatingSelect('admin_transparency', administration.transparency)}</td></tr>
+                <tr><td>Institutional discipline</td><td>${getRatingSelect('admin_discipline', administration.discipline)}</td></tr>
+                <tr><td>Record management</td><td>${getRatingSelect('admin_record', administration.record_keeping)}</td></tr>
+                </tbody></table>
+            </div>
+            
+            <!-- Financial -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold mb-2">3. Financial Management</h3>
+                <table class="w-full border"><thead><tr><th>Indicator</th><th>Rating</th><th>Comments</th></tr></thead>
+                <tbody><tr><td>Budget preparation</td><td>${getRatingSelect('fin_budget', financial.budget)}</td><td rowspan="6"><input type="text" name="fin_comments" class="w-full border p-1" value="${escapeHtml(financial.comments || '')}"></td></tr>
+                <tr><td>Financial accountability</td><td>${getRatingSelect('fin_accountability', financial.accountability)}</td></tr>
+                <tr><td>Resource mobilization</td><td>${getRatingSelect('fin_resource', financial.resource_mobilization)}</td></tr>
+                <tr><td>Expenditure monitoring</td><td>${getRatingSelect('fin_expenditure', financial.expenditure_monitoring)}</td></tr>
+                <tr><td>Financial compliance</td><td>${getRatingSelect('fin_compliance', financial.compliance)}</td></tr>
+                <tr><td>Internal control</td><td>${getRatingSelect('fin_control', financial.internal_control)}</td></tr>
+                </tbody></table>
+            </div>
+            
+            <!-- Academic -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold mb-2">4. Academic & Research Development</h3>
+                <table class="w-full border"><thead><tr><th>Indicator</th><th>Rating</th><th>Comments</th></tr></thead>
+                <tbody><tr><td>Teaching standards</td><td>${getRatingSelect('acad_teaching', academic.teaching_standards)}</td><td rowspan="6"><input type="text" name="acad_comments" class="w-full border p-1" value="${escapeHtml(academic.comments || '')}"></td></tr>
+                <tr><td>Staff training</td><td>${getRatingSelect('acad_training', academic.staff_training)}</td></tr>
+                <tr><td>Research support</td><td>${getRatingSelect('acad_research', academic.research)}</td></tr>
+                <tr><td>Academic monitoring</td><td>${getRatingSelect('acad_monitoring', academic.academic_monitoring)}</td></tr>
+                <tr><td>Curriculum implementation</td><td>${getRatingSelect('acad_curriculum', academic.curriculum)}</td></tr>
+                <tr><td>Student welfare</td><td>${getRatingSelect('acad_welfare', academic.student_welfare)}</td></tr>
+                </tbody></table>
+            </div>
+            
+            <!-- Operations -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold mb-2">5. Operations & Service Delivery</h3>
+                <table class="w-full border"><thead><tr><th>Indicator</th><th>Rating</th><th>Comments</th></tr></thead>
+                <tbody><tr><td>Operational coordination</td><td>${getRatingSelect('ops_coordination', operations.coordination)}</td><td rowspan="6"><input type="text" name="ops_comments" class="w-full border p-1" value="${escapeHtml(operations.comments || '')}"></td></tr>
+                <tr><td>Operational plans</td><td>${getRatingSelect('ops_plans', operations.operational_plans)}</td></tr>
+                <tr><td>Facility maintenance</td><td>${getRatingSelect('ops_maintenance', operations.facility_maintenance)}</td></tr>
+                <tr><td>Safety compliance</td><td>${getRatingSelect('ops_safety', operations.safety)}</td></tr>
+                <tr><td>Logistics efficiency</td><td>${getRatingSelect('ops_logistics', operations.logistics)}</td></tr>
+                <tr><td>Emergency response</td><td>${getRatingSelect('ops_emergency', operations.emergency)}</td></tr>
+                </tbody></table>
+            </div>
+            
+            <!-- Planning -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold mb-2">6. Planning, Research & Policy Analysis</h3>
+                <table class="w-full border"><thead><tr><th>Indicator</th><th>Rating</th><th>Comments</th></tr></thead>
+                <tbody><tr><td>Policy development</td><td>${getRatingSelect('plan_policy', planning.policy_development)}</td><td rowspan="6"><input type="text" name="plan_comments" class="w-full border p-1" value="${escapeHtml(planning.comments || '')}"></td></tr>
+                <tr><td>Monitoring & evaluation</td><td>${getRatingSelect('plan_me', planning.monitoring_evaluation)}</td></tr>
+                <tr><td>Data-driven decisions</td><td>${getRatingSelect('plan_data', planning.data_driven)}</td></tr>
+                <tr><td>Research effectiveness</td><td>${getRatingSelect('plan_research', planning.research_effectiveness)}</td></tr>
+                <tr><td>Quality assurance</td><td>${getRatingSelect('plan_qa', planning.quality_assurance)}</td></tr>
+                <tr><td>Sustainability planning</td><td>${getRatingSelect('plan_sustainability', planning.sustainability)}</td></tr>
+                </tbody></table>
+            </div>
+            
+            <!-- Human Resources -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold mb-2">7. Human Resource & Staff Welfare</h3>
+                <table class="w-full border"><thead><tr><th>Indicator</th><th>Rating</th><th>Comments</th></tr></thead>
+                <tbody><tr><td>Fairness in staff management</td><td>${getRatingSelect('hr_fairness', hr.fairness)}</td><td rowspan="6"><input type="text" name="hr_comments" class="w-full border p-1" value="${escapeHtml(hr.comments || '')}"></td></tr>
+                <tr><td>Staff motivation</td><td>${getRatingSelect('hr_motivation', hr.motivation)}</td></tr>
+                <tr><td>Professional ethics</td><td>${getRatingSelect('hr_ethics', hr.ethics)}</td></tr>
+                <tr><td>Staff welfare</td><td>${getRatingSelect('hr_welfare', hr.welfare)}</td></tr>
+                <tr><td>Communication</td><td>${getRatingSelect('hr_communication', hr.communication)}</td></tr>
+                <tr><td>Conflict resolution</td><td>${getRatingSelect('hr_conflict', hr.conflict_resolution)}</td></tr>
+                </tbody></table>
+            </div>
+            
+            <!-- Community Relations -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold mb-2">8. Community Relations & Public Image</h3>
+                <table class="w-full border"><thead><tr><th>Indicator</th><th>Rating</th><th>Comments</th></tr></thead>
+                <tbody><tr><td>Stakeholder relations</td><td>${getRatingSelect('comm_stakeholder', community.stakeholder_relation)}</td><td rowspan="6"><input type="text" name="comm_comments" class="w-full border p-1" value="${escapeHtml(community.comments || '')}"></td></tr>
+                <tr><td>Public representation</td><td>${getRatingSelect('comm_public', community.public_representation)}</td></tr>
+                <tr><td>Partnerships</td><td>${getRatingSelect('comm_partnership', community.partnerships)}</td></tr>
+                <tr><td>Community engagement</td><td>${getRatingSelect('comm_engagement', community.community_engagement)}</td></tr>
+                <tr><td>Reputation management</td><td>${getRatingSelect('comm_reputation', community.reputation)}</td></tr>
+                <tr><td>Media relations</td><td>${getRatingSelect('comm_media', community.media_relations)}</td></tr>
+                </tbody></table>
+            </div>
+            
+            <!-- Achievements, Challenges, Recommendations -->
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold">Major Achievements</h3>${[0,1,2,3,4].map(i => `<input type="text" name="achievement_${i}" class="w-full border p-2 my-1" placeholder="Achievement ${i+1}" value="${escapeHtml(achievements[i] || '')}">`).join('')}</div>
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold">Challenges Identified</h3>${[0,1,2,3,4].map(i => `<input type="text" name="challenge_${i}" class="w-full border p-2 my-1" placeholder="Challenge ${i+1}" value="${escapeHtml(challenges[i] || '')}">`).join('')}</div>
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold">Recommendations for Improvement</h3>${[0,1,2,3,4].map(i => `<input type="text" name="recommendation_${i}" class="w-full border p-2 my-1" placeholder="Recommendation ${i+1}" value="${escapeHtml(recommendations[i] || '')}">`).join('')}</div>
+            <div class="p-4 border rounded"><h3 class="text-xl font-bold">Final Appraisal Remarks</h3><textarea name="final_remarks" rows="4" class="border w-full p-2">${escapeHtml(finalRemarks)}</textarea></div>
+            
+            <div class="flex justify-end"><button type="submit" class="apply-btn px-6 py-2 rounded">Save Appraisal</button></div>
+        </form>`;
+        document.getElementById('appraisalFormContainer').innerHTML = formHtml;
+        
+        document.getElementById('appraisalForm').onsubmit = async (e) => {
+            e.preventDefault();
+            showLoading(true);
+            try {
+                const form = e.target;
+                // Collect all ratings
+                const leadershipData = {
+                    vision: parseInt(form.querySelector('[name="lead_vision"]')?.value||3),
+                    decision_making: parseInt(form.querySelector('[name="lead_decision"]')?.value||3),
+                    teamwork: parseInt(form.querySelector('[name="lead_teamwork"]')?.value||3),
+                    strategic_planning: parseInt(form.querySelector('[name="lead_strategic"]')?.value||3),
+                    crisis_management: parseInt(form.querySelector('[name="lead_crisis"]')?.value||3),
+                    innovation: parseInt(form.querySelector('[name="lead_innovation"]')?.value||3),
+                    comments: form.querySelector('[name="lead_comments"]')?.value||''
+                };
+                const administrationData = {
+                    compliance: parseInt(form.querySelector('[name="admin_compliance"]')?.value||3),
+                    supervision: parseInt(form.querySelector('[name="admin_supervision"]')?.value||3),
+                    board_decisions: parseInt(form.querySelector('[name="admin_board"]')?.value||3),
+                    transparency: parseInt(form.querySelector('[name="admin_transparency"]')?.value||3),
+                    discipline: parseInt(form.querySelector('[name="admin_discipline"]')?.value||3),
+                    record_keeping: parseInt(form.querySelector('[name="admin_record"]')?.value||3),
+                    comments: form.querySelector('[name="admin_comments"]')?.value||''
+                };
+                const financialData = {
+                    budget: parseInt(form.querySelector('[name="fin_budget"]')?.value||3),
+                    accountability: parseInt(form.querySelector('[name="fin_accountability"]')?.value||3),
+                    resource_mobilization: parseInt(form.querySelector('[name="fin_resource"]')?.value||3),
+                    expenditure_monitoring: parseInt(form.querySelector('[name="fin_expenditure"]')?.value||3),
+                    compliance: parseInt(form.querySelector('[name="fin_compliance"]')?.value||3),
+                    internal_control: parseInt(form.querySelector('[name="fin_control"]')?.value||3),
+                    comments: form.querySelector('[name="fin_comments"]')?.value||''
+                };
+                const academicData = {
+                    teaching_standards: parseInt(form.querySelector('[name="acad_teaching"]')?.value||3),
+                    staff_training: parseInt(form.querySelector('[name="acad_training"]')?.value||3),
+                    research: parseInt(form.querySelector('[name="acad_research"]')?.value||3),
+                    academic_monitoring: parseInt(form.querySelector('[name="acad_monitoring"]')?.value||3),
+                    curriculum: parseInt(form.querySelector('[name="acad_curriculum"]')?.value||3),
+                    student_welfare: parseInt(form.querySelector('[name="acad_welfare"]')?.value||3),
+                    comments: form.querySelector('[name="acad_comments"]')?.value||''
+                };
+                const operationsData = {
+                    coordination: parseInt(form.querySelector('[name="ops_coordination"]')?.value||3),
+                    operational_plans: parseInt(form.querySelector('[name="ops_plans"]')?.value||3),
+                    facility_maintenance: parseInt(form.querySelector('[name="ops_maintenance"]')?.value||3),
+                    safety: parseInt(form.querySelector('[name="ops_safety"]')?.value||3),
+                    logistics: parseInt(form.querySelector('[name="ops_logistics"]')?.value||3),
+                    emergency: parseInt(form.querySelector('[name="ops_emergency"]')?.value||3),
+                    comments: form.querySelector('[name="ops_comments"]')?.value||''
+                };
+                const planningData = {
+                    policy_development: parseInt(form.querySelector('[name="plan_policy"]')?.value||3),
+                    monitoring_evaluation: parseInt(form.querySelector('[name="plan_me"]')?.value||3),
+                    data_driven: parseInt(form.querySelector('[name="plan_data"]')?.value||3),
+                    research_effectiveness: parseInt(form.querySelector('[name="plan_research"]')?.value||3),
+                    quality_assurance: parseInt(form.querySelector('[name="plan_qa"]')?.value||3),
+                    sustainability: parseInt(form.querySelector('[name="plan_sustainability"]')?.value||3),
+                    comments: form.querySelector('[name="plan_comments"]')?.value||''
+                };
+                const hrData = {
+                    fairness: parseInt(form.querySelector('[name="hr_fairness"]')?.value||3),
+                    motivation: parseInt(form.querySelector('[name="hr_motivation"]')?.value||3),
+                    ethics: parseInt(form.querySelector('[name="hr_ethics"]')?.value||3),
+                    welfare: parseInt(form.querySelector('[name="hr_welfare"]')?.value||3),
+                    communication: parseInt(form.querySelector('[name="hr_communication"]')?.value||3),
+                    conflict_resolution: parseInt(form.querySelector('[name="hr_conflict"]')?.value||3),
+                    comments: form.querySelector('[name="hr_comments"]')?.value||''
+                };
+                const communityData = {
+                    stakeholder_relation: parseInt(form.querySelector('[name="comm_stakeholder"]')?.value||3),
+                    public_representation: parseInt(form.querySelector('[name="comm_public"]')?.value||3),
+                    partnerships: parseInt(form.querySelector('[name="comm_partnership"]')?.value||3),
+                    community_engagement: parseInt(form.querySelector('[name="comm_engagement"]')?.value||3),
+                    reputation: parseInt(form.querySelector('[name="comm_reputation"]')?.value||3),
+                    media_relations: parseInt(form.querySelector('[name="comm_media"]')?.value||3),
+                    comments: form.querySelector('[name="comm_comments"]')?.value||''
+                };
+                
+                const achievements = [];
+                for(let i=0; i<5; i++) achievements.push(form.querySelector(`[name="achievement_${i}"]`)?.value||'');
+                const challenges = [];
+                for(let i=0; i<5; i++) challenges.push(form.querySelector(`[name="challenge_${i}"]`)?.value||'');
+                const recommendations = [];
+                for(let i=0; i<5; i++) recommendations.push(form.querySelector(`[name="recommendation_${i}"]`)?.value||'');
+                
+                // Calculate total percentage (sum of all ratings / max possible)
+                const allRatings = [
+                    ...Object.values(leadershipData).slice(0,6),
+                    ...Object.values(administrationData).slice(0,6),
+                    ...Object.values(financialData).slice(0,6),
+                    ...Object.values(academicData).slice(0,6),
+                    ...Object.values(operationsData).slice(0,6),
+                    ...Object.values(planningData).slice(0,6),
+                    ...Object.values(hrData).slice(0,6),
+                    ...Object.values(communityData).slice(0,6)
+                ];
+                const totalScore = allRatings.reduce((a,b)=>a+b,0);
+                const maxScore = 48 * 5; // 48 indicators * 5 = 240
+                const totalPercentage = (totalScore / maxScore * 100).toFixed(1);
+                
+                const appraisalData = {
+                    id: data.id || null,
+                    school_name: form.querySelector('[name="school_name"]').value,
+                    appraisal_period: form.querySelector('[name="appraisal_period"]').value,
+                    date_of_evaluation: form.querySelector('[name="date_of_evaluation"]').value,
+                    prepared_by: form.querySelector('[name="prepared_by"]').value,
+                    evaluator_position: form.querySelector('[name="evaluator_position"]').value,
+                    leadership: leadershipData,
+                    administration: administrationData,
+                    financial: financialData,
+                    academic: academicData,
+                    operations: operationsData,
+                    planning: planningData,
+                    hr: hrData,
+                    community: communityData,
+                    achievements: achievements,
+                    challenges: challenges,
+                    recommendations: recommendations,
+                    final_remarks: form.querySelector('[name="final_remarks"]').value,
+                    total_percentage: parseFloat(totalPercentage),
+                    created_at: new Date()
+                };
+                await saveDGAppraisal(appraisalData);
+                await refreshData(true);
+                performanceAppraisalView();
+            } catch(e) { showToast(e.message, true); }
+            finally { showLoading(false); }
+        };
+    }
+    
+    document.getElementById('loadAppraisalBtn').onclick = async () => {
+        const id = document.getElementById('loadAppraisalSelect').value;
+        if (!id) return;
+        const appraisal = schoolData.dgAppraisals.find(a => a.id == id);
+        if (appraisal) renderForm(appraisal);
+        else showToast("Appraisal not found", true);
+    };
+    document.getElementById('newAppraisalBtn').onclick = () => renderForm({});
+    renderForm({});
+}
+
+
 async function directorRolesView() { showToast("Director Roles & KPIs", false); }
 async function directorAppraisalView() { showToast("Appraise Directors", false); }
 async function parentChildReportsView() { showToast("Child Reports", false); }
@@ -545,9 +834,25 @@ async function parentPaymentPortalView() { feeManagementEnhanced(); }
 async function parentResultView() { enhancedResultView(false); }
 async function parentPaymentHistoryView() { showToast("Payment History", false); }
 async function bankTransferUploadView() { showToast("Upload Transfer Proof", false); }
-async function myClassView() { showToast("My Class", false); }
-async function gradeStudentView() { teacherResultEntry(); }
-async function attendanceView() { showToast("Attendance", false); }
+async function myClassView() {
+    let teacherClass = currentUser.assigned_class || (schoolData.teachers.find(t=>t.id===currentUser.id)?.assigned_class) || CLASSES[0];
+    let students = schoolData.students.filter(s => s.academic_class === teacherClass);
+    let html = `<div class="bg-white p-5 rounded-xl"><h2>My Academic Class: ${teacherClass}</h2><button id="writeAppraisalBtn" class="apply-btn mt-2 mb-4 px-4 py-2">Write Appraisal</button><div id="appraisalList"></div><ul>${students.map(s=>`<li>${s.name} (${s.reg_number}) - Section: ${s.section}</li>`).join('')}</ul></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    let appraisals = schoolData.appraisals.filter(a => students.some(s => s.id === a.student_id));
+    document.getElementById('appraisalList').innerHTML = `<h3>Recent Appraisals</h3>${appraisals.map(a=>{ let s = students.find(st=>st.id===a.student_id); return `<div class="appraisal-card p-3 my-2"><p><strong>${s?.name}</strong> rated ${a.rating}/5</p><p>${escapeHtml(a.comment)}</p><small>${new Date(a.created_at).toLocaleDateString()}</small></div>`;}).join('') || '<p>None</p>'}`;
+    document.getElementById('writeAppraisalBtn').onclick = () => { let modal = document.createElement('div'); modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]'; modal.innerHTML = `<div class="bg-white p-6 rounded-xl w-96"><h3>Write Student Appraisal</h3><select id="appraisalStudent" class="border w-full my-2"><option>Select Student</option>${students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select><input id="appRating" type="number" placeholder="Rating (1-5)" class="border w-full my-2"><textarea id="appComment" placeholder="Comment" class="border w-full my-2" rows="3"></textarea><button id="submitAppraisalBtn" class="apply-btn w-full py-2">Submit</button><button id="closeAppModal" class="bg-gray-400 w-full mt-2 py-2 rounded">Cancel</button></div>`; document.body.appendChild(modal); document.getElementById('submitAppraisalBtn').onclick = async () => { let studentId = document.getElementById('appraisalStudent').value; let rating = parseInt(document.getElementById('appRating').value)||null; let comment = document.getElementById('appComment').value; if(!studentId) return showToast("Select student", true); try { await saveAppraisal(studentId, comment, rating); modal.remove(); await refreshData(true); myClassView(); } catch(e) { showToast(e.message, true); } }; document.getElementById('closeAppModal').onclick = () => modal.remove(); };
+}
+
+async function gradeStudentView() {
+    let teacherClass = currentUser.assigned_class || CLASSES[0];
+    let students = schoolData.students.filter(s=>s.academic_class===teacherClass);
+    if(!students.length) return showToast("No students in your class", true);
+    let html = `<div class="bg-white p-5 rounded-xl"><h2>Grade Students - ${teacherClass}</h2><select id="gradeStudentSelect" class="border w-full my-2">${students.map(s=>`<option value="${s.id}">${s.name}</option>`)}</select><div><input id="gSubj" placeholder="Subject" class="border w-full my-1"><input type="number" id="gCa1" placeholder="CA1" class="border w-full my-1"><input type="number" id="gCa2" placeholder="CA2" class="border w-full my-1"><input type="number" id="gExam" placeholder="Exam" class="border w-full my-1"><button class="apply-btn w-full py-2" onclick="window.saveTeacherGrade()">Save Grade</button></div></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    window.saveTeacherGrade = async () => { try { await saveResult(document.getElementById('gradeStudentSelect').value, 'First Term', currentYear, document.getElementById('gSubj').value, parseInt(document.getElementById('gCa1').value)||0, parseInt(document.getElementById('gCa2').value)||0, parseInt(document.getElementById('gExam').value)||0); showToast('Grade saved'); } catch(e) { showToast(e.message, true); } };
+}
+
 async function sectionStudentsView() { showToast("Section Students", false); }
 async function sectionFeesView() { showToast("Section Fees", false); }
 async function staffPerformanceAnalysisView() { showToast("Staff Performance", false); }

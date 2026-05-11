@@ -634,32 +634,169 @@ async function performanceAppraisalView() { if (!['dg_ceo', 'management_committe
     renderForm({});
 }
 async function directorRolesView() {
-    showToast("Director Roles Dashboard - KPIs & strategic objectives", false);
-    document.getElementById('mainContent').innerHTML = `
+    showLoading(true);
+    // Ensure director_kpis table exists (optional – run once via Supabase dashboard)
+    // Fetch all KPIs from Supabase
+    const { data: kpis, error } = await supabaseClient
+        .from('director_kpis')
+        .select('*')
+        .order('director_role', { ascending: true });
+    
+    if (error) console.error("Error fetching KPIs:", error);
+    
+    const directorRoles = ["DG/CEO", "DAF", "DER", "DO", "DPRPA"];
+    
+    // Group KPIs by director
+    const grouped = {};
+    directorRoles.forEach(role => { grouped[role] = (kpis || []).filter(k => k.director_role === role); });
+    
+    let html = `
         <div class="card p-6">
-            <h2 class="text-2xl font-bold mb-4">📊 Director Roles & KPIs</h2>
-            <p class="text-gray-600 mb-4">Strategic KPIs and performance dashboards for each directorate.</p>
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="bg-amber-50 p-4 rounded-xl">
-                    <h3 class="font-semibold">📈 DG/CEO</h3>
-                    <p>Key performance indicators: student growth, financial sustainability, stakeholder satisfaction.</p>
-                </div>
-                <div class="bg-emerald-50 p-4 rounded-xl">
-                    <h3 class="font-semibold">💰 DAF</h3>
-                    <p>Budget adherence, fee collection efficiency, payroll management.</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-xl">
-                    <h3 class="font-semibold">📚 DER</h3>
-                    <p>Academic performance, curriculum innovation, research output.</p>
-                </div>
-                <div class="bg-purple-50 p-4 rounded-xl">
-                    <h3 class="font-semibold">🔧 DO</h3>
-                    <p>Operational efficiency, infrastructure maintenance, logistics.</p>
-                </div>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">📊 Director Roles & KPIs Dashboard</h2>
+                <button id="refreshKpisBtn" class="apply-btn px-4 py-2 rounded-full"><i class="fas fa-sync-alt"></i> Refresh</button>
             </div>
-            <button class="apply-btn mt-6 px-6 py-2 rounded-full" onclick="alert('KPI templates can be edited here (coming soon).')">Edit KPIs</button>
-        </div>
+            <div class="grid md:grid-cols-2 gap-6" id="directorKpiContainer">
     `;
+    
+    for (const role of directorRoles) {
+        const roleKpis = grouped[role] || [];
+        // Calculate overall performance for this director
+        let totalWeight = 0;
+        let weightedSum = 0;
+        roleKpis.forEach(kpi => {
+            totalWeight += kpi.weight;
+            let achievement = (kpi.current_value / kpi.target_value) * 100;
+            if (achievement > 100) achievement = 100;
+            weightedSum += (achievement * kpi.weight);
+        });
+        const overallScore = totalWeight > 0 ? (weightedSum / totalWeight).toFixed(1) : 0;
+        
+        html += `
+            <div class="border rounded-2xl p-5 shadow-sm bg-white">
+                <div class="flex justify-between items-center border-b pb-2 mb-3">
+                    <h3 class="text-xl font-bold text-emerald-700">${role}</h3>
+                    <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">Score: ${overallScore}%</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr><th class="p-2">KPI Name</th><th>Target</th><th>Current</th><th class="w-32">Progress</th><th>Weight</th><th class="w-8"></th></tr>
+                        </thead>
+                        <tbody id="kpi-table-${role.replace(/\s/g, '')}">
+                            ${roleKpis.map(kpi => `
+                                <tr data-kpi-id="${kpi.id}">
+                                    <td class="editable-kpi p-2" data-field="kpi_name" data-id="${kpi.id}">${escapeHtml(kpi.kpi_name)}</td>
+                                    <td class="editable-kpi" data-field="target_value" data-id="${kpi.id}">${kpi.target_value}</td>
+                                    <td class="editable-kpi" data-field="current_value" data-id="${kpi.id}">${kpi.current_value}</td>
+                                    <td>
+                                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-emerald-600 h-2.5 rounded-full" style="width: ${Math.min(100, (kpi.current_value / kpi.target_value) * 100)}%"></div>
+                                        </div>
+                                    </td>
+                                    <td class="editable-kpi" data-field="weight" data-id="${kpi.id}">${kpi.weight}</td>
+                                    <td><button class="delete-kpi text-red-500" data-id="${kpi.id}"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <button class="add-kpi-btn mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" data-role="${role}">+ Add KPI</button>
+            </div>
+        `;
+    }
+    html += `</div><canvas id="directorPerformanceChart" class="mt-8 max-h-80"></canvas></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    
+    // Helper: attach editable behaviour to all .editable-kpi cells
+    function attachEditable() {
+        document.querySelectorAll('.editable-kpi').forEach(cell => {
+            cell.setAttribute('contenteditable', 'true');
+            cell.addEventListener('blur', async (e) => {
+                const id = cell.dataset.id;
+                const field = cell.dataset.field;
+                let newValue = cell.innerText.trim();
+                if (field === 'target_value' || field === 'current_value' || field === 'weight') {
+                    newValue = parseInt(newValue) || 0;
+                    if (field === 'weight' && newValue < 1) newValue = 1;
+                }
+                await supabaseClient.from('director_kpis').update({ [field]: newValue }).eq('id', id);
+                await refreshData();  // refresh global schoolData
+                directorRolesView();   // reload the whole view
+                showToast(`${field} updated`);
+            });
+        });
+        
+        document.querySelectorAll('.delete-kpi').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (confirm("Delete this KPI?")) {
+                    await supabaseClient.from('director_kpis').delete().eq('id', btn.dataset.id);
+                    await refreshData();
+                    directorRolesView();
+                    showToast("KPI deleted");
+                }
+            });
+        });
+        
+        document.querySelectorAll('.add-kpi-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const role = btn.dataset.role;
+                const newKpiName = prompt("Enter KPI name:");
+                if (!newKpiName) return;
+                const target = parseInt(prompt("Target value (e.g., 100):")) || 100;
+                const weight = parseInt(prompt("Weight (1-10, default 1):")) || 1;
+                await supabaseClient.from('director_kpis').insert([{
+                    director_role: role,
+                    kpi_name: newKpiName,
+                    target_value: target,
+                    current_value: 0,
+                    weight: weight
+                }]);
+                await refreshData();
+                directorRolesView();
+                showToast(`KPI added for ${role}`);
+            });
+        });
+    }
+    
+    attachEditable();
+    
+    // Draw chart for overall performance comparison
+    const overallScores = {};
+    for (const role of directorRoles) {
+        const roleKpis = (kpis || []).filter(k => k.director_role === role);
+        let totalWeight = 0, weightedSum = 0;
+        roleKpis.forEach(k => {
+            totalWeight += k.weight;
+            let ach = Math.min(100, (k.current_value / k.target_value) * 100);
+            weightedSum += ach * k.weight;
+        });
+        overallScores[role] = totalWeight ? (weightedSum / totalWeight) : 0;
+    }
+    
+    const ctx = document.getElementById('directorPerformanceChart').getContext('2d');
+    // Destroy previous chart if exists
+    if (window.directorChart) window.directorChart.destroy();
+    window.directorChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: directorRoles,
+            datasets: [{
+                label: 'Overall Performance (%)',
+                data: directorRoles.map(r => overallScores[r]),
+                backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Achievement %' } } },
+            plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.raw.toFixed(1)}%` } } }
+        }
+    });
+    
+    document.getElementById('refreshKpisBtn').onclick = () => { directorRolesView(); };
+    showLoading(false);
 }
 
 async function directorAppraisalView() {

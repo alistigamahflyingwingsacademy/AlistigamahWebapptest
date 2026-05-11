@@ -161,7 +161,7 @@ function resetIdleTimer() { if (!currentUser) return; if (idleTimeout) clearTime
 function attachActivityListeners() { ['mousedown','mousemove','keypress','scroll','touchstart'].forEach(ev => { document.removeEventListener(ev, resetIdleTimer); document.addEventListener(ev, resetIdleTimer); }); }
 function logoutUser() { currentUser = null; document.getElementById('appContainer').classList.add('hidden'); document.getElementById('landingPage').style.display = 'block'; if(window.slideInterval) clearInterval(window.slideInterval); renderLandingCarouselAndAnnouncement(); showToast("Logged out"); }
 
-// ========== SAVE CORE FUNCTIONS (FIXED) ==========
+// ========== SAVE CORE FUNCTIONS ==========
 async function saveResult(studentId, term, year, subject, ca1, ca2, exam) {
     const total = ca1+ca2+exam;
     const { error } = await supabaseClient.from('results').insert([{ student_id: studentId, term, year, subject, ca1, ca2, exam, total }]);
@@ -198,9 +198,78 @@ async function renderLandingCarouselAndAnnouncement() {
     document.getElementById('nextSlide')?.addEventListener('click', () => { idx = (idx+1)%slides.length; renderSlide(); });
 }
 
-// ========== DASHBOARD VIEW ==========
+// ========== DASHBOARD VIEW (role aware) ==========
 async function dashboardView() {
+    // For parent role: show child-centric dashboard only
+    if (currentUser && currentUser.role === 'parent') {
+        await parentDashboardView();
+        return;
+    }
+    // Admin/staff dashboard with global stats
     document.getElementById('mainContent').innerHTML = `<div class="card p-6"><h2 class="text-2xl font-bold text-gray-800 mb-4"><i class="fas fa-tachometer-alt text-amber-600 mr-2"></i>Dashboard</h2><div class="grid grid-cols-1 md:grid-cols-4 gap-5"><div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-2xl shadow"><i class="fas fa-users text-3xl text-blue-600"></i><p class="text-2xl font-bold mt-2">${schoolData.students.length}</p><p>Students</p></div><div class="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-2xl shadow"><i class="fas fa-chalkboard-user text-3xl text-green-600"></i><p class="text-2xl font-bold mt-2">${schoolData.teachers.length + schoolData.profiles.filter(p=>p.role !== 'parent').length}</p><p>Staff</p></div><div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-5 rounded-2xl shadow"><i class="fas fa-money-bill-wave text-3xl text-yellow-600"></i><p class="text-2xl font-bold mt-2">₦${schoolData.payments.reduce((a,b)=>a+(b.amount||0),0).toLocaleString()}</p><p>Fees Collected</p></div><div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-2xl shadow"><i class="fas fa-file-alt text-3xl text-purple-600"></i><p class="text-2xl font-bold mt-2">${schoolData.applications.length}</p><p>Applications</p></div></div></div>`;
+}
+
+// ========== PARENT DASHBOARD (no global stats, only child info) ==========
+async function parentDashboardView() {
+    const studentId = currentUser.studentId;
+    const student = schoolData.students.find(s => s.id == studentId);
+    if (!student) {
+        document.getElementById('mainContent').innerHTML = `<div class="card p-6"><p class="text-red-600">Student record not found. Please contact school.</p></div>`;
+        return;
+    }
+    const currentYear = new Date().getFullYear();
+    const currentTerm = "1st Term";
+    const paid = schoolData.payments.filter(p => p.student_id == studentId && p.term === currentTerm && p.year == currentYear).reduce((a,b)=>a+(b.amount||0),0);
+    const due = Math.max(0, 30000 - paid);
+    const status = due <= 0 ? 'Paid' : (paid > 0 ? 'Partial' : 'Unpaid');
+    const statusClass = status.toLowerCase();
+    const recentResults = schoolData.results.filter(r => r.student_id == studentId).slice(0, 5);
+    const resultPreview = recentResults.map(r => `<li>${r.subject}: ${r.total} marks</li>`).join('') || '<li>No grades yet</li>';
+    const html = `
+        <div class="card p-6">
+            <h2 class="text-2xl font-bold text-emerald-800 mb-4"><i class="fas fa-child mr-2"></i>Parent Dashboard</h2>
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 p-5 rounded-2xl mb-6">
+                <h3 class="text-xl font-bold">Welcome, ${escapeHtml(currentUser.full_name)}</h3>
+                <p class="text-gray-600">Your child's academic portal</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow p-4 border-l-4 border-emerald-500">
+                    <h3 class="font-bold text-lg"><i class="fas fa-user-graduate text-emerald-600"></i> Student Details</h3>
+                    <p><strong>Name:</strong> ${escapeHtml(student.name)}</p>
+                    <p><strong>Reg Number:</strong> ${student.reg_number}</p>
+                    <p><strong>Class:</strong> ${student.academic_class || 'Not assigned'}</p>
+                    <p><strong>Section:</strong> ${student.section || 'Not assigned'}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4 border-l-4 border-amber-500">
+                    <h3 class="font-bold text-lg"><i class="fas fa-coins text-amber-600"></i> Fee Status (${currentTerm} ${currentYear})</h3>
+                    <p><strong>Total Fee:</strong> ₦30,000</p>
+                    <p><strong>Paid:</strong> ₦${paid.toLocaleString()}</p>
+                    <p><strong>Due:</strong> ₦${due.toLocaleString()}</p>
+                    <p><span class="status-${statusClass} px-3 py-1 rounded-full text-sm">${status}</span></p>
+                    ${due > 0 ? `<button id="parentPayNowBtn" class="apply-btn mt-3 px-4 py-1 rounded-full text-sm">Pay Now</button>` : ''}
+                </div>
+                <div class="bg-white rounded-xl shadow p-4 border-l-4 border-blue-500">
+                    <h3 class="font-bold text-lg"><i class="fas fa-chart-line text-blue-600"></i> Recent Results</h3>
+                    <ul class="list-disc list-inside">${resultPreview}</ul>
+                    <button id="parentViewResultBtn" class="text-blue-600 underline mt-2 text-sm">View Full Report Card →</button>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4">
+                    <h3 class="font-bold text-lg"><i class="fas fa-fast-forward"></i> Quick Actions</h3>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <button id="quickFee" class="bg-green-600 text-white px-3 py-1 rounded-full text-sm">Pay Fees</button>
+                        <button id="quickResult" class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm">View Result</button>
+                        <button id="quickHistory" class="bg-gray-600 text-white px-3 py-1 rounded-full text-sm">Payment History</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+    if (due > 0) document.getElementById('parentPayNowBtn')?.addEventListener('click', () => parentPaymentPortalView());
+    document.getElementById('parentViewResultBtn')?.addEventListener('click', () => parentResultView());
+    document.getElementById('quickFee')?.addEventListener('click', () => parentPaymentPortalView());
+    document.getElementById('quickResult')?.addEventListener('click', () => parentResultView());
+    document.getElementById('quickHistory')?.addEventListener('click', () => parentPaymentHistoryView());
 }
 
 // ========== 1. UNIFIED STAFF ==========
@@ -218,7 +287,7 @@ async function unifiedStaffList() {
         let roleFilter = document.getElementById('staffRoleFilter').value;
         let sectionFilter = document.getElementById('staffSectionFilter').value;
         let filtered = allStaff.filter(s => (s.name.toLowerCase().includes(search) || (s.email||'').toLowerCase().includes(search)) && (roleFilter==='all' || s.role===roleFilter) && (sectionFilter==='all' || (s.section||'').includes(sectionFilter)));
-        document.getElementById('staffUnifiedBody').innerHTML = filtered.map(s => `<tr><td class="editable-staff-field" data-field="name" data-id="${s.id}" data-source="${s.source}">${escapeHtml(s.name)}</td><td class="font-semibold text-amber-700">${s.role}</td><td class="editable-staff-field" data-field="email" data-id="${s.id}" data-source="${s.source}">${escapeHtml(s.email)}</td><td class="editable-staff-field" data-field="assigned_class" data-id="${s.id}" data-source="${s.source}">${escapeHtml(s.assigned_class||'—')}</td><td class="editable-staff-field" data-field="section" data-id="${s.id}" data-source="${s.source}">${escapeHtml(s.section||'—')}</td><td class="editable-staff-field" data-field="salary" data-id="${s.id}" data-source="${s.source}">${s.salary ? '₦'+s.salary.toLocaleString() : '0'}</td>`).join('');
+        document.getElementById('staffUnifiedBody').innerHTML = filtered.map(s => `<tr><td class="editable-staff-field" data-field="name" data-id="${s.id}" data-source="${s.source}">${escapeHtml(s.name)}</td><td class="font-semibold text-amber-700">${s.role}</td><td class="editable-staff-field" data-field="email" data-id="${s.id}" data-source="${s.source}">${escapeHtml(s.email)}</td><td class="editable-staff-field" id="${s.id}" data-source="${s.source}">${escapeHtml(s.assigned_class||'—')}</td><td class="editable-staff-field" data-field="section" data-id="${s.id}" data-source="${s.source}">${escapeHtml(s.section||'—')}</td><td class="editable-staff-field" data-field="salary" data-id="${s.id}" data-source="${s.source}">${s.salary ? '₦'+s.salary.toLocaleString() : '0'}</td>`).join('');
         attachStaffEditable();
     }
     function attachStaffEditable() {
@@ -649,6 +718,8 @@ document.addEventListener('DOMContentLoaded', async()=>{
     document.getElementById('closeMobileSidebar').onclick=closeMobileSidebar;
     setInterval(()=>{ let d=new Date(); document.getElementById('liveTime').innerText=d.toLocaleTimeString(); document.getElementById('liveDate').innerText=d.toLocaleDateString(); },1000);
 });
+    console.log("All features active – parent dashboard shows only child info.");
+
 </script>
 </body>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </html>

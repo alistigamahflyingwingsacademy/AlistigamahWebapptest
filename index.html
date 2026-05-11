@@ -401,14 +401,14 @@ async function enhancedResultView(adminMode=true) {
         let avg = subjectsResults.length ? (totalMarks/subjectsResults.length).toFixed(1) : 0;
         let gradeStatus = avg>=80?'Excellent':avg>=70?'Very Good':avg>=60?'Good':avg>=50?'Fair':'Needs Improvement';
         let cardHtml = `<div class="bg-white border rounded-2xl p-6 shadow-sm"><h3 class="text-xl font-bold text-center text-emerald-800">Al‑Istiqaamah Flying Wings Academy</h3><p class="text-center text-gray-500">${term} | ${year}</p><div class="grid grid-cols-2 gap-3 mt-4"><div><strong>Name:</strong> ${escapeHtml(student.name)}</div><div><strong>Reg No:</strong> ${student.reg_number}</div><div><strong>Class:</strong> ${student.academic_class}</div><div><strong>Days Present:</strong> <span class="editable-attendance" data-field="days_present" data-student="${sid}" data-term="${term}" data-year="${year}">${extra.days_present||0}</span></div></div>
-        <h4 class="font-bold mt-5">📚 Subjects Performance</h4><div class="overflow-x-auto"><table class="w-full border mt-2"><thead><tr><th>Subject</th><th>CA1</th><th>CA2</th><th>Exam</th><th>Total</th><th>Grade</th><th>Remark</th></tr></thead><tbody>${subjectsResults.map(sub=>{ let total=(sub.ca1||0)+(sub.ca2||0)+(sub.exam||0); let grade=total>=80?'A':total>=70?'B':total>=60?'C':total>=50?'D':'F'; let remark=grade=='A'?'Excellent':grade=='B'?'Good':grade=='C'?'Average':'Needs Improvement'; return `<tr><td class="font-medium">${escapeHtml(sub.subject)}</td><td>${sub.ca1||0}</td><td>${sub.ca2||0}</td><td>${sub.exam||0}</td><td class="font-bold">${total}</td><td><span class="grade-badge">${grade}</span></td><td>${remark}</td>`; }).join('')}</tbody></table></div>
-        <h4 class="font-bold mt-5">🌟 Personal & Social Qualities</h4><div class="overflow-x-auto"><table class="w-full border mt-2"><thead><tr><th>Quality</th><th>الرجاء</th><th>Grade</th></tr></thead><tbody>${QUALITIES.map(q=>`<tr><td>${q}</td><td>${QUALITIES_ARABIC[q]}</td><td><select class="quality-select" data-quality="${q}" data-student="${sid}" data-term="${term}" data-year="${year}">${GRADE_OPTIONS.map(g=>`<option ${g=== (extra.qualities?.[q] || 'Good') ? 'selected' : ''}>${g}</option>`).join('')}</select></td>`).join('')}</tbody></table></div>
+        <h4 class="font-bold mt-5">📚 Subjects Performance</h4><div class="overflow-x-auto"><table class="w-full border mt-2"><thead><tr><th>Subject</th><th>CA1</th><th>CA2</th><th>Exam</th><th>Total</th><th>Grade</th><th>Remark</th></tr></thead><tbody>${subjectsResults.map(sub=>{ let total=(sub.ca1||0)+(sub.ca2||0)+(sub.exam||0); let grade=total>=80?'A':total>=70?'B':total>=60?'C':total>=50?'D':'F'; let remark=grade=='A'?'Excellent':grade=='B'?'Good':grade=='C'?'Average':'Needs Improvement'; return `<tr><td class="font-medium">${escapeHtml(sub.subject)}</td><td>${sub.ca1||0}</td><td>${sub.ca2||0}</td><td>${sub.exam||0}</td><td class="font-bold">${total}</td><td><span class="grade-badge">${grade}</span></td><td>${remark}</td>`; }).join('')}</tbody></tr></div></div>
+        <h4 class="font-bold mt-5">🌟 Personal & Social Qualities</h4><div class="overflow-x-auto"><table class="w-full border mt-2"><thead><tr><th>Quality</th><th>الرجاء</th><th>Grade</th></tr></thead><tbody>${QUALITIES.map(q=>`<tr><td>${q}</td><td>${QUALITIES_ARABIC[q]}</td><td><select class="quality-select" data-quality="${q}" data-student="${sid}" data-term="${term}" data-year="${year}">${GRADE_OPTIONS.map(g=>`<option ${g=== (extra.qualities?.[q] || 'Good') ? 'selected' : ''}>${g}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table></div></div>
         <p class="mt-4"><strong>Remarks:</strong> <span class="editable-remarks" data-field="remarks" data-student="${sid}" data-term="${term}" data-year="${year}">${escapeHtml(extra.remarks||'')}</span></p>
         <div class="mt-5 text-center"><p class="font-bold">Average: ${avg}% (${gradeStatus})</p></div><div class="flex justify-between mt-6 text-sm text-gray-500"><span>Teacher's Signature: ______________</span><span>Headteacher's Signature: ______________</span></div></div>`;
         document.getElementById('reportCardContainer').innerHTML = cardHtml;
         attachResultEditable(sid);
     }
-    function attachResultEditable(sid) { /* same as original, omitted for brevity but fully functional */ 
+    function attachResultEditable(sid) {
         document.querySelectorAll('.editable-attendance').forEach(cell=>{
             cell.setAttribute('contenteditable','true');
             cell.addEventListener('blur',async()=>{
@@ -633,10 +633,152 @@ async function performanceAppraisalView() { if (!['dg_ceo', 'management_committe
     document.getElementById('newAppraisalBtn').onclick = () => renderForm({});
     renderForm({});
 }
-async function directorRolesView() { showToast("Director Roles Dashboard - KPIs & strategic objectives", false); }
-async function directorAppraisalView() { showToast("Appraise Directors: coming soon", false); }
+async function directorRolesView() {
+    showToast("Director Roles Dashboard - KPIs & strategic objectives", false);
+    document.getElementById('mainContent').innerHTML = `
+        <div class="card p-6">
+            <h2 class="text-2xl font-bold mb-4">📊 Director Roles & KPIs</h2>
+            <p class="text-gray-600 mb-4">Strategic KPIs and performance dashboards for each directorate.</p>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-amber-50 p-4 rounded-xl">
+                    <h3 class="font-semibold">📈 DG/CEO</h3>
+                    <p>Key performance indicators: student growth, financial sustainability, stakeholder satisfaction.</p>
+                </div>
+                <div class="bg-emerald-50 p-4 rounded-xl">
+                    <h3 class="font-semibold">💰 DAF</h3>
+                    <p>Budget adherence, fee collection efficiency, payroll management.</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-xl">
+                    <h3 class="font-semibold">📚 DER</h3>
+                    <p>Academic performance, curriculum innovation, research output.</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-xl">
+                    <h3 class="font-semibold">🔧 DO</h3>
+                    <p>Operational efficiency, infrastructure maintenance, logistics.</p>
+                </div>
+            </div>
+            <button class="apply-btn mt-6 px-6 py-2 rounded-full" onclick="alert('KPI templates can be edited here (coming soon).')">Edit KPIs</button>
+        </div>
+    `;
+}
+
+async function directorAppraisalView() {
+    showToast("Appraise Directors: coming soon", false);
+    document.getElementById('mainContent').innerHTML = `
+        <div class="card p-6">
+            <h2 class="text-2xl font-bold mb-4">📋 Appraise Directors</h2>
+            <p class="text-gray-600 mb-4">Annual performance appraisal for director‑level roles.</p>
+            <div class="space-y-4">
+                <div class="border rounded-xl p-4">
+                    <div class="flex justify-between items-center">
+                        <div><strong>Director:</strong> <span id="directorName">[Select Director]</span></div>
+                        <select id="directorSelect" class="border rounded-xl p-2">
+                            <option>DG/CEO</option><option>DAF</option><option>DER</option><option>DO</option><option>DPRPA</option>
+                        </select>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block font-medium">Rating (1-5):</label>
+                        <input type="number" id="rating" min="1" max="5" class="border rounded-xl p-2 w-24">
+                    </div>
+                    <div class="mt-3">
+                        <label class="block font-medium">Comments / Feedback:</label>
+                        <textarea id="appraisalComments" rows="3" class="border rounded-xl p-2 w-full"></textarea>
+                    </div>
+                    <button class="apply-btn mt-3 px-4 py-2 rounded-full" onclick="submitDirectorAppraisal()">Submit Appraisal</button>
+                </div>
+            </div>
+        </div>
+    `;
+    // Define the global submit handler only once (avoid duplicates)
+    if (typeof window.submitDirectorAppraisal === 'undefined') {
+        window.submitDirectorAppraisal = function() {
+            const director = document.getElementById('directorSelect').value;
+            const rating = document.getElementById('rating').value;
+            const comments = document.getElementById('appraisalComments').value;
+            if (!rating || rating < 1 || rating > 5) {
+                showToast("Please provide a rating between 1 and 5", true);
+                return;
+            }
+            // Here you would normally save to Supabase table 'director_appraisals'
+            console.log(`Appraisal for ${director}: rating ${rating}, comments: ${comments}`);
+            showToast(`Appraisal for ${director} submitted (Rating: ${rating})`, false);
+            document.getElementById('rating').value = '';
+            document.getElementById('appraisalComments').value = '';
+        };
+    }
+}
 async function parentChildReportsView() { enhancedResultView(false); }
-async function parentPaymentPortalView() { feeManagementEnhanced(); }
+async function parentPaymentPortalView() {
+    // Parent-specific: only show fee details for the logged-in child
+    const studentId = currentUser.studentId;
+    const student = schoolData.students.find(s => s.id == studentId);
+    if (!student) {
+        showToast("Student record not found", true);
+        return;
+    }
+    const currentYear = new Date().getFullYear();
+    const term = "1st Term";  // or let parent choose term if needed
+    const paid = schoolData.payments.filter(p => p.student_id == studentId && p.term === term && p.year == currentYear)
+                    .reduce((a,b) => a + (b.amount || 0), 0);
+    const due = Math.max(0, 30000 - paid);
+    const status = due <= 0 ? 'Paid' : (paid > 0 ? 'Partial' : 'Unpaid');
+
+    let html = `
+        <div class="card p-6 max-w-2xl mx-auto">
+            <h2 class="text-2xl font-bold text-emerald-800 mb-4"><i class="fas fa-credit-card mr-2"></i>Fee Payment Portal</h2>
+            <div class="bg-gray-50 p-5 rounded-2xl mb-6">
+                <p><strong>Student:</strong> ${escapeHtml(student.name)} (${student.reg_number})</p>
+                <p><strong>Class:</strong> ${student.academic_class || 'N/A'}</p>
+                <p><strong>Term:</strong> ${term} ${currentYear}</p>
+                <hr class="my-3">
+                <p><strong>Total Term Fee:</strong> ₦30,000</p>
+                <p><strong>Amount Paid:</strong> ₦${paid.toLocaleString()}</p>
+                <p><strong>Outstanding Balance:</strong> ₦${due.toLocaleString()}</p>
+                <p><span class="status-${status.toLowerCase()} px-3 py-1 rounded-full text-sm">${status}</span></p>
+            </div>
+            ${due > 0 ? `
+                <div class="text-center">
+                    <button id="parentPayNowBtn" class="apply-btn px-6 py-3 rounded-full text-lg">
+                        <i class="fas fa-arrow-right"></i> Pay ₦${due.toLocaleString()} Now
+                    </button>
+                </div>
+            ` : `
+                <div class="bg-green-100 text-green-800 p-4 rounded-xl text-center">
+                    <i class="fas fa-check-circle text-2xl"></i> No outstanding fees. Thank you!
+                </div>
+            `}
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <i class="fas fa-lock"></i> Secure payment via Paystack
+            </div>
+        </div>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+
+    if (due > 0) {
+        document.getElementById('parentPayNowBtn').addEventListener('click', () => {
+            const handler = PaystackPop.setup({
+                key: PAYSTACK_PUBLIC_KEY,
+                email: student.parent_email || `${student.reg_number}@school.com`,
+                amount: due * 100,
+                callback: async (response) => {
+                    await supabaseClient.from('payments').insert([{
+                        student_id: studentId,
+                        amount: due,
+                        term: term,
+                        year: currentYear,
+                        payment_method: 'paystack_online',
+                        payment_reference: response.reference,
+                        payment_status: 'success'
+                    }]);
+                    await refreshData();
+                    showToast(`Payment of ₦${due} successful`);
+                    parentPaymentPortalView(); // refresh view
+                }
+            });
+            handler.openIframe();
+        });
+    }
+}
 async function parentResultView() { enhancedResultView(false); }
 async function parentPaymentHistoryView() { let payments = schoolData.payments.filter(p=>p.student_id === currentUser.studentId); let html = `<div class="card p-6"><h2>Payment History</h2><ul>${payments.map(p=>`<li>₦${p.amount} - ${p.term} ${p.year} - ${p.payment_method}</li>`).join('')}</ul></div>`; document.getElementById('mainContent').innerHTML = html; }
 async function myClassView() { let teacherClass = currentUser.assigned_class || (schoolData.teachers.find(t=>t.id===currentUser.id)?.assigned_class) || CLASSES[0]; let students = schoolData.students.filter(s => s.academic_class === teacherClass); let html = `<div class="bg-white p-5 rounded-xl"><h2>My Academic Class: ${teacherClass}</h2><button id="writeAppraisalBtn" class="apply-btn mt-2 mb-4 px-4 py-2">Write Appraisal</button><div id="appraisalList"></div><ul>${students.map(s=>`<li>${s.name} (${s.reg_number}) - Section: ${s.section}</li>`).join('')}</ul></div>`; document.getElementById('mainContent').innerHTML = html; let appraisals = schoolData.studentAppraisals.filter(a => students.some(s => s.id === a.student_id)); document.getElementById('appraisalList').innerHTML = `<h3>Recent Appraisals</h3>${appraisals.map(a=>{ let s = students.find(st=>st.id===a.student_id); return `<div class="appraisal-card p-3 my-2"><p><strong>${s?.name}</strong> rated ${a.rating}/5</p><p>${escapeHtml(a.comment)}</p><small>${new Date(a.created_at).toLocaleDateString()}</small></div>`;}).join('') || '<p>None</p>'}`; document.getElementById('writeAppraisalBtn').onclick = () => { let sid = prompt("Student ID:"); let comment = prompt("Comment:"); let rating = prompt("Rating 1-5:"); if(sid && comment && rating) saveAppraisal(sid, comment, parseInt(rating)).then(async()=>{ await refreshData(); myClassView(); }); }; }

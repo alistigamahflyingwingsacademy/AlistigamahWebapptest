@@ -55,14 +55,8 @@
         .quality-select { width: 100%; padding: 4px; border-radius: 6px; }
         .regulations-list { list-style-type: decimal; padding-left: 1.5rem; }
         .regulations-list li { margin-bottom: 0.75rem; line-height: 1.5; }
-        /* Admission letter print styles */
         @media print {
-            .admission-letter-print {
-                margin: 0;
-                padding: 0.5in;
-                width: 100%;
-                font-family: 'Times New Roman', serif;
-            }
+            .admission-letter-print { margin: 0; padding: 0.5in; width: 100%; font-family: 'Times New Roman', serif; }
             .no-print { display: none; }
         }
     </style>
@@ -75,7 +69,7 @@
 <div id="landingPage" class="min-h-screen flex flex-col">
     <div class="hero-pattern text-white py-16 md:py-20">
         <div class="container mx-auto px-6 text-center">
-            <img src="logo.jpg" alt="Academy Logo" class="h-20 w-auto mx-auto mb-4 rounded-full shadow-lg border-2 border-amber-300">
+            <img src="logo.jpg" alt="Academy Logo" class="h-20 w-auto mx-auto mb-4 rounded-full shadow-lg border-2 border-amber-300" onerror="this.style.display='none'">
             <h1 class="text-4xl md:text-5xl font-bold">Al‑Istiqaamah <span class="text-amber-300">Flying Wings Academy</span></h1>
             <p class="text-lg opacity-90 mt-2">Faith • Knowledge • Leadership</p>
             <div class="bg-amber-900/30 border-l-4 border-amber-400 p-3 rounded-r-xl mb-4 mx-auto max-w-2xl">
@@ -101,8 +95,8 @@
     <div class="container mx-auto px-6 pb-6 relative">
         <div class="relative rounded-2xl overflow-hidden shadow-xl h-96 md:h-[500px] bg-gray-800" id="slidesContainer"></div>
         <div class="flex justify-center gap-2 mt-3" id="dotsContainer"></div>
-        <button id="prevSlide" class="carousel-btn absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-2xl p-2 rounded-full w-10 h-10 z-20"><i class="fas fa-chevron-left"></i></button>
-        <button id="nextSlide" class="carousel-btn absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-2xl p-2 rounded-full w-10 h-10 z-20"><i class="fas fa-chevron-right"></i></button>
+        <button id="prevSlide" class="carousel-btn absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-2xl p-2 rounded-full w-10 h-10 z-20 bg-black/50 hover:bg-black/70"><i class="fas fa-chevron-left"></i></button>
+        <button id="nextSlide" class="carousel-btn absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-2xl p-2 rounded-full w-10 h-10 z-20 bg-black/50 hover:bg-black/70"><i class="fas fa-chevron-right"></i></button>
     </div>
     <div class="container mx-auto px-6 py-12">
         <div class="grid md:grid-cols-2 gap-6">
@@ -115,7 +109,7 @@
     <footer class="bg-slate-900 text-white text-center py-4 mt-auto"><p>© 2026 Al‑Istiqaamah Flying Wings Academy | No. 10 Federal Government Layout, Samaru, Zaria | <i class="fas fa-microchip"></i> Powered by Arrahmahtelecommunications</p></footer>
 </div>
 
-<!-- MODALS -->
+<!-- ==================== ALL MODALS ==================== -->
 <div id="loginModal" class="modal"><div class="modal-content relative"><span class="close-modal-x" onclick="closeModal('loginModal')">&times;</span><h2 class="text-2xl font-bold mb-4">Access Portal</h2><div class="flex gap-3 mb-4"><button id="adminTab" class="flex-1 py-2 bg-amber-500 rounded-full text-white">Admin</button><button id="staffTab" class="flex-1 py-2 bg-gray-200 rounded-full">Staff</button></div><form id="adminLoginForm"><input id="adminEmail" placeholder="Email" class="border p-3 w-full mb-3 rounded-xl"><input id="adminPassword" placeholder="Password" type="password" class="border p-3 w-full mb-4 rounded-xl"><button type="submit" class="apply-btn w-full py-3 rounded-xl font-semibold">Login</button></form><form id="staffLoginForm" style="display:none"><input id="staffUsername" placeholder="Staff ID" class="border p-3 w-full mb-3 rounded-xl"><input id="staffPassword" placeholder="Password" type="password" class="border p-3 w-full mb-4 rounded-xl"><button type="submit" class="apply-btn w-full py-3 rounded-xl">Login</button></form></div></div>
 <div id="parentModal" class="modal"><div class="modal-content relative"><span class="close-modal-x" onclick="closeModal('parentModal')">&times;</span><h2 class="text-2xl font-bold mb-4">Parent Login</h2><form id="parentLoginForm"><input id="studentRegNo" placeholder="Student Reg Number" class="border p-3 w-full mb-3 rounded-xl"><input id="parentPwd" placeholder="Password (default: al123)" type="password" class="border p-3 w-full mb-4 rounded-xl"><button type="submit" class="apply-btn w-full py-3 rounded-xl">Login</button></form></div></div>
 <div id="adminSignupModal" class="modal"><div class="modal-content relative"><span class="close-modal-x" onclick="closeModal('adminSignupModal')">&times;</span><h2 class="text-2xl font-bold mb-3">Admin Signup</h2><form id="adminSignupForm"><input id="regCode" placeholder="Registration Code" class="border p-3 w-full mb-2 rounded-xl"><input id="signupEmail" placeholder="Email" class="border p-3 w-full mb-2 rounded-xl"><input id="signupPassword" placeholder="Password" type="password" class="border p-3 w-full mb-2 rounded-xl"><input id="signupFullName" placeholder="Full Name" class="border p-3 w-full mb-2 rounded-xl"><select id="signupRole" class="border p-3 w-full mb-4 rounded-xl"><option value="dg_ceo">DG/CEO</option><option value="daf">DAF</option><option value="management_committee">Management Committee</option><option value="do">DO</option><option value="der">DER</option><option value="dprpa">DPRPA</option><option value="headteacher">Headteacher</option><option value="teacher">Teacher</option></select><button type="submit" class="apply-btn w-full py-3 rounded-xl">Create Account</button></form></div></div>
@@ -128,7 +122,6 @@
 <div id="appraisalModal" class="modal"><div class="modal-content relative" style="max-width: 600px;"><span class="close-modal-x" onclick="closeModal('appraisalModal')">&times;</span><h3 class="text-xl font-bold mb-3">Staff Appraisal</h3><form id="appraisalForm"><select id="appraisalStaffSelect" class="border p-2 w-full mb-2 rounded" required><option>Select Staff</option></select><label class="block font-medium mt-2">Overall Rating (1-5):</label><input type="number" id="appraisalRating" min="1" max="5" class="border p-2 w-full rounded mb-2" required><label class="block font-medium">Comments / Feedback:</label><textarea id="appraisalComment" rows="3" class="border p-2 w-full rounded mb-3"></textarea><button type="submit" class="apply-btn w-full py-2 rounded">Submit Appraisal</button></form></div></div>
 <div id="acceptDetailsModal" class="modal"><div class="modal-content relative" style="max-width: 600px;"><span class="close-modal-x" onclick="closeModal('acceptDetailsModal')">&times;</span><h3 class="text-xl font-bold mb-3">Accept Application – Official Use Only</h3><form id="acceptDetailsForm"><input type="hidden" id="acceptAppId"><label class="block font-medium">Entrance Test Score:</label><input type="text" id="acceptEntranceScore" class="border p-2 w-full rounded mb-2"><label class="block font-medium">Interview Remarks:</label><textarea id="acceptInterviewRemarks" rows="2" class="border p-2 w-full rounded mb-2"></textarea><label class="block font-medium">Class Admitted Into:</label><input type="text" id="acceptAdmittedClass" class="border p-2 w-full rounded mb-2"><label class="block font-medium">Admission Number:</label><input type="text" id="acceptAdmissionNumber" class="border p-2 w-full rounded mb-2"><label class="block font-medium">Date of Admission:</label><input type="date" id="acceptAdmissionDate" class="border p-2 w-full rounded mb-2"><label class="block font-medium">Authorized Signature (Name):</label><input type="text" id="acceptSignature" class="border p-2 w-full rounded mb-2"><button type="submit" class="apply-btn w-full py-2 rounded">Accept & Save</button></form></div></div>
 <div id="statusCheckModal" class="modal"><div class="modal-content relative" style="max-width: 500px;"><span class="close-modal-x" onclick="closeModal('statusCheckModal')">&times;</span><h3 class="text-xl font-bold mb-3">Check Application Status</h3><input type="email" id="statusEmail" placeholder="Enter your email address" class="border p-3 w-full rounded-xl mb-4"><button id="checkStatusSubmit" class="apply-btn w-full py-2 rounded-xl">Check Status</button><div id="statusResult" class="mt-4 text-center"></div></div></div>
-
 <div id="addStaffToPayrollModal" class="modal"><div class="modal-content relative"><span class="close-modal-x" onclick="closeModal('addStaffToPayrollModal')">&times;</span><h3 class="text-xl font-bold mb-3">Add Staff to Payroll</h3><form id="addToPayrollForm"><label class="block font-medium">Select Staff:</label><select id="payrollStaffSelect" class="border p-2 w-full rounded mb-3" required><option value="">-- Select Staff --</option></select><label class="block font-medium">Basic Salary (₦):</label><input type="number" id="payrollStaffSalary" class="border p-2 w-full rounded mb-3" placeholder="Salary amount"><label class="block font-medium">Allowances (₦):</label><input type="number" id="payrollStaffAllowances" class="border p-2 w-full rounded mb-3" placeholder="Allowances" value="0"><label class="block font-medium">Deductions (₦):</label><input type="number" id="payrollStaffDeductions" class="border p-2 w-full rounded mb-3" placeholder="Deductions" value="0"><label class="block font-medium">Account Details:</label><input type="text" id="payrollStaffAccount" class="border p-2 w-full rounded mb-3" placeholder="Bank account details"><button type="submit" class="apply-btn w-full py-2 rounded">Add to Payroll</button></form></div></div>
 
 <!-- DASHBOARD CONTAINER -->
@@ -163,6 +156,7 @@ let currentUser = null;
 let schoolData = { students: [], teachers: [], profiles: [], applications: [], results: [], payments: [], bankTransfers: [], staffAppraisals: [], slides: [], announcements: [], resultExtras: [], payrollRecords: [], dgAppraisals: [], studentAppraisals: [], attendance: [], directorAppraisals: [] };
 let idleTimeout;
 let pendingPaymentAction = null;
+let carouselInterval = null;
 
 // ========== UTILITIES ==========
 function showToast(msg, isErr=false) { let t=document.getElementById('toast'); t.textContent=msg; t.style.backgroundColor=isErr?'#dc2626':'#10b981'; t.style.display='block'; setTimeout(()=>t.style.display='none',4000); }
@@ -171,6 +165,20 @@ function escapeHtml(str) { return String(str??'').replace(/[&<>]/g, m=>({'&':'&a
 function closeModal(id) { document.getElementById(id).style.display='none'; }
 function closeMobileSidebar() { document.getElementById('dynamicSidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 
+// ========== CLOCK ==========
+function updateClock() {
+    const liveTimeSpan = document.getElementById('liveTime');
+    const liveDateSpan = document.getElementById('liveDate');
+    if (liveTimeSpan && liveDateSpan) {
+        const now = new Date();
+        liveTimeSpan.innerText = now.toLocaleTimeString();
+        liveDateSpan.innerText = now.toLocaleDateString();
+    }
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ========== REFRESH DATA ==========
 async function refreshData() {
     showLoading(true);
     try {
@@ -183,41 +191,35 @@ async function refreshData() {
             supabaseClient.from('attendance').select('*'), supabaseClient.from('director_appraisals').select('*')
         ]);
         schoolData = { students: sRes.data||[], teachers: tRes.data||[], profiles: pRes.data||[], applications: aRes.data||[], results: rRes.data||[], payments: payRes.data||[], bankTransfers: btRes.data||[], staffAppraisals: saRes.data||[], slides: slRes.data||[], announcements: annRes.data||[], resultExtras: rexRes.data||[], payrollRecords: payrollRes.data||[], dgAppraisals: dgRes.data||[], studentAppraisals: stuAppRes.data||[], attendance: attRes.data||[], directorAppraisals: dirAppRes.data||[] };
-    } catch(e) { console.error(e); } finally { showLoading(false); }
+    } catch(e) { console.error(e); showToast("Error loading data: "+e.message, true); } finally { showLoading(false); }
 }
 
-function resetIdleTimer() { if (!currentUser) return; if (idleTimeout) clearTimeout(idleTimeout); idleTimeout = setTimeout(() => { if (currentUser) { showToast("Auto-logout due to inactivity", false); logoutUser(); } }, 60 * 1000); }
-function attachActivityListeners() { ['mousedown','mousemove','keypress','scroll','touchstart'].forEach(ev => { document.removeEventListener(ev, resetIdleTimer); document.addEventListener(ev, resetIdleTimer); }); }
-
-function logoutUser() {
-    if(window.slideInterval) { clearInterval(window.slideInterval); window.slideInterval = null; }
-    currentUser = null;
-    document.getElementById('appContainer').classList.add('hidden');
-    document.getElementById('landingPage').style.display = 'block';
-    renderLandingCarouselAndAnnouncement();
-    showToast("Logged out");
-}
-
-// ========== LANDING CAROUSEL & ANNOUNCEMENT ==========
-async function renderLandingCarouselAndAnnouncement() {
-    if(window.slideInterval) clearInterval(window.slideInterval);
+// ========== LANDING CAROUSEL ==========
+function renderLandingCarouselAndAnnouncement() {
+    if (carouselInterval) clearInterval(carouselInterval);
     const ann = schoolData.announcements[0]?.content || 'Welcome to Flying Wings – Excellence in Islamic Education';
-    document.getElementById('announcementBarWrapper').innerHTML = `<div class="bg-amber-100 border-l-4 border-amber-500 p-3 rounded-r-xl">📢 ${escapeHtml(ann)}</div>`;
+    const annBar = document.getElementById('announcementBarWrapper');
+    if (annBar) annBar.innerHTML = `<div class="bg-amber-100 border-l-4 border-amber-500 p-3 rounded-r-xl">📢 ${escapeHtml(ann)}</div>`;
     let slides = schoolData.slides.length ? schoolData.slides : [{ image_url: 'https://via.placeholder.com/1200x500?text=Flying+Wings+Academy', caption: 'Empowering Minds & Souls' }];
     let idx = 0;
     const container = document.getElementById('slidesContainer');
     const dotsContainer = document.getElementById('dotsContainer');
     function renderSlide() {
+        if (!container) return;
         container.innerHTML = `<img src="${slides[idx].image_url}" class="w-full h-full object-cover" alt="slide"><div class="absolute bottom-4 left-0 right-0 text-center text-white bg-black/50 p-2">${escapeHtml(slides[idx].caption||'')}</div>`;
-        if(dotsContainer) {
+        if (dotsContainer) {
             dotsContainer.innerHTML = slides.map((_, i) => `<span class="dot w-3 h-3 rounded-full mx-1 ${i===idx?'bg-amber-500':'bg-gray-400'} cursor-pointer"></span>`).join('');
             document.querySelectorAll('.dot').forEach((dot, i) => dot.addEventListener('click', () => { idx = i; renderSlide(); }));
         }
     }
     renderSlide();
-    if(slides.length > 1) { window.slideInterval = setInterval(() => { idx = (idx+1)%slides.length; renderSlide(); }, 5000); }
-    document.getElementById('prevSlide')?.addEventListener('click', () => { idx = (idx-1+slides.length)%slides.length; renderSlide(); });
-    document.getElementById('nextSlide')?.addEventListener('click', () => { idx = (idx+1)%slides.length; renderSlide(); });
+    if (slides.length > 1) {
+        carouselInterval = setInterval(() => { idx = (idx+1)%slides.length; renderSlide(); }, 5000);
+    }
+    const prevBtn = document.getElementById('prevSlide');
+    const nextBtn = document.getElementById('nextSlide');
+    if (prevBtn) prevBtn.onclick = () => { idx = (idx-1+slides.length)%slides.length; renderSlide(); };
+    if (nextBtn) nextBtn.onclick = () => { idx = (idx+1)%slides.length; renderSlide(); };
 }
 
 // ========== AUTHENTICATION ==========
@@ -272,6 +274,17 @@ async function adminSignup(code, email, pwd, name, role) {
     if (insertError) throw insertError;
     showToast('Account created! Please verify email and login.');
     closeModal('adminSignupModal');
+}
+
+function resetIdleTimer() { if (!currentUser) return; if (idleTimeout) clearTimeout(idleTimeout); idleTimeout = setTimeout(() => { if (currentUser) { showToast("Auto-logout due to inactivity", false); logoutUser(); } }, 60 * 1000); }
+function attachActivityListeners() { ['mousedown','mousemove','keypress','scroll','touchstart'].forEach(ev => { document.removeEventListener(ev, resetIdleTimer); document.addEventListener(ev, resetIdleTimer); }); }
+function logoutUser() {
+    if(carouselInterval) clearInterval(carouselInterval);
+    currentUser = null;
+    document.getElementById('appContainer').classList.add('hidden');
+    document.getElementById('landingPage').style.display = 'block';
+    renderLandingCarouselAndAnnouncement();
+    showToast("Logged out");
 }
 
 // ========== DASHBOARD & MENU ==========
@@ -354,98 +367,27 @@ function printAdmissionLetter(application) {
     const category = official.admitted_class || formData.desired_class || 'Not specified';
     const admissionNumber = official.admission_number || 'Pending';
     const admissionDate = official.admission_date || new Date().toLocaleDateString();
-    const schoolStampHtml = `<div style="margin-top: 20px; text-align: center; border: 1px dashed #000; padding: 10px; width: 150px; margin-left: auto; margin-right: auto;">[School Stamp]</div>`;
-    
     const letterHtml = `
         <!DOCTYPE html>
         <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Admission Letter - ${fullName}</title>
-            <style>
-                body {
-                    font-family: 'Times New Roman', serif;
-                    margin: 0;
-                    padding: 0.5in;
-                    background: white;
-                }
-                .letter {
-                    max-width: 800px;
-                    margin: 0 auto;
-                    border: 1px solid #ccc;
-                    padding: 20px;
-                    position: relative;
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                .header h1 {
-                    font-size: 24px;
-                    margin: 0;
-                }
-                .header h2 {
-                    font-size: 18px;
-                    margin: 5px 0;
-                }
-                .header p {
-                    margin: 5px 0;
-                    font-size: 12px;
-                }
-                .motto {
-                    font-style: italic;
-                    font-size: 14px;
-                }
-                .ref {
-                    text-align: right;
-                    margin-bottom: 20px;
-                }
-                .content {
-                    margin: 20px 0;
-                }
-                .student-details {
-                    border: 1px solid #000;
-                    padding: 10px;
-                    margin: 20px 0;
-                }
-                .student-details td {
-                    padding: 5px;
-                }
-                .passport-placeholder {
-                    float: right;
-                    width: 100px;
-                    height: 120px;
-                    border: 1px solid #000;
-                    text-align: center;
-                    line-height: 120px;
-                    margin-left: 20px;
-                }
-                .signatures {
-                    margin-top: 40px;
-                    display: flex;
-                    justify-content: space-between;
-                }
-                .signature-line {
-                    text-align: center;
-                    width: 200px;
-                    border-top: 1px solid #000;
-                    padding-top: 5px;
-                }
-                .footer {
-                    margin-top: 30px;
-                    font-size: 10px;
-                    text-align: center;
-                }
-                @media print {
-                    body {
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .no-print {
-                        display: none;
-                    }
-                }
-            </style>
+        <head><meta charset="UTF-8"><title>Admission Letter - ${fullName}</title>
+        <style>
+            body { font-family: 'Times New Roman', serif; margin: 0; padding: 0.5in; background: white; }
+            .letter { max-width: 800px; margin: 0 auto; border: 1px solid #ccc; padding: 20px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .header h1 { font-size: 24px; margin: 0; }
+            .header h2 { font-size: 18px; margin: 5px 0; }
+            .header p { margin: 5px 0; font-size: 12px; }
+            .motto { font-style: italic; font-size: 14px; }
+            .ref { text-align: right; margin-bottom: 20px; }
+            .student-details { border: 1px solid #000; padding: 10px; margin: 20px 0; width: 70%; }
+            .student-details td { padding: 5px; }
+            .passport-placeholder { float: right; width: 100px; height: 120px; border: 1px solid #000; text-align: center; line-height: 120px; margin-left: 20px; }
+            .signatures { margin-top: 40px; display: flex; justify-content: space-between; }
+            .signature-line { text-align: center; width: 200px; border-top: 1px solid #000; padding-top: 5px; }
+            .footer { margin-top: 30px; font-size: 10px; text-align: center; }
+            @media print { .no-print { display: none; } }
+        </style>
         </head>
         <body>
             <div class="letter">
@@ -456,20 +398,16 @@ function printAdmissionLetter(application) {
                     <p class="motto">"The best of mankind is the most beneficial to humanity"</p>
                     <p>Email: alistiqaamah.fwac@gmail.com | Phone: +2348084816590, +2348067990749</p>
                 </div>
-                <div class="ref">
-                    <strong>Ref: AFWAN/AC/01/ADM NO.</strong> ${admissionNumber}
-                </div>
+                <div class="ref"><strong>Ref: AFWAN/AC/01/ADM NO.</strong> ${admissionNumber}</div>
                 <div class="content">
                     <div style="overflow: auto;">
-                        <div class="passport-placeholder">
-                            [Passport<br>Photo]
-                        </div>
-                        <table class="student-details" style="width: 70%;">
+                        <div class="passport-placeholder">[Passport<br>Photo]</div>
+                        <table class="student-details">
                             <tr><td><strong>Name:</strong></td><td>${escapeHtml(fullName)}</td></tr>
                             <tr><td><strong>Gender:</strong></td><td>${escapeHtml(gender)}</td></tr>
                             <tr><td><strong>State:</strong></td><td>${escapeHtml(state)}</td></tr>
                             <tr><td><strong>Category:</strong></td><td>${escapeHtml(category)}</td></tr>
-                        </table>
+                         </table>
                     </div>
                     <p style="margin-top: 30px;">I write to inform you that you have been offered <strong>provisional admission</strong> as indicated above, subject to confirmation of all registration requirements. Lost admission letters will be reprinted at the cost of N500.00. Failure to register in two week's time may lead to withdrawal of the admission.</p>
                 </div>
@@ -478,18 +416,12 @@ function printAdmissionLetter(application) {
                     <div class="signature-line">خاتم المرسلة<br>School Stamp</div>
                     <div class="signature-line">توقيع مسجل القسم<br>Section Registrar's Signature</div>
                 </div>
-                <div class="footer">
-                    Date of Issue: ${new Date().toLocaleDateString()} | Admission Date: ${admissionDate}
-                </div>
+                <div class="footer">Date of Issue: ${new Date().toLocaleDateString()} | Admission Date: ${admissionDate}</div>
             </div>
             <div class="no-print" style="text-align: center; margin-top: 20px;">
                 <button onclick="window.print();" style="padding: 8px 16px;">Print Letter</button>
                 <button onclick="window.close();" style="padding: 8px 16px;">Close</button>
             </div>
-            <script>
-                // Auto-print (optional)
-                // window.print();
-            </script>
         </body>
         </html>
     `;
@@ -571,8 +503,7 @@ async function feeManagementEnhanced() {
             let pendingTransfer = schoolData.bankTransfers.find(bt => bt.student_id == s.id && bt.term === term && bt.year == year && bt.status === 'pending');
             let proofUrl = pendingTransfer ? pendingTransfer.proof_url : null;
             let viewProofButton = proofUrl ? `<a href="${proofUrl}" target="_blank" class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm inline-block">📎 View Proof</a>` : '<span class="text-gray-400 text-sm">No proof</span>';
-            return `<tr><td class="font-medium">${escapeHtml(s.name)}</td><td>₦${termFee.toLocaleString()}</td><td>₦${paid.toLocaleString()}</td><td>₦${due.toLocaleString()}</td><td><span class="status-${status.toLowerCase()}">${status}</span></td><td><button class="paystack-term bg-green-600 text-white px-3 py-1 rounded-full text-sm" data-id="${s.id}" data-email="${s.parent_email||s.reg_number+'@school.com'}" data-due="${due}" data-term="${term}" data-year="${year}">Pay Now</button></td><td>${viewProofButton}</td><td><button class="admin-confirm-term bg-amber-600 text-white px-3 py-1 rounded-full text-sm" data-id="${s.id}" data-due="${due}" data-term="${term}" data-year="${year}">Confirm</button></td><td><button class="edit-term-fee bg-purple-600 text-white px-3 py-1 rounded-full text-sm" data-id="${s.id}">Edit Fee</button></td></tr>`;
-        }).join('');
+            return `<tr><td class="font-medium">${escapeHtml(s.name)}</td><td>₦${termFee.toLocaleString()}</td><td>₦${paid.toLocaleString()}</td><td>₦${due.toLocaleString()}</td><td><span class="status-${status.toLowerCase()}">${status}</span></td><td><button class="paystack-term bg-green-600 text-white px-3 py-1 rounded-full text-sm" data-id="${s.id}" data-email="${s.parent_email||s.reg_number+'@school.com'}" data-due="${due}" data-term="${term}" data-year="${year}">Pay Now</button></td><td>${viewProofButton}</td><td><button class="admin-confirm-term bg-amber-600 text-white px-3 py-1 rounded-full text-sm" data-id="${s.id}" data-due="${due}" data-term="${term}" data-year="${year}">Confirm</button></td><td><button class="edit-term-fee bg-purple-600 text-white px-3 py-1 rounded-full text-sm" data-id="${s.id}">Edit Fee</button></td>`).join('');
         attachEvents(year, term);
     }
     function attachEvents(year, term) {
@@ -751,9 +682,8 @@ document.getElementById('fullApplicationForm')?.addEventListener('submit', async
     for(let inp of fileInputs) {
         if(inp.files.length > 0) {
             let file = inp.files[0];
-            let ext = file.name.split('.').pop();
-            let fileName = `${Date.now()}_${inp.name}.${ext}`;
-            let { data, error } = await supabaseClient.storage.from('application-attachments').upload(fileName, file);
+            let fileName = `${Date.now()}_${inp.name}.${file.name.split('.').pop()}`;
+            let { error } = await supabaseClient.storage.from('application-attachments').upload(fileName, file);
             if(error) { showToast("Error uploading " + inp.name, true); continue; }
             let { data: { publicUrl } } = supabaseClient.storage.from('application-attachments').getPublicUrl(fileName);
             fileAttachments[inp.name] = publicUrl;
@@ -827,10 +757,10 @@ async function payrollModule() {
         }
         records.forEach(r => { r.gross_pay = (r.basic_salary||0) + (r.allowances||0); r.net_pay = r.gross_pay - (r.deductions||0); });
         let tbody = document.getElementById('payrollTbody');
-        tbody.innerHTML = records.map((r,i)=>`<tr><td class="text-center">${i+1}</td><td class="font-medium">${escapeHtml(r.employee_name)}</td><td><input type="text" class="payroll-basic" data-id="${r.id}" value="${r.basic_salary||0}" style="width:100px;"></td><td><input type="text" class="payroll-allowance" data-id="${r.id}" value="${r.allowances||0}" style="width:100px;"></td><td class="gross-pay-${r.id} font-bold text-emerald-700">${(r.gross_pay||0).toLocaleString()}</td><td><input type="text" class="payroll-deduction" data-id="${r.id}" value="${r.deductions||0}" style="width:100px;"></td><td class="net-pay-${r.id} font-bold text-blue-700">${(r.net_pay||0).toLocaleString()}</td><td><input type="text" class="payroll-account" data-id="${r.id}" value="${escapeHtml(r.account_details||'')}" style="width:150px;"></td></tr>`).join('');
+        tbody.innerHTML = records.map((r,i)=>`<tr><td class="text-center">${i+1}</td><td class="font-medium">${escapeHtml(r.employee_name)}</td><td><input type="text" class="payroll-basic" data-id="${r.id}" value="${r.basic_salary||0}" style="width:100px;"></td><td><input type="text" class="payroll-allowance" data-id="${r.id}" value="${r.allowances||0}" style="width:100px;"></td><td class="gross-pay-${r.id} font-bold text-emerald-700">${(r.gross_pay||0).toLocaleString()}</td><td><input type="text" class="payroll-deduction" data-id="${r.id}" value="${r.deductions||0}" style="width:100px;"></td><td class="net-pay-${r.id} font-bold text-blue-700">${(r.net_pay||0).toLocaleString()}</td><td><input type="text" class="payroll-account" data-id="${r.id}" value="${escapeHtml(r.account_details||'')}" style="width:150px;"></td>`).join('');
         let totals = {basic:0,allow:0,gross:0,ded:0,net:0};
         records.forEach(r=>{ totals.basic+=r.basic_salary||0; totals.allow+=r.allowances||0; totals.gross+=r.gross_pay||0; totals.ded+=r.deductions||0; totals.net+=r.net_pay||0; });
-        document.getElementById('payrollTotals').innerHTML = `<tr><td colspan="2" class="text-right font-bold">TOTAL</td><td class="font-bold">₦${totals.basic.toLocaleString()}</td><td class="font-bold">₦${totals.allow.toLocaleString()}</td><td class="font-bold">₦${totals.gross.toLocaleString()}</td><td class="font-bold">₦${totals.ded.toLocaleString()}</td><td class="font-bold">₦${totals.net.toLocaleString()}</td><td></td></tr>`;
+        document.getElementById('payrollTotals').innerHTML = `<tr><td colspan="2" class="text-right font-bold">TOTAL</td><td class="font-bold">₦${totals.basic.toLocaleString()}</td><td class="font-bold">₦${totals.allow.toLocaleString()}</td><td class="font-bold">₦${totals.gross.toLocaleString()}</td><td class="font-bold">₦${totals.ded.toLocaleString()}</td><td class="font-bold">₦${totals.net.toLocaleString()}</td><td></td>`);
         attachPayrollEditable();
     }
     function attachPayrollEditable() {
@@ -1122,8 +1052,9 @@ async function attendanceView() {
     document.getElementById('mainContent').innerHTML = html;
     document.getElementById('attList').innerHTML = `<table class="w-full border"><thead><tr><th>Name</th><th>Present</th></tr></thead><tbody>${students.map(s => {
         let isPresent = existingAttendance.some(a => a.student_id === s.id && a.status === 'present');
-        return `<tr><td class="p-2">${s.name}</td><td class="p-2"><input type="checkbox" class="attCheck" data-id="${s.id}" ${isPresent ? 'checked' : ''}></td></tr>`;
-    }).join('')}</tbody>}</table>`;
+        return `<tr><td class="p-2">${s.name}</td><td class="p-2"><input type="checkbox" class="attCheck" data-id="${s.id}" ${isPresent ? 'checked' : ''}></td>`;
+                return `<tr><td class="p-2">${s.name}</td><td class="p-2"><input type="checkbox" class="attCheck" data-id="${s.id}" ${isPresent ? 'checked' : ''}></td>`;
+    }).join('')}</tbody><table>`;
     document.getElementById('submitAttendance').onclick = async () => {
         showLoading(true);
         try {
@@ -1196,7 +1127,7 @@ async function directorAppraisalView() {
     loadExisting();
 }
 
-// ========== PERFORMANCE APPRAISAL ==========
+// ========== PERFORMANCE APPRAISAL (DG/CEO) ==========
 async function performanceAppraisalView() {
     if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) { showToast("Access denied", true); return; }
     let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📋 DG/CEO Performance Appraisal</h2>
@@ -1454,4 +1385,4 @@ document.addEventListener('DOMContentLoaded', async()=>{
 });
 </script>
 </body>
-                                                                                                                                                                                                                                                                                                                                                            </html>
+</html>

@@ -173,20 +173,15 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
-
 async function refreshData() {
-    showLoading(true);
-    try {
-        const [sRes, tRes, pRes, aRes, rRes, payRes, btRes, saRes, slRes, annRes, rexRes, payrollRes, dgRes, stuAppRes, attRes, dirAppRes] = await Promise.all([
-            supabaseClient.from('students').select('*'), supabaseClient.from('teachers').select('*'), supabaseClient.from('profiles').select('*'),
-            supabaseClient.from('applications').select('*'), supabaseClient.from('results').select('*'), supabaseClient.from('payments').select('*'),
-            supabaseClient.from('bank_transfers').select('*'), supabaseClient.from('staff_appraisals').select('*'), supabaseClient.from('slides').select('*'),
-            supabaseClient.from('site_announcement').select('*').limit(1), supabaseClient.from('result_extras').select('*'),
-            supabaseClient.from('payroll_records').select('*'), supabaseClient.from('dg_appraisals').select('*'), supabaseClient.from('student_appraisals').select('*'),
-            supabaseClient.from('attendance').select('*'), supabaseClient.from('director_appraisals').select('*')
-        ]);
-        schoolData = { students: sRes.data||[], teachers: tRes.data||[], profiles: pRes.data||[], applications: aRes.data||[], results: rRes.data||[], payments: payRes.data||[], bankTransfers: btRes.data||[], staffAppraisals: saRes.data||[], slides: slRes.data||[], announcements: annRes.data||[], resultExtras: rexRes.data||[], payrollRecords: payrollRes.data||[], dgAppraisals: dgRes.data||[], studentAppraisals: stuAppRes.data||[], attendance: attRes.data||[], directorAppraisals: dirAppRes.data||[] };
-    } catch(e) { console.error(e); showToast("Error loading data: "+e.message, true); } finally { showLoading(false); }
+  showLoading(true);
+  const tables = ['students','teachers','profiles','applications','results','payments','bank_transfers','staff_appraisals','slides','site_announcement','result_extras','payroll_records','dg_appraisals','student_appraisals','attendance','director_appraisals','director_kpis'];
+  const results = await Promise.allSettled(tables.map(t => supabaseClient.from(t).select('*')));
+  schoolData = {};
+  tables.forEach((t, idx) => {
+    schoolData[t] = (results[idx].status === 'fulfilled' && results[idx].value.data) ? results[idx].value.data : [];
+  });
+  showLoading(false);
 }
 
 function renderLandingCarouselAndAnnouncement() {

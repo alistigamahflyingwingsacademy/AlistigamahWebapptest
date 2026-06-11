@@ -1259,9 +1259,125 @@ async function parentPaymentHistoryView() { let payments = schoolData.payments.f
 // ========== TEACHER FUNCTIONS ==========
 async function myClassView() { let teacherClass = currentUser.assigned_class || (schoolData.teachers.find(t => t.id === currentUser.id)?.assigned_class) || CLASSES[0]; let students = schoolData.students.filter(s => s.academic_class === teacherClass); let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold">My Academic Class: ${teacherClass}</h2><button id="writeAppraisalBtn" class="apply-btn mt-2 mb-4 px-4 py-2">Write Appraisal</button><div id="appraisalList"></div><h3 class="font-bold mt-4">Students in class:</h3><ul class="mt-2">${students.map(s => `<li>${s.name} (${s.reg_number}) - Section: ${s.section}</li>`).join('')}</ul></div>`; document.getElementById('mainContent').innerHTML = html; let appraisals = schoolData.studentAppraisals.filter(a => students.some(s => s.id === a.student_id)); document.getElementById('appraisalList').innerHTML = `<h3 class="font-bold mt-4">Recent Appraisals</h3>${appraisals.map(a => { let s = students.find(st => st.id === a.student_id); return `<div class="appraisal-card p-3 my-2 border rounded"><p><strong>${s?.name}</strong> rated ${a.rating}/5</p><p>${escapeHtml(a.comment)}</p><small>${new Date(a.created_at).toLocaleDateString()}</small></div>`; }).join('') || '<p>None</p>'}`; document.getElementById('writeAppraisalBtn').onclick = () => { let sid = prompt("Student ID:"); let comment = prompt("Comment:"); let rating = prompt("Rating 1-5:"); if (sid && comment && rating) saveAppraisal(sid, comment, parseInt(rating)).then(async () => { await refreshData(); myClassView(); }); }; }
 async function saveAppraisal(studentId, comment, rating) { if (!studentId || !comment || rating < 1 || rating > 5) { showToast("Invalid appraisal data", true); return false; } const { error } = await supabaseClient.from('student_appraisals').insert([{ student_id: studentId, comment, rating, created_by: currentUser.id, created_at: new Date() }]); if (error) { showToast(error.message, true); return false; } await refreshData(); showToast("Student appraisal saved"); return true; }
-async function teacherResultEntry() { let students = schoolData.students, currentYear = new Date().getFullYear(); let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📝 Enter Subject Grades</h2><div class="filter-row"><select id="teacherTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select><input id="teacherYear" type="number" value="${currentYear}" class="w-28"><select id="teacherSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s => `<option>${s}</option>`).join('')}</select><select id="teacherClassFilter"><option value="all">All Classes</option>${CLASSES.map(c => `<option>${c}</option>`).join('')}</select><input id="teacherSearch" placeholder="🔍 Search student" class="flex-1"></div><select id="teacherStudentSelect" class="border p-3 w-full mb-4 rounded-xl"><option>Select Student</option></select><div class="bg-gray-50 p-4 rounded-2xl"><div class="flex flex-wrap gap-2"><input id="newSubject" placeholder="Subject" class="flex-1"><input id="ca1Val" placeholder="CA1 (0-20)" type="number" class="w-24"><input id="ca2Val" placeholder="CA2 (0-20)" type="number" class="w-24"><input id="examVal" placeholder="Exam (0-60)" type="number" class="w-24"><button id="addSubjectGradeBtn" class="apply-btn px-4">+ Add</button></div><div id="existingSubjectsList" class="mt-4"></div></div></div>`; document.getElementById('mainContent').innerHTML = html; function filterStudents() { let section = document.getElementById('teacherSectionFilter').value, classVal = document.getElementById('teacherClassFilter').value, search = document.getElementById('teacherSearch').value.toLowerCase(); let filtered = students.filter(s => (section === 'all' || s.section === section) && (classVal === 'all' || s.academic_class === classVal) && (s.name.toLowerCase().includes(search) || (s.reg_number || '').toLowerCase().includes(search))); let select = document.getElementById('teacherStudentSelect'); select.innerHTML = '<option>Select Student</option>' + filtered.map(s => `<option value="${s.id}">${s.name} (${s.reg_number})</option>`).join(''); if (select.value !== 'Select Student') loadSubjects(select.value); } async function loadSubjects(sid) { if (!sid || sid === 'Select Student') return; let term = document.getElementById('teacherTerm').value, year = document.getElementById('teacherYear').value; let existing = schoolData.results.filter(r => r.student_id == sid && r.term === term && r.year == year); document.getElementById('existingSubjectsList').innerHTML = existing.map(r => `<div class="flex justify-between items-center bg-white p-2 rounded-xl shadow-sm mt-2"><span class="font-medium">${escapeHtml(r.subject)}</span><span>CA1:${r.ca1} CA2:${r.ca2} Exam:${r.exam} Total:${r.total}</span><button class="delete-subject-btn text-red-500" data-id="${r.id}">✕</button></div>`).join(''); document.querySelectorAll('.delete-subject-btn').forEach(btn => btn.addEventListener('click', async () => { await supabaseClient.from('results').delete().eq('id', btn.dataset.id); await refreshData(); loadSubjects(sid); showToast("Subject deleted"); })); } document.getElementById('addSubjectGradeBtn').onclick = async () => { let sid = document.getElementById('teacherStudentSelect').value; if (sid === 'Select Student') return showToast("Select student", true); let subject = document.getElementById('newSubject').value.trim(); if (!subject) return showToast("Subject required", true); let ca1 = parseInt(document.getElementById('ca1Val').value) || 0, ca2 = parseInt(document.getElementById('ca2Val').value) || 0, exam = parseInt(document.getElementById('examVal').value) || 0; if (ca1 < 0 || ca1 > 20 || ca2 < 0 || ca2 > 20 || exam < 0 || exam > 60) return showToast("Invalid marks (CA:0-20, Exam:0-60)", true); let term = document.getElementById('teacherTerm').value, year = document.getElementById('teacherYear').value; await supabaseClient.from('results').insert([{ student_id: sid, term, year, subject, ca1, ca2, exam, total: ca1 + ca2 + exam }]); await refreshData(); showToast(`Grade for ${subject} added`); loadSubjects(sid); document.getElementById('newSubject').value = ''; document.getElementById('ca1Val').value = ''; document.getElementById('ca2Val').value = ''; document.getElementById('examVal').value = ''; }; document.getElementById('teacherStudentSelect').addEventListener('change', (e) => loadSubjects(e.target.value)); document.getElementById('teacherTerm').addEventListener('change', () => loadSubjects(document.getElementById('teacherStudentSelect').value)); document.getElementById('teacherYear').addEventListener('change', () => loadSubjects(document.getElementById('teacherStudentSelect').value)); document.getElementById('teacherSectionFilter').addEventListener('change', filterStudents); document.getElementById('teacherClassFilter').addEventListener('change', filterStudents); document.getElementById('teacherSearch').addEventListener('input', filterStudents); filterStudents(); }
 async function attendanceView() { let teacherClass = currentUser.assigned_class || CLASSES[0]; let students = schoolData.students.filter(s => s.academic_class === teacherClass); let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold">Attendance - ${teacherClass}</h2><div id="attList"></div><button id="submitAttendance" class="apply-btn mt-3 w-full py-2">Submit</button></div>`; document.getElementById('mainContent').innerHTML = html; document.getElementById('attList').innerHTML = `<table class="w-full border"><thead><tr><th>Name</th><th>Present</th></tr></thead><tbody>${students.map(s => `<tr><td class="p-2">${s.name}</td><td class="p-2"><input type="checkbox" class="attCheck" data-id="${s.id}"></td></tr>`).join('')}</tbody></table>`; document.getElementById('submitAttendance').onclick = () => showToast("Attendance recorded (demo)"); }
+async function teacherResultEntry() {
+    let students = schoolData.students, currentYear = new Date().getFullYear();
+    let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📝 Enter Subject Grades</h2>
+    <div class="filter-row">
+        <select id="teacherTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select>
+        <input id="teacherYear" type="number" value="${currentYear}" class="w-28">
+        <select id="teacherSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s => `<option>${s}</option>`).join('')}</select>
+        <select id="teacherClassFilter"><option value="all">All Classes</option>${CLASSES.map(c => `<option>${c}</option>`).join('')}</select>
+        <input id="teacherSearch" placeholder="🔍 Search student" class="flex-1">
+    </div>
+    <select id="teacherStudentSelect" class="border p-3 w-full mb-4 rounded-xl"><option value="">Select Student</option></select>
+    <div class="bg-gray-50 p-4 rounded-2xl">
+        <div class="flex flex-wrap gap-2">
+            <input id="newSubject" placeholder="Subject" class="flex-1 border rounded p-2">
+            <input id="ca1Val" placeholder="CA1 (0-20)" type="number" class="w-24 border rounded p-2">
+            <input id="ca2Val" placeholder="CA2 (0-20)" type="number" class="w-24 border rounded p-2">
+            <input id="examVal" placeholder="Exam (0-60)" type="number" class="w-24 border rounded p-2">
+            <button id="addSubjectGradeBtn" class="apply-btn px-4 py-2 rounded">+ Add</button>
+        </div>
+        <div id="existingSubjectsList" class="mt-4"></div>
+    </div>
+    </div>`;
+    document.getElementById('mainContent').innerHTML = html;
 
+    function filterStudents() {
+        let section = document.getElementById('teacherSectionFilter').value;
+        let classVal = document.getElementById('teacherClassFilter').value;
+        let search = document.getElementById('teacherSearch').value.toLowerCase();
+        let filtered = students.filter(s => (section === 'all' || s.section === section) && (classVal === 'all' || s.academic_class === classVal) && (s.name.toLowerCase().includes(search) || (s.reg_number || '').toLowerCase().includes(search)));
+        let select = document.getElementById('teacherStudentSelect');
+        select.innerHTML = '<option value="">Select Student</option>' + filtered.map(s => `<option value="${s.id}">${s.name} (${s.reg_number})</option>`).join('');
+        if (select.value) loadSubjects(select.value);
+    }
+
+    async function loadSubjects(sid) {
+        if (!sid) return;
+        let term = document.getElementById('teacherTerm').value;
+        let year = document.getElementById('teacherYear').value;
+        let existing = schoolData.results.filter(r => r.student_id == sid && r.term === term && r.year == year);
+        let container = document.getElementById('existingSubjectsList');
+        if (existing.length === 0) {
+            container.innerHTML = '<p class="text-gray-500">No subjects added yet.</p>';
+        } else {
+            container.innerHTML = existing.map(r => `<div class="flex justify-between items-center bg-white p-2 rounded-xl shadow-sm mt-2"><span class="font-medium">${escapeHtml(r.subject)}</span><span>CA1:${r.ca1} CA2:${r.ca2} Exam:${r.exam} Total:${r.total}</span><button class="delete-subject-btn text-red-500" data-id="${r.id}">✕</button></div>`).join('');
+        }
+        document.querySelectorAll('.delete-subject-btn').forEach(btn => btn.addEventListener('click', async () => {
+            await supabaseClient.from('results').delete().eq('id', btn.dataset.id);
+            await refreshData();
+            loadSubjects(sid);
+            showToast("Subject deleted");
+        }));
+    }
+
+    document.getElementById('addSubjectGradeBtn').onclick = async () => {
+        let sid = document.getElementById('teacherStudentSelect').value;
+        if (!sid) { showToast("Select a student first", true); return; }
+        let subject = document.getElementById('newSubject').value.trim();
+        if (!subject) { showToast("Subject name required", true); return; }
+        let ca1 = parseInt(document.getElementById('ca1Val').value) || 0;
+        let ca2 = parseInt(document.getElementById('ca2Val').value) || 0;
+        let exam = parseInt(document.getElementById('examVal').value) || 0;
+        if (ca1 < 0 || ca1 > 20 || ca2 < 0 || ca2 > 20 || exam < 0 || exam > 60) {
+            showToast("Invalid marks: CA (0-20), Exam (0-60)", true);
+            return;
+        }
+        let term = document.getElementById('teacherTerm').value;
+        let year = parseInt(document.getElementById('teacherYear').value);
+        let total = ca1 + ca2 + exam;
+        
+        showLoading(true);
+        try {
+            // Check for duplicate subject
+            let existing = schoolData.results.find(r => r.student_id == sid && r.term === term && r.year === year && r.subject === subject);
+            if (existing) {
+                showToast("Subject already entered for this term. Delete existing to update.", true);
+                return;
+            }
+            const { error } = await supabaseClient.from('results').insert([{
+                student_id: sid,
+                term: term,
+                year: year,
+                subject: subject,
+                ca1: ca1,
+                ca2: ca2,
+                exam: exam,
+                total: total
+            }]);
+            if (error) throw error;
+            await refreshData();
+            showToast(`Grade for ${subject} added successfully`);
+            // Clear inputs
+            document.getElementById('newSubject').value = '';
+            document.getElementById('ca1Val').value = '';
+            document.getElementById('ca2Val').value = '';
+            document.getElementById('examVal').value = '';
+            loadSubjects(sid);
+        } catch (err) {
+            console.error("Error adding grade:", err);
+            showToast(err.message, true);
+        } finally {
+            showLoading(false);
+        }
+    };
+
+    document.getElementById('teacherStudentSelect').addEventListener('change', (e) => loadSubjects(e.target.value));
+    document.getElementById('teacherTerm').addEventListener('change', () => {
+        let sid = document.getElementById('teacherStudentSelect').value;
+        if (sid) loadSubjects(sid);
+    });
+    document.getElementById('teacherYear').addEventListener('change', () => {
+        let sid = document.getElementById('teacherStudentSelect').value;
+        if (sid) loadSubjects(sid);
+    });
+    document.getElementById('teacherSectionFilter').addEventListener('change', filterStudents);
+    document.getElementById('teacherClassFilter').addEventListener('change', filterStudents);
+    document.getElementById('teacherSearch').addEventListener('input', filterStudents);
+    filterStudents();
+}
 // ========== HEADTEACHER FUNCTIONS ==========
 async function sectionStudentsView() { let students = schoolData.students; let html = `<div class="card p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">📚 Students by Section</h2><button id="addStudentFromSectionBtn" class="apply-btn px-4 py-2 rounded-full text-sm">+ Enroll New</button></div><div class="filter-row"><select id="sectionStudentsSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s => `<option>${s}</option>`).join('')}</select><select id="sectionStudentsClassFilter"><option value="all">All Classes</option>${CLASSES.map(c => `<option>${c}</option>`).join('')}</select><input id="sectionStudentsSearch" placeholder="🔍 Search name/reg" class="flex-1 border rounded-xl p-2"></div><div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th>Reg No</th><th>Name</th><th>Parent</th><th>Section</th><th>Class</th><th>Term Fee (₦)</th><th>Actions</th></table></thead><tbody id="sectionStudentsTableBody"></tbody>}</div></div>`; document.getElementById('mainContent').innerHTML = html; const tbody = document.getElementById('sectionStudentsTableBody'); const sectionFilter = document.getElementById('sectionStudentsSectionFilter'); const classFilter = document.getElementById('sectionStudentsClassFilter'); const searchInput = document.getElementById('sectionStudentsSearch'); function render() { let section = sectionFilter.value, classVal = classFilter.value, search = searchInput.value.toLowerCase(); let filtered = students.filter(s => (section === 'all' || s.section === section) && (classVal === 'all' || s.academic_class === classVal) && (s.name.toLowerCase().includes(search) || (s.reg_number || '').toLowerCase().includes(search))); tbody.innerHTML = filtered.map(s => `<tr><td class="editable-student-section" data-field="reg_number" data-id="${s.id}">${escapeHtml(s.reg_number)}</td><td class="editable-student-section" data-field="name" data-id="${s.id}">${escapeHtml(s.name)}</td><td class="editable-student-section" data-field="parent_name" data-id="${s.id}">${escapeHtml(s.parent_name || '')}</td><td><select class="section-update" data-id="${s.id}">${SECTIONS.map(sec => `<option value="${sec}" ${s.section === sec ? 'selected' : ''}>${sec}</option>`).join('')}</select></td><td><select class="class-update" data-id="${s.id}">${CLASSES.map(cls => `<option value="${cls}" ${s.academic_class === cls ? 'selected' : ''}>${cls}</option>`).join('')}</select></td><td class="editable-student-section" data-field="term_fee" data-id="${s.id}">${s.term_fee || 30000}</td><td><button class="delete-student-section text-red-500" data-id="${s.id}">Delete</button></td></tr>`).join(''); attachSectionEvents(); } function attachSectionEvents() { document.querySelectorAll('.editable-student-section').forEach(cell => { cell.setAttribute('contenteditable', 'true'); cell.addEventListener('blur', async () => { let field = cell.dataset.field, id = cell.dataset.id, val = cell.innerText.trim(); if (field === 'term_fee') val = parseFloat(val) || 0; await supabaseClient.from('students').update({ [field]: val }).eq('id', id); await refreshData(); sectionStudentsView(); showToast(`${field} updated`); }); }); document.querySelectorAll('.section-update').forEach(select => { select.addEventListener('change', async (e) => { let id = select.dataset.id; let newSection = e.target.value; await supabaseClient.from('students').update({ section: newSection }).eq('id', id); await refreshData(); sectionStudentsView(); showToast(`Section updated`); }); }); document.querySelectorAll('.class-update').forEach(select => { select.addEventListener('change', async (e) => { let id = select.dataset.id; let newClass = e.target.value; await supabaseClient.from('students').update({ academic_class: newClass }).eq('id', id); await refreshData(); sectionStudentsView(); showToast(`Class updated`); }); }); document.querySelectorAll('.delete-student-section').forEach(btn => btn.addEventListener('click', async () => { if (confirm("Delete this student permanently?")) { await supabaseClient.from('students').delete().eq('id', btn.dataset.id); await refreshData(); sectionStudentsView(); showToast("Student deleted"); } })); } sectionFilter.addEventListener('change', render); classFilter.addEventListener('change', render); searchInput.addEventListener('input', render); document.getElementById('addStudentFromSectionBtn').addEventListener('click', () => enrollViewModern()); render(); }
 async function sectionFeesView() { let students = schoolData.students; let currentYear = new Date().getFullYear(); let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">💰 Section Fee Report</h2><div class="filter-row"><label>Term:</label><select id="sectionFeesTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select><label>Year:</label><input type="number" id="sectionFeesYear" value="${currentYear}" class="border rounded-xl p-2 w-28"><button id="refreshSectionFees" class="apply-btn px-4 py-2 rounded-full">Refresh</button></div><div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th>Section</th><th># Students</th><th>Total Term Fee (₦)</th><th>Total Paid (₦)</th><th>Total Due (₦)</th><th>Collection Rate (%)</th><th>Action</th></tr></thead><tbody id="sectionFeesTableBody"></tbody>}</div><div class="mt-6" id="sectionFeesDetailArea"></div></div>`; document.getElementById('mainContent').innerHTML = html; const termSelect = document.getElementById('sectionFeesTerm'); const yearInput = document.getElementById('sectionFeesYear'); const tbody = document.getElementById('sectionFeesTableBody'); const detailArea = document.getElementById('sectionFeesDetailArea'); async function loadReport() { const term = termSelect.value, year = parseInt(yearInput.value); let rows = []; for (const section of SECTIONS) { const sectionStudents = students.filter(s => s.section === section); const studentIds = sectionStudents.map(s => s.id); const totalFeeExpected = sectionStudents.reduce((sum, s) => sum + (s.term_fee || 30000), 0); let totalPaid = 0; for (const sid of studentIds) { const payments = schoolData.payments.filter(p => p.student_id === sid && p.term === term && p.year === year); totalPaid += payments.reduce((sum, p) => sum + (p.amount || 0), 0); } const totalDue = Math.max(0, totalFeeExpected - totalPaid); const collectionRate = totalFeeExpected === 0 ? 0 : (totalPaid / totalFeeExpected) * 100; rows.push({ section, studentCount: sectionStudents.length, totalFeeExpected, totalPaid, totalDue, collectionRate: collectionRate.toFixed(1) }); } tbody.innerHTML = rows.map(row => `<tr><td class="font-medium">${row.section}</td><td class="text-center">${row.studentCount}</td><td class="text-right">₦${row.totalFeeExpected.toLocaleString()}</td><td class="text-right">₦${row.totalPaid.toLocaleString()}</td><td class="text-right">₦${row.totalDue.toLocaleString()}</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-emerald-600 h-2.5 rounded-full" style="width: ${row.collectionRate}%"></div></div>${row.collectionRate}%</td><td><button class="viewSectionDetailsBtn bg-blue-600 text-white px-3 py-1 rounded-full text-sm" data-section="${row.section}" data-term="${term}" data-year="${year}">View Students</button></td></tr>`).join(''); document.querySelectorAll('.viewSectionDetailsBtn').forEach(btn => { btn.addEventListener('click', async () => { const section = btn.dataset.section, term = btn.dataset.term, year = btn.dataset.year; const sectionStudents = students.filter(s => s.section === section); if (sectionStudents.length === 0) { detailArea.innerHTML = `<div class="bg-yellow-50 p-4 rounded-xl">No students in ${section}</div>`; return; } let detailHtml = `<h3 class="font-bold text-lg mt-4 mb-2">${section} – Student Fee Details (${term} ${year})</h3><div class="overflow-x-auto"><table class="min-w-full border"><thead class="bg-gray-50"><tr><th>Student</th><th>Reg No</th><th>Term Fee (₦)</th><th>Paid (₦)</th><th>Due (₦)</th><th>Status</th></tr></thead><tbody>`; for (const stu of sectionStudents) { const termFee = stu.term_fee || 30000; const paid = schoolData.payments.filter(p => p.student_id === stu.id && p.term === term && p.year === year).reduce((s, p) => s + (p.amount || 0), 0); const due = Math.max(0, termFee - paid); const status = due <= 0 ? 'Paid' : (paid > 0 ? 'Partial' : 'Unpaid'); detailHtml += `<tr><td>${escapeHtml(stu.name)}</td><td>${stu.reg_number}</td><td class="text-right">₦${termFee.toLocaleString()}</td><td class="text-right">₦${paid.toLocaleString()}</td><td class="text-right">₦${due.toLocaleString()}</td><td><span class="status-${status.toLowerCase()} px-2 py-0.5 rounded-full text-xs">${status}</span></td></tr>`; } detailHtml += `</tbody><tr></div>`; detailArea.innerHTML = detailHtml; }); }); } termSelect.addEventListener('change', loadReport); yearInput.addEventListener('change', loadReport); document.getElementById('refreshSectionFees').addEventListener('click', async () => { await refreshData(); students = schoolData.students; loadReport(); showToast("Section fee report refreshed"); }); loadReport(); }

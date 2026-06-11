@@ -849,15 +849,212 @@ async function applicationsViewEnhanced() {
 function printAdmissionLetter(application) {
     const official = application.official_data || {};
     const formData = application.form_data || {};
-    const fullName = application.full_name || `${formData.first_name || ''} ${formData.surname || ''}`.trim();
-    const admissionNumber = official.admission_number || 'Pending';
-    const admissionDate = official.admission_date || new Date().toLocaleDateString();
-    const admittedClass = official.admitted_class || formData.desired_class || 'Not assigned';
-    const letterHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Admission Letter</title><style>body{font-family:'Times New Roman',serif;padding:0.5in;}</style></head><body><div style="max-width:800px;margin:auto;border:1px solid #ccc;padding:20px"><h1 style="text-align:center">Al‑Istiqaamah Flying Wings Academy</h1><p><strong>Admission Number:</strong> ${admissionNumber}</p><p><strong>Student Name:</strong> ${fullName}</p><p><strong>Class:</strong> ${admittedClass}</p><p><strong>Date of Admission:</strong> ${admissionDate}</p><p>This is to certify that the above named student has been offered provisional admission.</p><div style="margin-top:40px"><div style="float:left">_________________<br>Headmaster</div><div style="float:right">_________________<br>Registrar</div></div></div></body></html>`;
+    
+    // Extract student details
+    const fullName = application.full_name || `${formData.first_name || ''} ${formData.surname || ''}`.trim() || '........................';
+    const gender = formData.gender || '........................';
+    const state = formData.state_origin || formData.lga || '........................';
+    const category = official.admitted_class || formData.desired_class || '........................';
+    const admissionNumber = official.admission_number || '........................';
+    const admissionDate = official.admission_date || new Date().toLocaleDateString('en-GB');
+    
+    // Create HTML structure matching the sample image
+    const letterHtml = `<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Admission Letter - ${fullName}</title>
+        <style>
+            @page {
+                size: A4;
+                margin: 1.5cm;
+            }
+            body {
+                font-family: 'Times New Roman', serif;
+                margin: 0;
+                padding: 0;
+                background: white;
+                direction: ltr;
+            }
+            .letter {
+                max-width: 800px;
+                margin: 0 auto;
+                border: 1px solid #ccc;
+                padding: 30px 25px;
+                background: white;
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #000;
+                padding-bottom: 10px;
+            }
+            .header h1 {
+                font-size: 22px;
+                margin: 0;
+                font-weight: bold;
+            }
+            .header h2 {
+                font-size: 18px;
+                margin: 5px 0;
+                font-weight: normal;
+            }
+            .header p {
+                margin: 3px 0;
+                font-size: 11px;
+            }
+            .motto {
+                font-style: italic;
+                font-size: 12px;
+                margin-top: 5px;
+            }
+            .contact {
+                font-size: 10px;
+                margin-top: 5px;
+            }
+            .ref {
+                text-align: right;
+                margin: 15px 0 10px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            .title {
+                text-align: center;
+                font-size: 16px;
+                font-weight: bold;
+                margin: 20px 0 10px;
+                text-decoration: underline;
+            }
+            .student-details {
+                width: 70%;
+                margin: 20px 0;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+            .student-details td {
+                padding: 6px 8px;
+                border: 1px solid #000;
+            }
+            .student-details td:first-child {
+                width: 35%;
+                font-weight: bold;
+            }
+            .passport-placeholder {
+                float: right;
+                width: 110px;
+                height: 130px;
+                border: 1px solid #000;
+                text-align: center;
+                line-height: 130px;
+                margin-left: 20px;
+                margin-bottom: 20px;
+                font-size: 12px;
+                background: #f9f9f9;
+            }
+            .content {
+                clear: both;
+                margin-top: 30px;
+                font-size: 14px;
+                line-height: 1.5;
+                text-align: justify;
+            }
+            .signatures {
+                margin-top: 50px;
+                display: flex;
+                justify-content: space-between;
+                text-align: center;
+                font-size: 12px;
+            }
+            .signature-line {
+                width: 30%;
+                border-top: 1px solid #000;
+                padding-top: 8px;
+                margin-top: 30px;
+            }
+            .signature-line div {
+                margin-top: 5px;
+            }
+            .footer {
+                margin-top: 30px;
+                font-size: 10px;
+                text-align: center;
+                border-top: 1px solid #ddd;
+                padding-top: 10px;
+            }
+            @media print {
+                body { margin: 0; padding: 0; }
+                .letter { border: none; padding: 0; }
+                .no-print { display: none; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="letter">
+            <div class="header">
+                <h1>أكاديمية الاستقامة أجنحة التحليق</h1>
+                <h2>AL-ISTIQAAMAH FLYING WINGS ACADEMY</h2>
+                <p>Address: No. 10 Federal Government Layout, Samaru, Zaria, Nigeria.</p>
+                <p class="motto">Motto: <em>"The best of mankind is the most beneficial to humanity"</em></p>
+                <p class="contact">E-mail: alistiqaamah.fwac@gmail.com / alistiqaamah.gi@outlook.com<br>
+                Phone NO.: +2348084816590, +2348067990749</p>
+            </div>
+
+            <div class="ref">
+                <strong>AFWAN/AC/01/ ADM NO. ${admissionNumber}</strong>
+            </div>
+
+            <div class="title">
+                استمارة القبول الموقت<br>
+                PROVISIONAL ADMISSION LETTER
+            </div>
+
+            <div style="overflow: auto;">
+                <div class="passport-placeholder">
+                    Affix recent<br>passport
+                </div>
+                <table class="student-details">
+                    <tr><td>Name:</td><td>${escapeHtml(fullName)}</td></tr>
+                    <tr><td>Gender:</td><td>${escapeHtml(gender)}</td></tr>
+                    <tr><td>State:</td><td>${escapeHtml(state)}</td></tr>
+                    <tr><td>Category:</td><td>${escapeHtml(category)}</td></tr>
+                </table>
+            </div>
+
+            <div class="content">
+                I write to inform you that you have been offered <strong>provisional admission</strong> as indicated above, subject to confirmation of all registration requirements. Lost admission letters will be reprinted at the cost of <strong>N500.00</strong>. Failure to register in two week's time may lead to withdrawal of the admission.
+            </div>
+
+            <div class="signatures">
+                <div class="signature-line">
+                    توقيع عميد المرسلة<br>
+                    Head Master's Signature<br>
+                    <span style="font-size:10px">(Head teacher's signature)</span>
+                </div>
+                <div class="signature-line">
+                    خاتم المرسلة<br>
+                    School Stamp
+                </div>
+                <div class="signature-line">
+                    توقيع مسجل القسم<br>
+                    Section Registrar's Signature
+                </div>
+            </div>
+
+            <div class="footer">
+                Date of Issue: ${new Date().toLocaleDateString()} | Admission Date: ${admissionDate}
+            </div>
+        </div>
+        <div class="no-print" style="text-align:center; margin-top:20px;">
+            <button onclick="window.print();" style="padding:8px 16px; margin:5px;">🖨️ Print Letter</button>
+            <button onclick="window.close();" style="padding:8px 16px; margin:5px;">❌ Close</button>
+        </div>
+    </body>
+    </html>`;
+
     const win = window.open();
     win.document.write(letterHtml);
     win.document.close();
-}
+                    }
 
 // ========== ACCEPT DETAILS FORM ==========
 document.getElementById('acceptDetailsForm')?.addEventListener('submit', async (e) => {

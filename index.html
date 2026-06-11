@@ -110,34 +110,8 @@
 <div id="statusCheckModal" class="modal"><div class="modal-content relative" style="max-width: 500px;"><span class="close-modal-x" onclick="closeModal('statusCheckModal')">&times;</span><h3 class="text-xl font-bold mb-3">Check Application Status</h3><input type="email" id="statusEmail" placeholder="Enter your email address" class="border p-3 w-full rounded-xl mb-4"><button id="checkStatusSubmit" class="apply-btn w-full py-2 rounded-xl">Check Status</button><div id="statusResult" class="mt-4 text-center"></div></div></div>
 
 <div id="amountModal" class="modal"><div class="modal-content relative"><span class="close-modal-x" onclick="closeModal('amountModal')">&times;</span><h3 class="text-xl font-bold mb-3">Enter Payment Amount</h3><input type="number" id="paymentAmount" class="border p-3 w-full rounded-xl mb-4" placeholder="Amount in ₦"><button id="confirmAmountBtn" class="apply-btn w-full py-2 rounded-xl">Confirm Payment</button></div></div>
-
-<div id="addStaffModal" class="modal"><div class="modal-content relative"><span class="close-modal-x" onclick="closeModal('addStaffModal')">&times;</span><h2 class="text-xl font-bold mb-3">➕ Add New Staff</h2><form id="addStaffForm"><input id="staffName" placeholder="Full Name" required class="border p-3 w-full mb-2 rounded-xl"><input id="staffEmail" placeholder="Email" class="border p-3 w-full mb-2 rounded-xl"><select id="staffRole" class="border p-3 w-full mb-2 rounded-xl"><option value="teacher">Teacher</option><option value="headteacher">Headteacher</option><option value="daf">DAF</option><option value="do">DO</option><option value="der">DER</option><option value="dprpa">DPRPA</option><option value="dg_ceo">DG/CEO</option></select><input id="staffSection" placeholder="Section" class="border p-3 w-full mb-2 rounded-xl"><input id="staffAssignedClass" placeholder="Assigned Class" class="border p-3 w-full mb-2 rounded-xl"><input id="staffSalary" type="number" placeholder="Salary (₦)" class="border p-3 w-full mb-2 rounded-xl"><input id="newStaffUsername" placeholder="Staff ID (username)" required class="border p-3 w-full mb-2 rounded-xl"><input id="newStaffPassword" placeholder="Password" type="password" value="pass123" class="border p-3 w-full mb-3 rounded-xl"><button type="submit" class="apply-btn w-full py-3 rounded-xl">Create Staff</button></form></div></div>
-
-<div id="appraisalModal" class="modal"><div class="modal-content relative" style="max-width: 600px;"><span class="close-modal-x" onclick="closeModal('appraisalModal')">&times;</span><h3 class="text-xl font-bold mb-3">Staff Appraisal</h3><form id="appraisalForm"><select id="appraisalStaffSelect" class="border p-2 w-full mb-2 rounded" required><option>Select Staff</option></select><label class="block font-medium mt-2">Overall Rating (1-5):</label><input type="number" id="appraisalRating" min="1" max="5" class="border p-2 w-full rounded mb-2" required><label class="block font-medium">Comments / Feedback:</label><textarea id="appraisalComment" rows="3" class="border p-2 w-full rounded mb-3"></textarea><button type="submit" class="apply-btn w-full py-2 rounded">Submit Appraisal</button></form></div></div>
-
-<!-- Accept Details Modal with Signature Pad -->
-<div id="acceptDetailsModal" class="modal"><div class="modal-content relative" style="max-width: 700px;"><span class="close-modal-x" onclick="closeModal('acceptDetailsModal')">&times;</span><h3 class="text-xl font-bold mb-3">Accept Application – Official Use Only</h3><form id="acceptDetailsForm"><input type="hidden" id="acceptAppId"><div class="grid grid-cols-2 gap-3 mb-2"><div><label>Entrance Test Score:</label><input id="acceptEntranceScore" class="border p-2 w-full rounded"></div><div><label>Class Admitted Into:</label><input id="acceptAdmittedClass" class="border p-2 w-full rounded"></div><div><label>Admission Number:</label><input id="acceptAdmissionNumber" class="border p-2 w-full rounded"></div><div><label>Date of Admission:</label><input type="date" id="acceptAdmissionDate" class="border p-2 w-full rounded"></div></div><div class="mb-2"><label>Interview Remarks:</label><textarea id="acceptInterviewRemarks" rows="2" class="border p-2 w-full rounded"></textarea></div><div class="border rounded p-3 mb-3 bg-gray-50"><label class="block font-bold mb-2">Authorized Signature (Draw below):</label><canvas id="signatureCanvas" width="400" height="150" style="border:1px solid #ccc; background:white; width:100%; height:150px;"></canvas><div class="flex gap-2 mt-2"><button type="button" id="clearSignatureBtn" class="bg-gray-500 text-white px-3 py-1 rounded text-sm">Clear</button><button type="button" id="undoSignatureBtn" class="bg-gray-500 text-white px-3 py-1 rounded text-sm">Undo</button></div><input type="hidden" id="acceptSignatureData" value=""></div><div class="mb-2"><label>Authorized Name (Printed):</label><input id="acceptSignature" class="border p-2 w-full rounded"></div><button type="submit" class="apply-btn w-full py-2 rounded">Accept & Save</button></form></div></div>
-
-<div id="addStaffToPayrollModal" class="modal"><div class="modal-content relative"><span class="close-modal-x" onclick="closeModal('addStaffToPayrollModal')">&times;</span><h3 class="text-xl font-bold mb-3">Add Staff to Payroll</h3><form id="addToPayrollForm"><label>Select Staff:</label><select id="payrollStaffSelect" class="border p-2 w-full rounded mb-3" required><option value="">-- Select Staff --</option></select><label>Basic Salary (₦):</label><input type="number" id="payrollStaffSalary" class="border p-2 w-full rounded mb-3"><label>Allowances (₦):</label><input type="number" id="payrollStaffAllowances" class="border p-2 w-full rounded mb-3" value="0"><label>Deductions (₦):</label><input type="number" id="payrollStaffDeductions" class="border p-2 w-full rounded mb-3" value="0"><label>Account Details:</label><input id="payrollStaffAccount" class="border p-2 w-full rounded mb-3"><button type="submit" class="apply-btn w-full py-2 rounded">Add to Payroll</button></form></div></div>
-
-<div id="emailFeedbackModal" class="modal"><div class="modal-content relative"><span class="close-modal-x" onclick="closeModal('emailFeedbackModal')">&times;</span><h3 class="text-xl font-bold">Send Acceptance</h3><textarea id="feedbackMessage" rows="3" class="border w-full p-3 rounded-xl my-2"></textarea><button id="confirmAcceptBtn" class="apply-btn w-full py-2 rounded-xl">Confirm & Send</button></div></div>
-
-<!-- DASHBOARD CONTAINER -->
-<div id="appContainer" class="hidden flex flex-col h-screen fixed inset-0 z-40 bg-gray-50">
-    <div class="bg-white/80 backdrop-blur-md shadow-sm px-6 py-3 flex justify-between items-center border-b border-gray-100">
-        <div class="flex items-center gap-3"><button id="mobileMenuToggle" class="text-2xl md:hidden text-emerald-800"><i class="fas fa-bars"></i></button><span class="font-bold text-emerald-800 text-xl">🏫 Flying Wings Portal</span></div>
-        <div class="flex items-center gap-4"><span class="text-gray-700"><i class="fas fa-user-circle mr-1"></i><span id="topUserName"></span> (<span id="topUserRole"></span>)</span><button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm transition">Logout</button></div>
-    </div>
-    <div class="flex flex-1 overflow-hidden relative">
-        <div id="sidebarOverlay" class="sidebar-overlay"></div>
-        <aside id="dynamicSidebar" class="sidebar text-white flex flex-col shadow-xl">
-            <div class="p-5 border-b border-white/10 flex justify-between items-center"><span class="font-semibold text-lg"><i class="fas fa-compass mr-2"></i>Menu</span><button id="closeMobileSidebar" class="md:hidden text-white text-2xl">&times;</button></div>
-            <nav id="dynamicNav" class="flex-1 px-3 py-5 space-y-1"></nav>
-        </aside>
-        <main id="mainContent" class="flex-1 overflow-auto p-6"></main>
-    </div>
-    </div>
-    <script>
+</div>
+<script>
 // ========== SUPABASE CONFIG ==========
 const SUPABASE_URL = 'https://kabqdeulwpfftbtwwouw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_OIE7KFQ3quev7pQgKsvFXg_ralf9SMM';
@@ -252,8 +226,8 @@ async function parentLogin(regNo, pwd) {
     await refreshData();
     document.getElementById('landingPage').style.display = 'none';
     document.getElementById('appContainer').classList.remove('hidden');
-    showToast(`Logged in as parent`);
-    parentChildReportsView();
+    showToast(`Logged in as parent of ${student.name}`);
+    showDashboard(); // showDashboard will handle parent menu
 }
 async function adminSignup(code, email, pwd, name, role) {
     if (code !== 'ALIFLY2026') throw new Error('Invalid code');
@@ -272,7 +246,7 @@ function logoutUser() {
     showToast("Logged out");
 }
 
-// ========== DASHBOARD & MENU (All Roles, including Parent) ==========
+// ========== DASHBOARD & MENU (All Roles, with Parent Menu Fix) ==========
 const roleMenus = {
     dg_ceo: ['Dashboard','Students','Enroll','Results','Fees','Unified Staff','Payroll','Apps','Download Records','Announce','Slides','View Appraisals','Performance Appraisal','Director Roles','Appraise Directors'],
     daf: ['Dashboard','Students','Enroll','Results','Fees','Unified Staff','Payroll','Apps','Download Records','Announce','Slides','Staff Appraisal'],
@@ -282,7 +256,7 @@ const roleMenus = {
     do: ['Dashboard','Enroll','Fees','Students','Unified Staff','Staff performance analysis','Staff Appraisal','Announce','Slides'],
     der: ['Dashboard','Enroll','Students','Unified Staff','Academic performance','Sections analysis','Staff Appraisal','Announce','Slides'],
     dprpa: ['Dashboard','Enroll','Students','Academic performance','Section analysis','Download Records','Staff Appraisal','Announce','Slides'],
-    parent: ['Result', 'Fee payment', 'Payment history']
+    parent: ['Result', 'Fee payment', 'Payment history']   // Three items
 };
 
 async function dashboardView() {
@@ -299,12 +273,11 @@ function showDashboard() {
     let navHtml = '';
 
     if (currentUser.role === 'parent') {
-        // Parent menu – explicit items to ensure all three appear
-        const parentItems = [
-            { label: 'Result', icon: 'fa-chart-line' },
-            { label: 'Fee payment', icon: 'fa-money-bill' },
-            { label: 'Payment history', icon: 'fa-history' }
-        ];
+        // Build parent menu from roleMenus (ensures all three items)
+        const parentItems = menu.map(label => ({
+            label: label,
+            icon: label === 'Result' ? 'fa-chart-line' : (label === 'Fee payment' ? 'fa-money-bill' : 'fa-history')
+        }));
         navHtml = parentItems.map(item => `<div class="nav-link flex items-center gap-3 px-4 py-2 rounded-xl text-slate-200 hover:bg-white/10 transition" data-view="${item.label}"><i class="fas ${item.icon} w-6"></i><span class="nav-text">${item.label}</span></div>`).join('');
     } else {
         navHtml = menu.map(label => `<div class="nav-link flex items-center gap-3 px-4 py-2 rounded-xl text-slate-200 hover:bg-white/10 transition" data-view="${label}"><i class="fas ${label==='Dashboard'?'fa-tachometer-alt':label==='Students'?'fa-users':label==='Fees'?'fa-coins':label==='Payroll'?'fa-money-bill':label==='Result'?'fa-chart-line':'fa-circle'} w-6"></i><span class="nav-text">${label}</span></div>`).join('');
@@ -342,15 +315,19 @@ function showDashboard() {
         'Sections analysis': sectionAnalysisView
     };
 
+    // Attach click handlers to all .nav-link elements
     document.querySelectorAll('.nav-link').forEach(el => {
-        el.addEventListener('click', () => {
+        el.removeEventListener('click', el._listener);
+        const handler = () => {
             let fn = viewMap[el.dataset.view];
             if (fn) fn();
             else if (currentUser.role === 'parent') parentResultViewSimple();
             else dashboardView();
             document.getElementById('dynamicSidebar').classList.remove('open');
             document.getElementById('sidebarOverlay').classList.remove('active');
-        });
+        };
+        el._listener = handler;
+        el.addEventListener('click', handler);
     });
 
     // Default view based on role
@@ -359,7 +336,48 @@ function showDashboard() {
     } else {
         dashboardView();
     }
-        }
+}
+
+// ========== APPRAISAL FUNCTIONS WITH ROLE CHECKS (stubs – replace with actual implementations) ==========
+async function staffAppraisalView() {
+    if (!['daf','do','der','dprpa'].includes(currentUser.role)) {
+        showToast("Access denied. Only directors can appraise staff.", true);
+        return;
+    }
+    // Your existing implementation here
+}
+
+async function viewAppraisalsView() {
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied", true);
+        return;
+    }
+    // Your existing implementation here
+}
+
+async function performanceAppraisalView() {
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied", true);
+        return;
+    }
+    // Your existing implementation here
+}
+
+async function directorRolesView() {
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied. Only DG/CEO and Management Committee can view Director KPIs.", true);
+        return;
+    }
+    // Your existing implementation here
+}
+
+async function directorAppraisalView() {
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied. Only DG/CEO and Management Committee can appraise directors.", true);
+        return;
+    }
+    // Your existing implementation here
+}
 // ========== ENROLLMENT UI ==========
 async function enrollViewModern() {
     const html = `<div class="max-w-2xl mx-auto"><div class="enroll-card p-6 md:p-8"><div class="flex items-center gap-3 mb-6 border-b pb-4"><i class="fas fa-user-plus text-3xl text-emerald-600"></i><h2 class="text-2xl font-bold text-gray-800">Enroll New Student</h2></div><form id="modernEnrollForm" class="space-y-5"><div class="grid md:grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label><input type="text" id="enrollName" required class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-emerald-500"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Registration Number *</label><input type="text" id="enrollRegNo" required class="w-full border rounded-xl p-3 focus:ring-2 focus:ring-emerald-500"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Parent/Guardian Name</label><input type="text" id="enrollParent" class="w-full border rounded-xl p-3"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Parent Email</label><input type="email" id="enrollParentEmail" class="w-full border rounded-xl p-3"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Section</label><select id="enrollSection" class="w-full border rounded-xl p-3">${SECTIONS.map(s=>`<option>${s}</option>`).join('')}</select></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Academic Class</label><select id="enrollClass" class="w-full border rounded-xl p-3">${CLASSES.map(c=>`<option>${c}</option>`).join('')}</select></div></div><div class="pt-4"><button type="submit" class="apply-btn w-full py-3 rounded-xl text-lg font-semibold transition transform hover:scale-[1.01]"><i class="fas fa-save mr-2"></i>Register Student</button></div></form></div></div>`;
@@ -394,11 +412,7 @@ async function studentsViewEditable() {
         let section = document.getElementById('studentSectionFilter').value;
         let classVal = document.getElementById('studentClassFilter').value;
         let search = document.getElementById('studentSearch').value.toLowerCase();
-        let filtered = students.filter(s => 
-            (section === 'all' || s.section === section) &&
-            (classVal === 'all' || s.academic_class === classVal) &&
-            (s.name.toLowerCase().includes(search) || (s.reg_number||'').toLowerCase().includes(search))
-        );
+        let filtered = students.filter(s => (section === 'all' || s.section === section) && (classVal === 'all' || s.academic_class === classVal) && (s.name.toLowerCase().includes(search) || (s.reg_number||'').toLowerCase().includes(search)));
         let tbody = document.getElementById('studentEditBody');
         tbody.innerHTML = filtered.map(s => `
             <tr>
@@ -415,13 +429,12 @@ async function studentsViewEditable() {
     }
     function attachEvents() {
         document.querySelectorAll('.editable-student').forEach(cell => {
-            cell.setAttribute('contenteditable', 'true');
+            cell.setAttribute('contenteditable','true');
             cell.addEventListener('blur', async () => {
                 let field = cell.dataset.field, id = cell.dataset.id, val = cell.innerText.trim();
                 if (field === 'term_fee') val = parseFloat(val) || 0;
                 await supabaseClient.from('students').update({ [field]: val }).eq('id', id);
-                await refreshData();
-                studentsViewEditable();
+                await refreshData(); studentsViewEditable();
                 showToast(`${field} saved`);
             });
         });
@@ -430,8 +443,7 @@ async function studentsViewEditable() {
                 let id = select.dataset.id;
                 let newSection = e.target.value;
                 await supabaseClient.from('students').update({ section: newSection }).eq('id', id);
-                await refreshData();
-                studentsViewEditable();
+                await refreshData(); studentsViewEditable();
                 showToast(`Section updated to ${newSection}`);
             });
         });
@@ -440,20 +452,16 @@ async function studentsViewEditable() {
                 let id = select.dataset.id;
                 let newClass = e.target.value;
                 await supabaseClient.from('students').update({ academic_class: newClass }).eq('id', id);
-                await refreshData();
-                studentsViewEditable();
+                await refreshData(); studentsViewEditable();
                 showToast(`Class updated to ${newClass}`);
             });
         });
-        document.querySelectorAll('.delete-student').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                if (confirm("Delete permanently?")) {
-                    await supabaseClient.from('students').delete().eq('id', btn.dataset.id);
-                    await refreshData();
-                    studentsViewEditable();
-                }
-            });
-        });
+        document.querySelectorAll('.delete-student').forEach(btn => btn.addEventListener('click', async () => {
+            if (confirm("Delete permanently?")) {
+                await supabaseClient.from('students').delete().eq('id', btn.dataset.id);
+                await refreshData(); studentsViewEditable();
+            }
+        }));
     }
     render();
     document.getElementById('studentSectionFilter').addEventListener('change', render);
@@ -474,11 +482,7 @@ async function unifiedStaffList() {
         let search = document.getElementById('staffSearch').value.toLowerCase();
         let roleFilter = document.getElementById('staffRoleFilter').value;
         let sectionFilter = document.getElementById('staffSectionFilter').value;
-        let filtered = allStaff.filter(s => 
-            (s.name.toLowerCase().includes(search) || (s.email||'').toLowerCase().includes(search)) &&
-            (roleFilter === 'all' || s.role === roleFilter) &&
-            (sectionFilter === 'all' || (s.section||'').toLowerCase().includes(sectionFilter.toLowerCase()))
-        );
+        let filtered = allStaff.filter(s => (s.name.toLowerCase().includes(search) || (s.email||'').toLowerCase().includes(search)) && (roleFilter==='all' || s.role===roleFilter) && (sectionFilter==='all' || (s.section||'').toLowerCase().includes(sectionFilter.toLowerCase())));
         let tbody = document.getElementById('staffUnifiedBody');
         tbody.innerHTML = filtered.map(s => `
             <tr>
@@ -507,8 +511,7 @@ async function unifiedStaffList() {
                 let table = source === 'teacher' ? 'teachers' : 'profiles';
                 const { error } = await supabaseClient.from(table).update({ [field]: val }).eq('id', id);
                 if (error) { showToast(error.message, true); return; }
-                await refreshData();
-                unifiedStaffList();
+                await refreshData(); unifiedStaffList();
                 showToast(`${field} updated`);
             });
         });
@@ -518,8 +521,7 @@ async function unifiedStaffList() {
                 let newClass = e.target.value;
                 let table = source === 'teacher' ? 'teachers' : 'profiles';
                 await supabaseClient.from(table).update({ assigned_class: newClass || null }).eq('id', id);
-                await refreshData();
-                unifiedStaffList();
+                await refreshData(); unifiedStaffList();
                 showToast(`Assigned class updated`);
             });
         });
@@ -529,8 +531,7 @@ async function unifiedStaffList() {
                 let newSection = e.target.value;
                 let table = source === 'teacher' ? 'teachers' : 'profiles';
                 await supabaseClient.from(table).update({ section: newSection || null }).eq('id', id);
-                await refreshData();
-                unifiedStaffList();
+                await refreshData(); unifiedStaffList();
                 showToast(`Section updated`);
             });
         });
@@ -540,7 +541,8 @@ async function unifiedStaffList() {
     document.getElementById('staffRoleFilter').addEventListener('change', render);
     document.getElementById('staffSectionFilter').addEventListener('change', render);
 }
-  // ========== ENHANCED RESULTS WITH RANKING AND PRINT RESULT SLIP ==========
+
+// ========== ENHANCED RESULTS WITH RANKING AND PRINT RESULT SLIP ==========
 async function printResultSlip(studentId, term, year) {
     const student = schoolData.students.find(s => s.id == studentId);
     if (!student) { showToast("Student not found", true); return; }
@@ -550,7 +552,7 @@ async function printResultSlip(studentId, term, year) {
     const avg = subjectsResults.length ? (totalMarks / subjectsResults.length).toFixed(1) : 0;
     const grade = avg>=80?'A':avg>=70?'B':avg>=60?'C':avg>=50?'D':'F';
     const remarks = extra.remarks || (grade === 'A' ? 'Excellent' : grade === 'B' ? 'Good' : grade === 'C' ? 'Average' : 'Needs Improvement');
-    const slipHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Result Slip - ${student.name}</title><style>body{font-family:'Times New Roman',serif;margin:0;padding:0.5in;}.slip{max-width:700px;margin:0 auto;border:1px solid #000;padding:20px;}.header{text-align:center;border-bottom:2px solid #000;margin-bottom:20px;}.header h1{margin:0;font-size:24px;}.student-info{width:100%;margin-bottom:20px;}.results-table{width:100%;border-collapse:collapse;margin-top:20px;}.results-table th,.results-table td{border:1px solid #000;padding:8px;text-align:center;}.remarks{margin-top:20px;font-style:italic;}.signature{margin-top:40px;display:flex;justify-content:space-between;}.footer{margin-top:20px;text-align:center;font-size:12px;}@media print{.no-print{display:none;}}</style></head><body><div class="slip"><div class="header"><h1>Al‑Istiqaamah Flying Wings Academy</h1><h2>RESULT SLIP</h2><p>${term} ${year}</p></div><table class="student-info"><tr><td><strong>Name:</strong> ${escapeHtml(student.name)}</td><td><strong>Reg No:</strong> ${student.reg_number}</td></tr><tr><td><strong>Class:</strong> ${student.academic_class}</td><td><strong>Term:</strong> ${term}</td></tr></table><table class="results-table"><thead><tr><th>Subject</th><th>CA1</th><th>CA2</th><th>Exam</th><th>Total</th><th>Grade</th></tr></thead><tbody>${subjectsResults.map(sub => { let total = (sub.ca1||0)+(sub.ca2||0)+(sub.exam||0); let grade = total>=80?'A':total>=70?'B':total>=60?'C':total>=50?'D':'F'; return `<tr><td>${escapeHtml(sub.subject)}</td><td>${sub.ca1||0}</td><td>${sub.ca2||0}</td><td>${sub.exam||0}</td><td>${total}</td><td>${grade}</td></tr>`; }).join('')}</tbody></table><div class="remarks"><strong>Remarks:</strong> ${escapeHtml(remarks)}</div><div class="signature"><div>_________________<br>Class Teacher</div><div>_________________<br>Headteacher</div></div><div class="footer">School stamp required</div></div><div class="no-print" style="text-align:center;margin-top:20px;"><button onclick="window.print();">Print Result</button><button onclick="window.close();">Close</button></div></body></html>`;
+    const slipHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Result Slip - ${student.name}</title><style>body{font-family:'Times New Roman',serif;margin:0;padding:0.5in;}.slip{max-width:700px;margin:0 auto;border:1px solid #000;padding:20px;}.header{text-align:center;border-bottom:2px solid #000;margin-bottom:20px;}.header h1{margin:0;font-size:24px;}.student-info{width:100%;margin-bottom:20px;}.results-table{width:100%;border-collapse:collapse;margin-top:20px;}.results-table th,.results-table td{border:1px solid #000;padding:8px;text-align:center;}.remarks{margin-top:20px;font-style:italic;}.signature{margin-top:40px;display:flex;justify-content:space-between;}.footer{margin-top:20px;text-align:center;font-size:12px;}@media print{.no-print{display:none;}}</style></head><body><div class="slip"><div class="header"><h1>Al‑Istiqaamah Flying Wings Academy</h1><h2>RESULT SLIP</h2><p>${term} ${year}</p></div><table class="student-info"><tr><td><strong>Name:</strong> ${escapeHtml(student.name)}</td><td><strong>Reg No:</strong> ${student.reg_number}</td></tr><tr><td><strong>Class:</strong> ${student.academic_class}</td><td><strong>Term:</strong> ${term}</td></tr></table><table class="results-table"><thead><tr><th>Subject</th><th>CA1</th><th>CA2</th><th>Exam</th><th>Total</th><th>Grade</th></tr></thead><tbody>${subjectsResults.map(sub => { let total = (sub.ca1||0)+(sub.ca2||0)+(sub.exam||0); let grd = total>=80?'A':total>=70?'B':total>=60?'C':total>=50?'D':'F'; return `<tr><td>${escapeHtml(sub.subject)}</td><td>${sub.ca1||0}</td><td>${sub.ca2||0}</td><td>${sub.exam||0}</td><td>${total}</td><td>${grd}</td></tr>`; }).join('')}</tbody></table><div class="remarks"><strong>Remarks:</strong> ${escapeHtml(remarks)}</div><div class="signature"><div>_________________<br>Class Teacher</div><div>_________________<br>Headteacher</div></div><div class="footer">School stamp required</div></div><div class="no-print" style="text-align:center;margin-top:20px;"><button onclick="window.print();">Print Result</button><button onclick="window.close();">Close</button></div></body></html>`;
     const win = window.open();
     win.document.write(slipHtml);
     win.document.close();
@@ -649,7 +651,7 @@ async function printFeeReceipt(studentId, term, year) {
 // ========== FEE MANAGEMENT (with Print Receipt button) ==========
 async function feeManagementEnhanced() {
     let students = schoolData.students, currentYear = new Date().getFullYear();
-    let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">💰 Fee Management by Term</h2><div class="filter-row"><input id="feeYear" type="number" value="${currentYear}" class="w-28"><select id="feeTermSelect">${TERMS.map(t=>`<option>${t}</option>`).join('')}</select><select id="feeSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s=>`<option>${s}</option>`).join('')}</select><select id="feeClassFilter"><option value="all">All Classes</option>${CLASSES.map(c=>`<option>${c}</option>`).join('')}</select><input id="feeSearch" placeholder="🔍 Search student" class="flex-1"></div><div class="overflow-x-auto"><table class="min-w-full"><thead><tr><th>Student</th><th>Term Fee</th><th>Paid</th><th>Due</th><th>Status</th><th>Pay Online</th><th>Bank Proof</th><th>Admin Confirm</th><th>Edit Fee</th><th>Receipt</th></tr></thead><tbody id="feeTermBody"></tbody></table></div><div id="pendingBankArea" class="mt-5"></div></div>`;
+    let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">💰 Fee Management by Term</h2><div class="filter-row"><input id="feeYear" type="number" value="${currentYear}" class="w-28"><select id="feeTermSelect">${TERMS.map(t=>`<option>${t}</option>`).join('')}</select><select id="feeSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s=>`<option>${s}</option>`).join('')}</select><select id="feeClassFilter"><option value="all">All Classes</option>${CLASSES.map(c=>`<option>${c}</option>`).join('')}</select><input id="feeSearch" placeholder="🔍 Search student" class="flex-1"></div><div class="overflow-x-auto"><table class="min-w-full"><thead><tr><th>Student</th><th>Term Fee</th><th>Paid</th><th>Due</th><th>Status</th><th>Pay Online</th><th>Bank Proof</th><th>Admin Confirm</th><th>Edit Fee</th><th>Receipt</th></tr></thead><tbody id="feeTermBody"></tbody>}</div><div id="pendingBankArea" class="mt-5"></div></div>`;
     document.getElementById('mainContent').innerHTML = html;
     async function render() {
         let year = document.getElementById('feeYear').value, term = document.getElementById('feeTermSelect').value, section = document.getElementById('feeSectionFilter').value, classVal = document.getElementById('feeClassFilter').value, search = document.getElementById('feeSearch').value.toLowerCase();
@@ -742,7 +744,7 @@ document.getElementById('confirmAmountBtn')?.addEventListener('click', async () 
     } catch(err) { showToast(err.message, true); } finally { showLoading(false); pendingPaymentAction = null; }
 });
 
-// ========== PAYROLL MODULE ==========
+// ========== PAYROLL MODULE (fixed salary persistence) ==========
 async function payrollModule() {
     let staffTeachers = schoolData.teachers.map(t=>({id:t.id,name:t.name,section:t.section||'', salary: t.salary || 0}));
     let staffProfiles = schoolData.profiles.filter(p=>p.role && p.role !== 'parent').map(p=>({id:p.id,name:p.full_name,section:p.section||'', salary:0}));
@@ -755,7 +757,7 @@ async function payrollModule() {
     <button id="generatePayrollBtn" class="apply-btn">Refresh</button><button id="exportPayrollCsv" class="apply-btn bg-emerald-600">Export CSV</button>
     <button id="syncStaffToPayroll" class="apply-btn bg-blue-600">Sync Staff to Payroll</button>
     <button id="addStaffToPayrollBtn" class="apply-btn bg-purple-600">+ Add Staff to Payroll</button></div>
-    <div class="overflow-x-auto"><table class="min-w-full payroll-table border"><thead class="bg-gray-100"><tr><th>S/N</th><th>Employee Name</th><th>Basic Salary (₦)</th><th>Allowances (₦)</th><th>Gross Pay (₦)</th><th>Deductions (₦)</th><th>Net Pay (₦)</th><th>Account Details</th></tr></thead><tbody id="payrollTbody"></tbody><tfoot id="payrollTotals" class="bg-gray-50 font-bold"></tfoot></table></div></div>`;
+    <div class="overflow-x-auto"><table class="min-w-full payroll-table border"><thead class="bg-gray-100"><tr><th>S/N</th><th>Employee Name</th><th>Basic Salary (₦)</th><th>Allowances (₦)</th><th>Gross Pay (₦)</th><th>Deductions (₦)</th><th>Net Pay (₦)</th><th>Account Details</th></tr></thead><tbody id="payrollTbody"></tbody><tfoot id="payrollTotals" class="bg-gray-50 font-bold"></tfoot>}</div></div>`;
     document.getElementById('mainContent').innerHTML = html;
     
     async function ensureAllStaffHavePayrollRecords(month, year, staffList) {
@@ -935,7 +937,7 @@ document.getElementById('addStaffForm')?.addEventListener('submit', async (e) =>
         unifiedStaffList();
     } catch(err) { showToast(err.message, true); } finally { showLoading(false); }
 });
-        // ========== APPLICATIONS MANAGEMENT ==========
+// ========== APPLICATIONS MANAGEMENT ==========
 async function applicationsViewEnhanced() {
     let apps = schoolData.applications;
     let html = `<div class="card p-6"><div class="flex flex-wrap justify-between items-center gap-4 mb-6"><h2 class="text-2xl font-bold">📋 Applications Management</h2><div class="flex gap-2"><button id="refreshAppsBtn" class="apply-btn px-4 py-2 rounded-full"><i class="fas fa-sync-alt"></i> Refresh</button></div></div><div class="filter-row"><input id="appSearch" placeholder="🔍 Search by name or email" class="flex-1 border rounded-xl p-2"><select id="appStatusFilter" class="border rounded-xl p-2"><option value="all">All Status</option><option>pending</option><option>accepted</option><option>rejected</option></select><button id="exportAppsCsv" class="bg-emerald-600 text-white px-4 py-2 rounded-full">Export CSV</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4" id="appsGrid"></div></div>`;
@@ -1023,7 +1025,7 @@ function printAdmissionLetter(application) {
     const passportPhotoUrl = formData.attachments?.attachment_passport_photos || null;
     const signatureImage = official.authorized_signature_image || null;
     const signatoryName = official.authorized_signature_name || 'Authorized Officer';
-    const letterHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Admission Letter - ${fullName}</title><style>body{font-family:'Times New Roman',serif;margin:0;padding:0.5in;}.letter{max-width:800px;margin:0 auto;border:1px solid #ccc;padding:20px;}.header{text-align:center;margin-bottom:20px;}.header h1{font-size:24px;margin:0;}.header h2{font-size:18px;margin:5px 0;}.header p{margin:5px 0;font-size:12px;}.motto{font-style:italic;font-size:14px;}.ref{text-align:right;margin-bottom:20px;}.student-details{border:1px solid #000;padding:10px;margin:20px 0;width:70%;}.student-details td{padding:5px;}.passport-photo{float:right;width:120px;height:140px;border:1px solid #000;text-align:center;margin-left:20px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;overflow:hidden;}.passport-photo img{width:100%;height:100%;object-fit:cover;}.passport-photo .placeholder{font-size:12px;color:#999;text-align:center;}.signatures{margin-top:40px;display:flex;justify-content:space-between;}.signature-line{text-align:center;width:200px;}.signature-image{height:60px;margin-bottom:5px;}.signature-image img{max-height:60px;max-width:180px;}.footer{margin-top:30px;font-size:10px;text-align:center;}.clearfix::after{content:"";clear:both;display:table;}@media print{.no-print{display:none;}}</style></head><body><div class="letter"><div class="header"><h1>أكاديمية الاستقامة أجنحة التحليق</h1><h2>AL-ISTIQAAMAH FLYING WINGS ACADEMY</h2><p>No. 10 Federal Government Layout, Samaru, Zaria, Nigeria.</p><p class="motto">"The best of mankind is the most beneficial to humanity"</p><p>Email: alistiqaamah.fwac@gmail.com | Phone: +2348084816590, +2348067990749</p></div><div class="ref"><strong>Ref: AFWAN/AC/01/ADM NO.</strong> ${admissionNumber}</div><div class="content clearfix"><div class="passport-photo">${passportPhotoUrl ? `<img src="${passportPhotoUrl}" alt="Passport Photo" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'placeholder\'>[Passport<br>Photo]</div>';">` : `<div class="placeholder">[Passport<br>Photo]</div>`}</div><table class="student-details"><tr><td><strong>Name:</strong></td><td>${escapeHtml(fullName)}</td></tr><tr><td><strong>Gender:</strong></td><td>${escapeHtml(gender)}</td></tr><tr><td><strong>State of Origin:</strong></td><td>${escapeHtml(state)}</td></tr><tr><td><strong>Admitted Class:</strong></td><td>${escapeHtml(category)}</td></tr></table><p style="margin-top:30px;">I write to inform you that you have been offered <strong>provisional admission</strong> as indicated above, subject to confirmation of all registration requirements. Lost admission letters will be reprinted at the cost of N500.00. Failure to register in two week's time may lead to withdrawal of the admission.</p></div><div class="signatures"><div class="signature-line">${signatureImage ? `<div class="signature-image"><img src="${signatureImage}" alt="Signature"></div>` : '<div style="height:40px;"></div>'}<div>${escapeHtml(signatoryName)}</div><div style="border-top:1px solid #000; padding-top:5px;">توقيع عميد المرسلة<br>Head Master's Signature</div></div><div class="signature-line"><div style="height:40px;"></div><div>School Stamp</div><div style="border-top:1px solid #000; padding-top:5px;">خاتم المرسلة<br>School Stamp</div></div><div class="signature-line"><div style="height:40px;"></div><div>Section Registrar</div><div style="border-top:1px solid #000; padding-top:5px;">توقيع مسجل القسم<br>Section Registrar's Signature</div></div></div><div class="footer">Date of Issue: ${new Date().toLocaleDateString()} | Admission Date: ${admissionDate}</div></div><div class="no-print" style="text-align:center;margin-top:20px;"><button onclick="window.print();">Print Letter</button><button onclick="window.close();">Close</button></div></body></html>`;
+    const letterHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Admission Letter - ${fullName}</title><style>body{font-family:'Times New Roman',serif;margin:0;padding:0.5in;}.letter{max-width:800px;margin:0 auto;border:1px solid #ccc;padding:20px;}.header{text-align:center;margin-bottom:20px;}.header h1{font-size:24px;margin:0;}.header h2{font-size:18px;margin:5px 0;}.header p{margin:5px 0;font-size:12px;}.motto{font-style:italic;font-size:14px;}.ref{text-align:right;margin-bottom:20px;}.student-details{border:1px solid #000;padding:10px;margin:20px 0;width:70%;}.student-details td{padding:5px;}.passport-photo{float:right;width:120px;height:140px;border:1px solid #000;text-align:center;margin-left:20px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;overflow:hidden;}.passport-photo img{width:100%;height:100%;object-fit:cover;}.passport-photo .placeholder{font-size:12px;color:#999;text-align:center;}.signatures{margin-top:40px;display:flex;justify-content:space-between;}.signature-line{text-align:center;width:200px;}.signature-image{height:60px;margin-bottom:5px;}.signature-image img{max-height:60px;max-width:180px;}.footer{margin-top:30px;font-size:10px;text-align:center;}.clearfix::after{content:"";clear:both;display:table;}@media print{.no-print{display:none;}}</style></head><body><div class="letter"><div class="header"><h1>أكاديمية الاستقامة أجنحة التحليق</h1><h2>AL-ISTIQAAMAH FLYING WINGS ACADEMY</h2><p>No. 10 Federal Government Layout, Samaru, Zaria, Nigeria.</p><p class="motto">"The best of mankind is the most beneficial to humanity"</p><p>Email: alistiqaamah.fwac@gmail.com | Phone: +2348084816590, +2348067990749</p></div><div class="ref"><strong>Ref: AFWAN/AC/01/ADM NO.</strong> ${admissionNumber}</div><div class="content clearfix"><div class="passport-photo">${passportPhotoUrl ? `<img src="${passportPhotoUrl}" alt="Passport Photo" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'placeholder\'>[Passport<br>Photo]</div>';">` : `<div class="placeholder">[Passport<br>Photo]</div>`}</div><table class="student-details"><tr><td><strong>Name:</strong></td><td>${escapeHtml(fullName)}</div></div><div class="signatures"><div class="signature-line">${signatureImage ? `<div class="signature-image"><img src="${signatureImage}" alt="Signature"></div>` : '<div style="height:40px;"></div>'}<div>${escapeHtml(signatoryName)}</div><div style="border-top:1px solid #000; padding-top:5px;">توقيع عميد المرسلة<br>Head Master's Signature</div></div><div class="signature-line"><div style="height:40px;"></div><div>School Stamp</div><div style="border-top:1px solid #000; padding-top:5px;">خاتم المرسلة<br>School Stamp</div></div><div class="signature-line"><div style="height:40px;"></div><div>Section Registrar</div><div style="border-top:1px solid #000; padding-top:5px;">توقيع مسجل القسم<br>Section Registrar's Signature</div></div></div><div class="footer">Date of Issue: ${new Date().toLocaleDateString()} | Admission Date: ${admissionDate}</div></div><div class="no-print" style="text-align:center;margin-top:20px;"><button onclick="window.print();">Print Letter</button><button onclick="window.close();">Close</button></div></body></html>`;
     const win = window.open();
     win.document.write(letterHtml);
     win.document.close();
@@ -1121,11 +1123,15 @@ document.getElementById('fullApplicationForm')?.addEventListener('submit', async
 // ========== DOWNLOAD RECORDS, ANNOUNCE, SLIDES ==========
 async function downloadRecordsView() { document.getElementById('mainContent').innerHTML = `<div class="card p-6"><button class="apply-btn px-6 py-2 rounded-full" onclick="window.downloadCSV(schoolData.students,'students.csv')">Export Students CSV</button> <button class="apply-btn px-6 py-2 rounded-full ml-3" onclick="window.downloadCSV(schoolData.teachers,'staff.csv')">Export Staff CSV</button></div>`; window.downloadCSV=(data,fn)=>{ let blob = new Blob([JSON.stringify(data)],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fn; a.click(); }; }
 async function announceView() { let ann = schoolData.announcements[0]?.content || ''; document.getElementById('mainContent').innerHTML = `<div class="card p-6"><textarea id="annText" class="border w-full p-3 rounded-xl h-32">${escapeHtml(ann)}</textarea><button class="apply-btn mt-4 px-6 py-2 rounded-full" onclick="window.updateAnnounce()">Update Announcement</button></div>`; window.updateAnnounce=async()=>{ await supabaseClient.from('site_announcement').upsert({id:1, content:document.getElementById('annText').value}); await refreshData(); showToast("Announcement updated"); }; }
-async function slidesManageView() { let slides = schoolData.slides; let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Slideshow Manager</h2><input type="file" id="slideFile" accept="image/*" class="mb-3"><input id="slideCaption" placeholder="Caption" class="border p-3 w-full rounded-xl mb-3"><button id="uploadSlide" class="apply-btn px-6 py-2 rounded-full">Upload</button><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">${slides.map(s=>`<div class="bg-white rounded-xl shadow p-2"><img src="${s.image_url}" class="h-32 w-full object-cover rounded-lg"><p class="text-sm mt-1">${escapeHtml(s.caption||'')}</p><button onclick="window.deleteSlide('${s.id}')" class="text-red-500 text-sm mt-1">Delete</button></div>`).join('')}</div></div>`; document.getElementById('mainContent').innerHTML = html; document.getElementById('uploadSlide').onclick = async()=>{ let file=document.getElementById('slideFile').files[0]; if(!file) return; let path=`slides/${Date.now()}_${file.name}`; await supabaseClient.storage.from('school-slides').upload(path,file); let {data:{publicUrl}}=supabaseClient.storage.from('school-slides').getPublicUrl(path); await supabaseClient.from('slides').insert([{image_url:publicUrl, caption:document.getElementById('slideCaption').value}]); await refreshData(); slidesManageView(); }; window.deleteSlide=async(id)=>{ await supabaseClient.from('slides').delete().eq('id',id); await refreshData(); slidesManageView(); }; }
+async function slidesManageView() { let slides = schoolData.slides; let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Slideshow Manager</h2><input type="file" id="slideFile" accept="image/*" class="mb-3"><input id="slideCaption" placeholder="Caption" class="border p-3 w-full rounded-xl mb-3"><button id="uploadSlide" class="apply-btn px-6 py-2 rounded-full">Upload</button><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">${slides.map(s=>`<div class="bg-white rounded-xl shadow p-2"><img src="${s.image_url}" class="h-32 w-full object-cover rounded-lg"><p class="text-sm mt-1">${escapeHtml(s.caption||'')}</p><button onclick="window.deleteSlide('${s.id}')" class="text-red-500 text-sm mt-1">Delete</button></div>`).join('')}</div></div>`;
+    document.getElementById('mainContent').innerHTML = html; document.getElementById('uploadSlide').onclick = async()=>{ let file=document.getElementById('slideFile').files[0]; if(!file) return; let path=`slides/${Date.now()}_${file.name}`; await supabaseClient.storage.from('school-slides').upload(path,file); let {data:{publicUrl}}=supabaseClient.storage.from('school-slides').getPublicUrl(path); await supabaseClient.from('slides').insert([{image_url:publicUrl, caption:document.getElementById('slideCaption').value}]); await refreshData(); slidesManageView(); }; window.deleteSlide=async(id)=>{ await supabaseClient.from('slides').delete().eq('id',id); await refreshData(); slidesManageView(); }; }
 
 // ========== STAFF APPRAISAL ==========
 async function staffAppraisalView() {
-    if(!['daf','do','der','dprpa'].includes(currentUser.role)) { showToast("Access denied. Only directors can appraise staff.", true); return; }
+    if (!['daf','do','der','dprpa'].includes(currentUser.role)) {
+        showToast("Access denied. Only directors can appraise staff.", true);
+        return;
+    }
     let allStaff = [...schoolData.teachers];
     let staffList = allStaff.filter(s => !['daf','do','der','dprpa','dg_ceo','management_committee'].includes(s.role));
     let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📝 Staff Appraisal</h2><div class="filter-row"><select id="appraisalStaffFilter" class="border p-2 rounded"><option value="all">All Staff</option>${staffList.map(s=>`<option value="${s.id}">${s.name} (${s.role})</option>`).join('')}</select><button id="newAppraisalBtn" class="apply-btn px-4 py-2 rounded-full">+ New Appraisal</button></div><div id="appraisalsList" class="mt-4 space-y-3"></div></div>`;
@@ -1156,7 +1162,10 @@ document.getElementById('appraisalForm')?.addEventListener('submit', async (e) =
 
 // ========== VIEW APPRAISALS ==========
 async function viewAppraisalsView() {
-    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) { showToast("Access denied", true); return; }
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied", true);
+        return;
+    }
     let allStaff = schoolData.teachers;
     let appraisals = schoolData.staffAppraisals;
     let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">👁️ Staff Appraisals Overview</h2><div class="filter-row"><select id="viewStaffFilter"><option value="all">All Staff</option>${allStaff.map(s=>`<option value="${s.id}">${s.name} (${s.role})</option>`).join('')}</select><select id="viewAppraiserFilter"><option value="all">All Appraisers</option><option>daf</option><option>do</option><option>der</option><option>dprpa</option></select><button id="refreshAppraisalsView" class="apply-btn px-4 py-2 rounded-full">Refresh</button></div><div id="appraisalsGridView" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4"></div></div>`;
@@ -1177,7 +1186,10 @@ async function viewAppraisalsView() {
 
 // ========== PERFORMANCE APPRAISAL (DG/CEO) ==========
 async function performanceAppraisalView() {
-    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) { showToast("Access denied", true); return; }
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied", true);
+        return;
+    }
     let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📋 DG/CEO Performance Appraisal</h2><div class="mb-4"><label class="font-bold">Load Previous:</label><select id="loadAppraisalSelect" class="border p-2 rounded w-64 ml-2"><option value="">-- New --</option>${schoolData.dgAppraisals.map(a=>`<option value="${a.id}">${a.appraisal_period} - Score: ${a.total_percentage}%</option>`).join('')}</select><button id="loadAppraisalBtn" class="apply-btn ml-2 px-4 py-2 rounded">Load</button><button id="newAppraisalBtn" class="bg-gray-500 text-white px-4 py-2 rounded ml-2">New</button></div><div id="appraisalFormContainer"></div></div>`;
     document.getElementById('mainContent').innerHTML = html;
     function renderForm(data={}) {
@@ -1199,6 +1211,10 @@ async function saveDGAppraisal(data) {
 
 // ========== DIRECTOR ROLES & KPIs ==========
 async function directorRolesView() {
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied. Only DG/CEO and Management Committee can view Director KPIs.", true);
+        return;
+    }
     showLoading(true);
     const { data: kpis, error } = await supabaseClient.from('director_kpis').select('*').order('director_role', { ascending: true });
     if(error) console.error("Error fetching KPIs:", error);
@@ -1263,6 +1279,10 @@ async function directorRolesView() {
 
 // ========== APPRAISE DIRECTORS ==========
 async function directorAppraisalView() {
+    if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
+        showToast("Access denied. Only DG/CEO and Management Committee can appraise directors.", true);
+        return;
+    }
     let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📋 Appraise Directors</h2><p class="text-gray-600 mb-4">Annual performance appraisal for director‑level roles.</p><div class="space-y-4"><div class="border rounded-xl p-4"><div class="flex justify-between items-center"><div><strong>Director:</strong> <span id="directorName">[Select Director]</span></div><select id="directorSelect" class="border rounded-xl p-2"><option>DG/CEO</option><option>DAF</option><option>DER</option><option>DO</option><option>DPRPA</option></select></div><div class="mt-3"><label class="block font-medium">Rating (1-5):</label><input type="number" id="rating" min="1" max="5" class="border rounded-xl p-2 w-24"></div><div class="mt-3"><label class="block font-medium">Comments / Feedback:</label><textarea id="appraisalComments" rows="3" class="border rounded-xl p-2 w-full"></textarea></div><button id="submitDirectorAppraisalBtn" class="apply-btn mt-3 px-4 py-2 rounded-full">Submit Appraisal</button></div></div></div>`;
     document.getElementById('mainContent').innerHTML = html;
     document.getElementById('submitDirectorAppraisalBtn').onclick = async () => {
@@ -1277,10 +1297,78 @@ async function directorAppraisalView() {
         document.getElementById('appraisalComments').value = '';
         await refreshData();
     };
+    }
+    // ========== PARENT FUNCTIONS ==========
+// Simplified parent result view (non-editable)
+async function parentResultViewSimple() {
+    let studentId = currentUser.studentId;
+    if (!studentId) {
+        showToast("No student linked to this parent account", true);
+        document.getElementById('mainContent').innerHTML = '<div class="card p-6 text-center text-red-600">No student linked. Please contact school admin.</div>';
+        return;
+    }
+    let student = schoolData.students.find(s => s.id == studentId);
+    if (!student) {
+        showToast("Student data missing", true);
+        return;
+    }
+    let currentYear = new Date().getFullYear();
+    let html = `<div class="card p-6">
+        <h2 class="text-2xl font-bold mb-4">Result for ${escapeHtml(student.name)} (${student.reg_number})</h2>
+        <div class="flex gap-2 mb-4 flex-wrap">
+            <select id="parentTermSelect" class="border p-2 rounded">${TERMS.map(t => `<option>${t}</option>`).join('')}</select>
+            <input type="number" id="parentYearSelect" value="${currentYear}" class="border p-2 rounded w-28">
+            <button id="parentLoadResultBtn" class="apply-btn px-4 py-2 rounded">Load Result</button>
+            <button id="parentPrintResultBtn" class="apply-btn px-4 py-2 rounded bg-emerald-600">Print Result Slip</button>
+        </div>
+        <div id="parentResultContainer"></div>
+    </div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    
+    async function loadResult() {
+        let term = document.getElementById('parentTermSelect').value;
+        let year = parseInt(document.getElementById('parentYearSelect').value);
+        let subjectsResults = schoolData.results.filter(r => r.student_id == studentId && r.term === term && r.year === year);
+        let extra = schoolData.resultExtras.find(e => e.student_id == studentId && e.term === term && e.year === year) || { remarks: '' };
+        let totalMarks = subjectsResults.reduce((s, sub) => s + (sub.total || 0), 0);
+        let avg = subjectsResults.length ? (totalMarks / subjectsResults.length).toFixed(1) : 0;
+        let grade = avg >= 80 ? 'A' : avg >= 70 ? 'B' : avg >= 60 ? 'C' : avg >= 50 ? 'D' : 'F';
+        let remarks = extra.remarks || (grade === 'A' ? 'Excellent' : grade === 'B' ? 'Good' : grade === 'C' ? 'Average' : 'Needs Improvement');
+        
+        let resultHtml = `<div class="bg-white p-4 rounded shadow">
+            <h3 class="font-bold text-lg">${term} ${year}</h3>
+            <table class="min-w-full border mt-2">
+                <thead class="bg-gray-100">
+                    <tr><th>Subject</th><th>CA1</th><th>CA2</th><th>Exam</th><th>Total</th><th>Grade</th></tr>
+                </thead>
+                <tbody>
+                ${subjectsResults.map(sub => { 
+                    let total = (sub.ca1||0)+(sub.ca2||0)+(sub.exam||0); 
+                    let grd = total>=80?'A':total>=70?'B':total>=60?'C':total>=50?'D':'F'; 
+                    return `<tr><td class="text-center">${escapeHtml(sub.subject)}</td><td class="text-center">${sub.ca1||0}</td><td class="text-center">${sub.ca2||0}</td><td class="text-center">${sub.exam||0}</td><td class="text-center font-bold">${total}</td><td class="text-center">${grd}</td></tr>`;
+                }).join('')}
+                </tbody>
+            </table>
+            <p class="mt-3"><strong>Average:</strong> ${avg}% (${grade})</p>
+            <p><strong>Remarks:</strong> ${escapeHtml(remarks)}</p>
+        </div>`;
+        if (subjectsResults.length === 0) resultHtml = '<div class="bg-yellow-50 p-4 rounded">No results found for this term.</div>';
+        document.getElementById('parentResultContainer').innerHTML = resultHtml;
+        
+        window.parentCurrentResult = { student, term, year, subjectsResults, remarks, avg, grade };
+    }
+    
+    document.getElementById('parentLoadResultBtn').addEventListener('click', loadResult);
+    document.getElementById('parentPrintResultBtn').addEventListener('click', () => {
+        if (window.parentCurrentResult) {
+            printResultSlip(window.parentCurrentResult.student.id, window.parentCurrentResult.term, window.parentCurrentResult.year);
+        } else {
+            showToast("Load a result first", true);
         }
-        // ========== PARENT FUNCTIONS ==========
-async function parentChildReportsView() { enhancedResultView(false); }
-async function parentResultView() { enhancedResultView(false); }
+    });
+    loadResult();
+}
+
 async function parentPaymentPortalView() {
     let studentId = currentUser.studentId, student = schoolData.students.find(s => s.id == studentId);
     if (!student) { showToast("Student not found", true); return; }
@@ -1291,40 +1379,121 @@ async function parentPaymentPortalView() {
     let pendingTransfer = schoolData.bankTransfers.find(bt => bt.student_id == studentId && bt.term === term && bt.year == currentYear && bt.status === 'pending');
     let proofUploaded = !!pendingTransfer;
     let proofUrl = pendingTransfer ? pendingTransfer.proof_url : null;
-    let html = `<div class="card p-6 max-w-2xl mx-auto"><h2 class="text-2xl font-bold text-emerald-800 mb-4">Fee Payment Portal</h2><div class="bg-gray-50 p-5 rounded-2xl mb-6"><p><strong>Student:</strong> ${escapeHtml(student.name)} (${student.reg_number})</p><p><strong>Class:</strong> ${student.academic_class || 'N/A'}</p><p><strong>Term:</strong> ${term} ${currentYear}</p><hr class="my-3"><p><strong>Term Fee:</strong> ₦${termFee.toLocaleString()}</p><p><strong>Paid:</strong> ₦${paid.toLocaleString()}</p><p><strong>Outstanding Balance:</strong> ₦${due.toLocaleString()}</p><p><span class="status-${due <= 0 ? 'paid' : paid > 0 ? 'partial' : 'unpaid'}">${due <= 0 ? 'Paid' : paid > 0 ? 'Partial' : 'Unpaid'}</span></p></div>${due > 0 ? `<div class="mb-6 border rounded-xl p-4 bg-white"><h3 class="font-bold text-lg mb-2">💳 Pay Online with Card</h3><button id="parentPayNowBtn" class="apply-btn px-6 py-2 rounded-full">Pay ₦${due.toLocaleString()} Now</button></div><div class="border rounded-xl p-4 bg-white"><h3 class="font-bold text-lg mb-2">🏦 Upload Bank Transfer Proof</h3><p class="text-sm text-gray-600 mb-2">Make a transfer to the school bank account and upload the receipt here. Admin will verify.</p>${proofUploaded ? `<div class="mb-3"><a href="${proofUrl}" target="_blank" class="text-blue-600 underline">View uploaded proof</a><br><span class="text-yellow-700">Status: Pending verification</span></div>` : ''}<input type="file" id="parentBankProof" accept="image/*" class="mb-2"><button id="submitParentProofBtn" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm">Upload Proof</button></div>` : `<div class="bg-green-100 text-green-800 p-4 rounded-xl text-center">No outstanding fees. Thank you!</div>`}</div>`;
+    let html = `<div class="card p-6 max-w-2xl mx-auto">
+        <h2 class="text-2xl font-bold text-emerald-800 mb-4">Fee Payment Portal</h2>
+        <div class="bg-gray-50 p-5 rounded-2xl mb-6">
+            <p><strong>Student:</strong> ${escapeHtml(student.name)} (${student.reg_number})</p>
+            <p><strong>Class:</strong> ${student.academic_class || 'N/A'}</p>
+            <p><strong>Term:</strong> ${term} ${currentYear}</p>
+            <hr class="my-3">
+            <p><strong>Term Fee:</strong> ₦${termFee.toLocaleString()}</p>
+            <p><strong>Paid:</strong> ₦${paid.toLocaleString()}</p>
+            <p><strong>Outstanding Balance:</strong> ₦${due.toLocaleString()}</p>
+            <p><span class="status-${due <= 0 ? 'paid' : paid > 0 ? 'partial' : 'unpaid'}">${due <= 0 ? 'Paid' : paid > 0 ? 'Partial' : 'Unpaid'}</span></p>
+        </div>
+        ${due > 0 ? `
+        <div class="mb-6 border rounded-xl p-4 bg-white">
+            <h3 class="font-bold text-lg mb-2">💳 Pay Online with Card</h3>
+            <button id="parentPayNowBtn" class="apply-btn px-6 py-2 rounded-full">Pay ₦${due.toLocaleString()} Now</button>
+        </div>
+        <div class="border rounded-xl p-4 bg-white">
+            <h3 class="font-bold text-lg mb-2">🏦 Upload Bank Transfer Proof</h3>
+            <p class="text-sm text-gray-600 mb-2">Make a transfer to the school bank account and upload the receipt here. Admin will verify.</p>
+            ${proofUploaded ? `<div class="mb-3"><a href="${proofUrl}" target="_blank" class="text-blue-600 underline">View uploaded proof</a><br><span class="text-yellow-700">Status: Pending verification</span></div>` : ''}
+            <input type="file" id="parentBankProof" accept="image/*" class="mb-2">
+            <button id="submitParentProofBtn" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm">Upload Proof</button>
+        </div>
+        ` : `<div class="bg-green-100 text-green-800 p-4 rounded-xl text-center">No outstanding fees. Thank you!</div>`}
+    </div>`;
     document.getElementById('mainContent').innerHTML = html;
     if (due > 0) {
-        document.getElementById('parentPayNowBtn')?.addEventListener('click', () => { let handler = PaystackPop.setup({ key: PAYSTACK_PUBLIC_KEY, email: student.parent_email || `${student.reg_number}@school.com`, amount: due * 100, callback: async (response) => { await supabaseClient.from('payments').insert([{ student_id: studentId, amount: due, term, year: currentYear, payment_method: 'paystack_online', payment_reference: response.reference, payment_status: 'success' }]); await refreshData(); parentPaymentPortalView(); showToast(`Payment of ₦${due} successful`); } }); handler.openIframe(); });
-        document.getElementById('submitParentProofBtn')?.addEventListener('click', async () => { let file = document.getElementById('parentBankProof').files[0]; if (!file) { showToast("Please select an image file", true); return; } showLoading(true); try { let path = `parent-proofs/${Date.now()}_${file.name}`; await supabaseClient.storage.from('school-bank-proofs').upload(path, file); let { data: { publicUrl } } = supabaseClient.storage.from('school-bank-proofs').getPublicUrl(path); if (pendingTransfer) { await supabaseClient.from('bank_transfers').update({ proof_url: publicUrl }).eq('id', pendingTransfer.id); } else { await supabaseClient.from('bank_transfers').insert([{ student_id: studentId, proof_url: publicUrl, status: 'pending', amount: termFee, term, year: currentYear }]); } await refreshData(); showToast("Bank proof uploaded. Admin will verify."); parentPaymentPortalView(); } catch (err) { showToast(err.message, true); } finally { showLoading(false); } });
+        document.getElementById('parentPayNowBtn')?.addEventListener('click', () => {
+            let handler = PaystackPop.setup({ key: PAYSTACK_PUBLIC_KEY, email: student.parent_email || `${student.reg_number}@school.com`, amount: due * 100, callback: async (response) => {
+                await supabaseClient.from('payments').insert([{ student_id: studentId, amount: due, term, year: currentYear, payment_method: 'paystack_online', payment_reference: response.reference, payment_status: 'success' }]);
+                await refreshData(); parentPaymentPortalView(); showToast(`Payment of ₦${due} successful`);
+            } }); handler.openIframe();
+        });
+        document.getElementById('submitParentProofBtn')?.addEventListener('click', async () => {
+            let file = document.getElementById('parentBankProof').files[0];
+            if (!file) { showToast("Please select an image file", true); return; }
+            showLoading(true);
+            try {
+                let path = `parent-proofs/${Date.now()}_${file.name}`;
+                await supabaseClient.storage.from('school-bank-proofs').upload(path, file);
+                let { data: { publicUrl } } = supabaseClient.storage.from('school-bank-proofs').getPublicUrl(path);
+                if (pendingTransfer) {
+                    await supabaseClient.from('bank_transfers').update({ proof_url: publicUrl }).eq('id', pendingTransfer.id);
+                } else {
+                    await supabaseClient.from('bank_transfers').insert([{ student_id: studentId, proof_url: publicUrl, status: 'pending', amount: termFee, term, year: currentYear }]);
+                }
+                await refreshData();
+                showToast("Bank proof uploaded. Admin will verify.");
+                parentPaymentPortalView();
+            } catch (err) { showToast(err.message, true); } finally { showLoading(false); }
+        });
     }
 }
-async function parentPaymentHistoryView() { let payments = schoolData.payments.filter(p => p.student_id === currentUser.studentId); let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Payment History</h2><ul class="space-y-2">${payments.map(p => `<li class="border-b pb-2">₦${p.amount.toLocaleString()} - ${p.term} ${p.year} - ${p.payment_method} (Ref: ${p.payment_reference || 'N/A'})</li>`).join('')}</ul>${payments.length === 0 ? '<p class="text-gray-500">No payments recorded.</p>' : ''}</div>`; document.getElementById('mainContent').innerHTML = html; }
+
+async function parentPaymentHistoryView() {
+    let payments = schoolData.payments.filter(p => p.student_id === currentUser.studentId);
+    let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Payment History</h2>
+        <ul class="space-y-2">${payments.map(p => `<li class="border-b pb-2">₦${p.amount.toLocaleString()} - ${p.term} ${p.year} - ${p.payment_method} (Ref: ${p.payment_reference || 'N/A'})</li>`).join('')}</ul>
+        ${payments.length === 0 ? '<p class="text-gray-500">No payments recorded.</p>' : ''}
+    </div>`;
+    document.getElementById('mainContent').innerHTML = html;
+}
 
 // ========== TEACHER FUNCTIONS ==========
-async function myClassView() { let teacherClass = currentUser.assigned_class || (schoolData.teachers.find(t => t.id === currentUser.id)?.assigned_class) || CLASSES[0]; let students = schoolData.students.filter(s => s.academic_class === teacherClass); let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold">My Academic Class: ${teacherClass}</h2><button id="writeAppraisalBtn" class="apply-btn mt-2 mb-4 px-4 py-2">Write Appraisal</button><div id="appraisalList"></div><h3 class="font-bold mt-4">Students in class:</h3><ul class="mt-2">${students.map(s => `<li>${s.name} (${s.reg_number}) - Section: ${s.section}</li>`).join('')}</ul></div>`; document.getElementById('mainContent').innerHTML = html; let appraisals = schoolData.studentAppraisals.filter(a => students.some(s => s.id === a.student_id)); document.getElementById('appraisalList').innerHTML = `<h3 class="font-bold mt-4">Recent Appraisals</h3>${appraisals.map(a => { let s = students.find(st => st.id === a.student_id); return `<div class="appraisal-card p-3 my-2 border rounded"><p><strong>${s?.name}</strong> rated ${a.rating}/5</p><p>${escapeHtml(a.comment)}</p><small>${new Date(a.created_at).toLocaleDateString()}</small></div>`; }).join('') || '<p>None</p>'}`; document.getElementById('writeAppraisalBtn').onclick = () => { let sid = prompt("Student ID:"); let comment = prompt("Comment:"); let rating = prompt("Rating 1-5:"); if (sid && comment && rating) saveAppraisal(sid, comment, parseInt(rating)).then(async () => { await refreshData(); myClassView(); }); }; }
-async function saveAppraisal(studentId, comment, rating) { if (!studentId || !comment || rating < 1 || rating > 5) { showToast("Invalid appraisal data", true); return false; } const { error } = await supabaseClient.from('student_appraisals').insert([{ student_id: studentId, comment, rating, created_by: currentUser.id, created_at: new Date() }]); if (error) { showToast(error.message, true); return false; } await refreshData(); showToast("Student appraisal saved"); return true; }
-async function attendanceView() { let teacherClass = currentUser.assigned_class || CLASSES[0]; let students = schoolData.students.filter(s => s.academic_class === teacherClass); let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold">Attendance - ${teacherClass}</h2><div id="attList"></div><button id="submitAttendance" class="apply-btn mt-3 w-full py-2">Submit</button></div>`; document.getElementById('mainContent').innerHTML = html; document.getElementById('attList').innerHTML = `<table class="w-full border"><thead><tr><th>Name</th><th>Present</th></tr></thead><tbody>${students.map(s => `<tr><td class="p-2">${s.name}</td><td class="p-2"><input type="checkbox" class="attCheck" data-id="${s.id}"></td></tr>`).join('')}</tbody></table>`; document.getElementById('submitAttendance').onclick = () => showToast("Attendance recorded (demo)"); }
+async function myClassView() {
+    let teacherClass = currentUser.assigned_class || (schoolData.teachers.find(t => t.id === currentUser.id)?.assigned_class) || CLASSES[0];
+    let students = schoolData.students.filter(s => s.academic_class === teacherClass);
+    let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold">My Academic Class: ${teacherClass}</h2>
+        <button id="writeAppraisalBtn" class="apply-btn mt-2 mb-4 px-4 py-2">Write Appraisal</button>
+        <div id="appraisalList"></div>
+        <h3 class="font-bold mt-4">Students in class:</h3>
+        <ul class="mt-2">${students.map(s => `<li>${s.name} (${s.reg_number}) - Section: ${s.section}</li>`).join('')}</ul>
+    </div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    let appraisals = schoolData.studentAppraisals.filter(a => students.some(s => s.id === a.student_id));
+    document.getElementById('appraisalList').innerHTML = `<h3 class="font-bold mt-4">Recent Appraisals</h3>${appraisals.map(a => { let s = students.find(st => st.id === a.student_id); return `<div class="appraisal-card p-3 my-2 border rounded"><p><strong>${s?.name}</strong> rated ${a.rating}/5</p><p>${escapeHtml(a.comment)}</p><small>${new Date(a.created_at).toLocaleDateString()}</small></div>`; }).join('') || '<p>None</p>'}`;
+    document.getElementById('writeAppraisalBtn').onclick = () => {
+        let sid = prompt("Student ID:");
+        let comment = prompt("Comment:");
+        let rating = prompt("Rating 1-5:");
+        if (sid && comment && rating) saveAppraisal(sid, comment, parseInt(rating)).then(async () => { await refreshData(); myClassView(); });
+    };
+}
+
+async function saveAppraisal(studentId, comment, rating) {
+    if (!studentId || !comment || rating < 1 || rating > 5) { showToast("Invalid appraisal data", true); return false; }
+    const { error } = await supabaseClient.from('student_appraisals').insert([{ student_id: studentId, comment, rating, created_by: currentUser.id, created_at: new Date() }]);
+    if (error) { showToast(error.message, true); return false; }
+    await refreshData();
+    showToast("Student appraisal saved");
+    return true;
+}
+
 async function teacherResultEntry() {
     let students = schoolData.students, currentYear = new Date().getFullYear();
     let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📝 Enter Subject Grades</h2>
-    <div class="filter-row">
-        <select id="teacherTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select>
-        <input id="teacherYear" type="number" value="${currentYear}" class="w-28">
-        <select id="teacherSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s => `<option>${s}</option>`).join('')}</select>
-        <select id="teacherClassFilter"><option value="all">All Classes</option>${CLASSES.map(c => `<option>${c}</option>`).join('')}</select>
-        <input id="teacherSearch" placeholder="🔍 Search student" class="flex-1">
-    </div>
-    <select id="teacherStudentSelect" class="border p-3 w-full mb-4 rounded-xl"><option value="">Select Student</option></select>
-    <div class="bg-gray-50 p-4 rounded-2xl">
-        <div class="flex flex-wrap gap-2">
-            <input id="newSubject" placeholder="Subject" class="flex-1 border rounded p-2">
-            <input id="ca1Val" placeholder="CA1 (0-20)" type="number" class="w-24 border rounded p-2">
-            <input id="ca2Val" placeholder="CA2 (0-20)" type="number" class="w-24 border rounded p-2">
-            <input id="examVal" placeholder="Exam (0-60)" type="number" class="w-24 border rounded p-2">
-            <button id="addSubjectGradeBtn" class="apply-btn px-4 py-2 rounded">+ Add</button>
+        <div class="filter-row">
+            <select id="teacherTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select>
+            <input id="teacherYear" type="number" value="${currentYear}" class="w-28">
+            <select id="teacherSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s => `<option>${s}</option>`).join('')}</select>
+            <select id="teacherClassFilter"><option value="all">All Classes</option>${CLASSES.map(c => `<option>${c}</option>`).join('')}</select>
+            <input id="teacherSearch" placeholder="🔍 Search student" class="flex-1">
         </div>
-        <div id="existingSubjectsList" class="mt-4"></div>
-    </div>
+        <select id="teacherStudentSelect" class="border p-3 w-full mb-4 rounded-xl"><option value="">Select Student</option></select>
+        <div class="bg-gray-50 p-4 rounded-2xl">
+            <div class="flex flex-wrap gap-2">
+                <input id="newSubject" placeholder="Subject" class="flex-1 border rounded p-2">
+                <input id="ca1Val" placeholder="CA1 (0-20)" type="number" class="w-24 border rounded p-2">
+                <input id="ca2Val" placeholder="CA2 (0-20)" type="number" class="w-24 border rounded p-2">
+                <input id="examVal" placeholder="Exam (0-60)" type="number" class="w-24 border rounded p-2">
+                <button id="addSubjectGradeBtn" class="apply-btn px-4 py-2 rounded">+ Add</button>
+            </div>
+            <div id="existingSubjectsList" class="mt-4"></div>
+        </div>
     </div>`;
     document.getElementById('mainContent').innerHTML = html;
 
@@ -1341,8 +1510,8 @@ async function teacherResultEntry() {
     async function loadSubjects(sid) {
         if (!sid) return;
         let term = document.getElementById('teacherTerm').value;
-        let year = document.getElementById('teacherYear').value;
-        let existing = schoolData.results.filter(r => r.student_id == sid && r.term === term && r.year == year);
+        let year = parseInt(document.getElementById('teacherYear').value);
+        let existing = schoolData.results.filter(r => r.student_id == sid && r.term === term && r.year === year);
         let container = document.getElementById('existingSubjectsList');
         if (existing.length === 0) {
             container.innerHTML = '<p class="text-gray-500">No subjects added yet.</p>';
@@ -1372,64 +1541,283 @@ async function teacherResultEntry() {
         let term = document.getElementById('teacherTerm').value;
         let year = parseInt(document.getElementById('teacherYear').value);
         let total = ca1 + ca2 + exam;
-        
         showLoading(true);
         try {
-            // Check for duplicate subject
             let existing = schoolData.results.find(r => r.student_id == sid && r.term === term && r.year === year && r.subject === subject);
-            if (existing) {
-                showToast("Subject already entered for this term. Delete existing to update.", true);
-                return;
-            }
-            const { error } = await supabaseClient.from('results').insert([{
-                student_id: sid,
-                term: term,
-                year: year,
-                subject: subject,
-                ca1: ca1,
-                ca2: ca2,
-                exam: exam,
-                total: total
-            }]);
+            if (existing) { showToast("Subject already entered for this term.", true); return; }
+            const { error } = await supabaseClient.from('results').insert([{ student_id: sid, term, year, subject, ca1, ca2, exam, total }]);
             if (error) throw error;
             await refreshData();
             showToast(`Grade for ${subject} added successfully`);
-            // Clear inputs
             document.getElementById('newSubject').value = '';
             document.getElementById('ca1Val').value = '';
             document.getElementById('ca2Val').value = '';
             document.getElementById('examVal').value = '';
             loadSubjects(sid);
-        } catch (err) {
-            console.error("Error adding grade:", err);
-            showToast(err.message, true);
-        } finally {
-            showLoading(false);
-        }
+        } catch (err) { console.error(err); showToast(err.message, true); } finally { showLoading(false); }
     };
 
     document.getElementById('teacherStudentSelect').addEventListener('change', (e) => loadSubjects(e.target.value));
-    document.getElementById('teacherTerm').addEventListener('change', () => {
-        let sid = document.getElementById('teacherStudentSelect').value;
-        if (sid) loadSubjects(sid);
-    });
-    document.getElementById('teacherYear').addEventListener('change', () => {
-        let sid = document.getElementById('teacherStudentSelect').value;
-        if (sid) loadSubjects(sid);
-    });
+    document.getElementById('teacherTerm').addEventListener('change', () => { let sid = document.getElementById('teacherStudentSelect').value; if (sid) loadSubjects(sid); });
+    document.getElementById('teacherYear').addEventListener('change', () => { let sid = document.getElementById('teacherStudentSelect').value; if (sid) loadSubjects(sid); });
     document.getElementById('teacherSectionFilter').addEventListener('change', filterStudents);
     document.getElementById('teacherClassFilter').addEventListener('change', filterStudents);
     document.getElementById('teacherSearch').addEventListener('input', filterStudents);
     filterStudents();
 }
+
+async function attendanceView() {
+    let teacherClass = currentUser.assigned_class || CLASSES[0];
+    let students = schoolData.students.filter(s => s.academic_class === teacherClass);
+    let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold">Attendance - ${teacherClass}</h2>
+        <div id="attList"></div><button id="submitAttendance" class="apply-btn mt-3 w-full py-2">Submit</button>
+    </div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    document.getElementById('attList').innerHTML = `<table class="w-full border"><thead><tr><th>Name</th><th>Present</th></tr></thead><tbody>${students.map(s => `<tr><td class="p-2">${s.name}</td><td class="p-2"><input type="checkbox" class="attCheck" data-id="${s.id}"></td></tr>`).join('')}</tbody><td>`;
+    document.getElementById('submitAttendance').onclick = () => showToast("Attendance recorded (demo)");
+}
+
 // ========== HEADTEACHER FUNCTIONS ==========
-async function sectionStudentsView() { let students = schoolData.students; let html = `<div class="card p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">📚 Students by Section</h2><button id="addStudentFromSectionBtn" class="apply-btn px-4 py-2 rounded-full text-sm">+ Enroll New</button></div><div class="filter-row"><select id="sectionStudentsSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s => `<option>${s}</option>`).join('')}</select><select id="sectionStudentsClassFilter"><option value="all">All Classes</option>${CLASSES.map(c => `<option>${c}</option>`).join('')}</select><input id="sectionStudentsSearch" placeholder="🔍 Search name/reg" class="flex-1 border rounded-xl p-2"></div><div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th>Reg No</th><th>Name</th><th>Parent</th><th>Section</th><th>Class</th><th>Term Fee (₦)</th><th>Actions</th></table></thead><tbody id="sectionStudentsTableBody"></tbody>}</div></div>`; document.getElementById('mainContent').innerHTML = html; const tbody = document.getElementById('sectionStudentsTableBody'); const sectionFilter = document.getElementById('sectionStudentsSectionFilter'); const classFilter = document.getElementById('sectionStudentsClassFilter'); const searchInput = document.getElementById('sectionStudentsSearch'); function render() { let section = sectionFilter.value, classVal = classFilter.value, search = searchInput.value.toLowerCase(); let filtered = students.filter(s => (section === 'all' || s.section === section) && (classVal === 'all' || s.academic_class === classVal) && (s.name.toLowerCase().includes(search) || (s.reg_number || '').toLowerCase().includes(search))); tbody.innerHTML = filtered.map(s => `<tr><td class="editable-student-section" data-field="reg_number" data-id="${s.id}">${escapeHtml(s.reg_number)}</td><td class="editable-student-section" data-field="name" data-id="${s.id}">${escapeHtml(s.name)}</td><td class="editable-student-section" data-field="parent_name" data-id="${s.id}">${escapeHtml(s.parent_name || '')}</td><td><select class="section-update" data-id="${s.id}">${SECTIONS.map(sec => `<option value="${sec}" ${s.section === sec ? 'selected' : ''}>${sec}</option>`).join('')}</select></td><td><select class="class-update" data-id="${s.id}">${CLASSES.map(cls => `<option value="${cls}" ${s.academic_class === cls ? 'selected' : ''}>${cls}</option>`).join('')}</select></td><td class="editable-student-section" data-field="term_fee" data-id="${s.id}">${s.term_fee || 30000}</td><td><button class="delete-student-section text-red-500" data-id="${s.id}">Delete</button></td></tr>`).join(''); attachSectionEvents(); } function attachSectionEvents() { document.querySelectorAll('.editable-student-section').forEach(cell => { cell.setAttribute('contenteditable', 'true'); cell.addEventListener('blur', async () => { let field = cell.dataset.field, id = cell.dataset.id, val = cell.innerText.trim(); if (field === 'term_fee') val = parseFloat(val) || 0; await supabaseClient.from('students').update({ [field]: val }).eq('id', id); await refreshData(); sectionStudentsView(); showToast(`${field} updated`); }); }); document.querySelectorAll('.section-update').forEach(select => { select.addEventListener('change', async (e) => { let id = select.dataset.id; let newSection = e.target.value; await supabaseClient.from('students').update({ section: newSection }).eq('id', id); await refreshData(); sectionStudentsView(); showToast(`Section updated`); }); }); document.querySelectorAll('.class-update').forEach(select => { select.addEventListener('change', async (e) => { let id = select.dataset.id; let newClass = e.target.value; await supabaseClient.from('students').update({ academic_class: newClass }).eq('id', id); await refreshData(); sectionStudentsView(); showToast(`Class updated`); }); }); document.querySelectorAll('.delete-student-section').forEach(btn => btn.addEventListener('click', async () => { if (confirm("Delete this student permanently?")) { await supabaseClient.from('students').delete().eq('id', btn.dataset.id); await refreshData(); sectionStudentsView(); showToast("Student deleted"); } })); } sectionFilter.addEventListener('change', render); classFilter.addEventListener('change', render); searchInput.addEventListener('input', render); document.getElementById('addStudentFromSectionBtn').addEventListener('click', () => enrollViewModern()); render(); }
-async function sectionFeesView() { let students = schoolData.students; let currentYear = new Date().getFullYear(); let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">💰 Section Fee Report</h2><div class="filter-row"><label>Term:</label><select id="sectionFeesTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select><label>Year:</label><input type="number" id="sectionFeesYear" value="${currentYear}" class="border rounded-xl p-2 w-28"><button id="refreshSectionFees" class="apply-btn px-4 py-2 rounded-full">Refresh</button></div><div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th>Section</th><th># Students</th><th>Total Term Fee (₦)</th><th>Total Paid (₦)</th><th>Total Due (₦)</th><th>Collection Rate (%)</th><th>Action</th></tr></thead><tbody id="sectionFeesTableBody"></tbody>}</div><div class="mt-6" id="sectionFeesDetailArea"></div></div>`; document.getElementById('mainContent').innerHTML = html; const termSelect = document.getElementById('sectionFeesTerm'); const yearInput = document.getElementById('sectionFeesYear'); const tbody = document.getElementById('sectionFeesTableBody'); const detailArea = document.getElementById('sectionFeesDetailArea'); async function loadReport() { const term = termSelect.value, year = parseInt(yearInput.value); let rows = []; for (const section of SECTIONS) { const sectionStudents = students.filter(s => s.section === section); const studentIds = sectionStudents.map(s => s.id); const totalFeeExpected = sectionStudents.reduce((sum, s) => sum + (s.term_fee || 30000), 0); let totalPaid = 0; for (const sid of studentIds) { const payments = schoolData.payments.filter(p => p.student_id === sid && p.term === term && p.year === year); totalPaid += payments.reduce((sum, p) => sum + (p.amount || 0), 0); } const totalDue = Math.max(0, totalFeeExpected - totalPaid); const collectionRate = totalFeeExpected === 0 ? 0 : (totalPaid / totalFeeExpected) * 100; rows.push({ section, studentCount: sectionStudents.length, totalFeeExpected, totalPaid, totalDue, collectionRate: collectionRate.toFixed(1) }); } tbody.innerHTML = rows.map(row => `<tr><td class="font-medium">${row.section}</td><td class="text-center">${row.studentCount}</td><td class="text-right">₦${row.totalFeeExpected.toLocaleString()}</td><td class="text-right">₦${row.totalPaid.toLocaleString()}</td><td class="text-right">₦${row.totalDue.toLocaleString()}</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-emerald-600 h-2.5 rounded-full" style="width: ${row.collectionRate}%"></div></div>${row.collectionRate}%</td><td><button class="viewSectionDetailsBtn bg-blue-600 text-white px-3 py-1 rounded-full text-sm" data-section="${row.section}" data-term="${term}" data-year="${year}">View Students</button></td></tr>`).join(''); document.querySelectorAll('.viewSectionDetailsBtn').forEach(btn => { btn.addEventListener('click', async () => { const section = btn.dataset.section, term = btn.dataset.term, year = btn.dataset.year; const sectionStudents = students.filter(s => s.section === section); if (sectionStudents.length === 0) { detailArea.innerHTML = `<div class="bg-yellow-50 p-4 rounded-xl">No students in ${section}</div>`; return; } let detailHtml = `<h3 class="font-bold text-lg mt-4 mb-2">${section} – Student Fee Details (${term} ${year})</h3><div class="overflow-x-auto"><table class="min-w-full border"><thead class="bg-gray-50"><tr><th>Student</th><th>Reg No</th><th>Term Fee (₦)</th><th>Paid (₦)</th><th>Due (₦)</th><th>Status</th></tr></thead><tbody>`; for (const stu of sectionStudents) { const termFee = stu.term_fee || 30000; const paid = schoolData.payments.filter(p => p.student_id === stu.id && p.term === term && p.year === year).reduce((s, p) => s + (p.amount || 0), 0); const due = Math.max(0, termFee - paid); const status = due <= 0 ? 'Paid' : (paid > 0 ? 'Partial' : 'Unpaid'); detailHtml += `<tr><td>${escapeHtml(stu.name)}</td><td>${stu.reg_number}</td><td class="text-right">₦${termFee.toLocaleString()}</td><td class="text-right">₦${paid.toLocaleString()}</td><td class="text-right">₦${due.toLocaleString()}</td><td><span class="status-${status.toLowerCase()} px-2 py-0.5 rounded-full text-xs">${status}</span></td></tr>`; } detailHtml += `</tbody><tr></div>`; detailArea.innerHTML = detailHtml; }); }); } termSelect.addEventListener('change', loadReport); yearInput.addEventListener('change', loadReport); document.getElementById('refreshSectionFees').addEventListener('click', async () => { await refreshData(); students = schoolData.students; loadReport(); showToast("Section fee report refreshed"); }); loadReport(); }
+async function sectionStudentsView() {
+    let students = schoolData.students;
+    let html = `<div class="card p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">📚 Students by Section</h2><button id="addStudentFromSectionBtn" class="apply-btn px-4 py-2 rounded-full text-sm">+ Enroll New</button></div><div class="filter-row"><select id="sectionStudentsSectionFilter"><option value="all">All Sections</option>${SECTIONS.map(s => `<option>${s}</option>`).join('')}</select><select id="sectionStudentsClassFilter"><option value="all">All Classes</option>${CLASSES.map(c => `<option>${c}</option>`).join('')}</select><input id="sectionStudentsSearch" placeholder="🔍 Search name/reg" class="flex-1 border rounded-xl p-2"></div><div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th>Reg No</th><th>Name</th><th>Parent</th><th>Section</th><th>Class</th><th>Term Fee (₦)</th><th>Actions</th></tr></thead><tbody id="sectionStudentsTableBody"></tbody>}</div></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    const tbody = document.getElementById('sectionStudentsTableBody');
+    const sectionFilter = document.getElementById('sectionStudentsSectionFilter');
+    const classFilter = document.getElementById('sectionStudentsClassFilter');
+    const searchInput = document.getElementById('sectionStudentsSearch');
+    function render() {
+        let section = sectionFilter.value, classVal = classFilter.value, search = searchInput.value.toLowerCase();
+        let filtered = students.filter(s => (section === 'all' || s.section === section) && (classVal === 'all' || s.academic_class === classVal) && (s.name.toLowerCase().includes(search) || (s.reg_number || '').toLowerCase().includes(search)));
+        tbody.innerHTML = filtered.map(s => `<tr>
+            <td class="editable-student-section" data-field="reg_number" data-id="${s.id}">${escapeHtml(s.reg_number)}</td>
+            <td class="editable-student-section" data-field="name" data-id="${s.id}">${escapeHtml(s.name)}</td>
+            <td class="editable-student-section" data-field="parent_name" data-id="${s.id}">${escapeHtml(s.parent_name || '')}</td>
+            <td><select class="section-update" data-id="${s.id}">${SECTIONS.map(sec => `<option value="${sec}" ${s.section === sec ? 'selected' : ''}>${sec}</option>`).join('')}</select></td>
+            <td><select class="class-update" data-id="${s.id}">${CLASSES.map(cls => `<option value="${cls}" ${s.academic_class === cls ? 'selected' : ''}>${cls}</option>`).join('')}</select></td>
+            <td class="editable-student-section" data-field="term_fee" data-id="${s.id}">${s.term_fee || 30000}</td>
+            <td><button class="delete-student-section text-red-500" data-id="${s.id}">Delete</button></td>
+        </tr>`).join('');
+        attachSectionEvents();
+    }
+    function attachSectionEvents() {
+        document.querySelectorAll('.editable-student-section').forEach(cell => {
+            cell.setAttribute('contenteditable', 'true');
+            cell.addEventListener('blur', async () => {
+                let field = cell.dataset.field, id = cell.dataset.id, val = cell.innerText.trim();
+                if (field === 'term_fee') val = parseFloat(val) || 0;
+                await supabaseClient.from('students').update({ [field]: val }).eq('id', id);
+                await refreshData(); sectionStudentsView();
+                showToast(`${field} updated`);
+            });
+        });
+        document.querySelectorAll('.section-update').forEach(select => {
+            select.addEventListener('change', async (e) => {
+                let id = select.dataset.id;
+                let newSection = e.target.value;
+                await supabaseClient.from('students').update({ section: newSection }).eq('id', id);
+                await refreshData(); sectionStudentsView();
+                showToast(`Section updated`);
+            });
+        });
+        document.querySelectorAll('.class-update').forEach(select => {
+            select.addEventListener('change', async (e) => {
+                let id = select.dataset.id;
+                let newClass = e.target.value;
+                await supabaseClient.from('students').update({ academic_class: newClass }).eq('id', id);
+                await refreshData(); sectionStudentsView();
+                showToast(`Class updated`);
+            });
+        });
+        document.querySelectorAll('.delete-student-section').forEach(btn => btn.addEventListener('click', async () => {
+            if (confirm("Delete this student permanently?")) {
+                await supabaseClient.from('students').delete().eq('id', btn.dataset.id);
+                await refreshData(); sectionStudentsView();
+                showToast("Student deleted");
+            }
+        }));
+    }
+    sectionFilter.addEventListener('change', render);
+    classFilter.addEventListener('change', render);
+    searchInput.addEventListener('input', render);
+    document.getElementById('addStudentFromSectionBtn').addEventListener('click', () => enrollViewModern());
+    render();
+}
+
+async function sectionFeesView() {
+    let students = schoolData.students;
+    let currentYear = new Date().getFullYear();
+    let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">💰 Section Fee Report</h2>
+        <div class="filter-row"><label>Term:</label><select id="sectionFeesTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select>
+        <label>Year:</label><input type="number" id="sectionFeesYear" value="${currentYear}" class="border rounded-xl p-2 w-28">
+        <button id="refreshSectionFees" class="apply-btn px-4 py-2 rounded-full">Refresh</button></div>
+        <div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><td><th>Section</th><th># Students</th><th>Total Term Fee (₦)</th><th>Total Paid (₦)</th><th>Total Due (₦)</th><th>Collection Rate (%)</th><th>Action</th></tr></thead><tbody id="sectionFeesTableBody"></tbody>}</div><div class="mt-6" id="sectionFeesDetailArea"></div></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    const termSelect = document.getElementById('sectionFeesTerm');
+    const yearInput = document.getElementById('sectionFeesYear');
+    const tbody = document.getElementById('sectionFeesTableBody');
+    const detailArea = document.getElementById('sectionFeesDetailArea');
+    async function loadReport() {
+        const term = termSelect.value, year = parseInt(yearInput.value);
+        let rows = [];
+        for (const section of SECTIONS) {
+            const sectionStudents = students.filter(s => s.section === section);
+            const studentIds = sectionStudents.map(s => s.id);
+            const totalFeeExpected = sectionStudents.reduce((sum, s) => sum + (s.term_fee || 30000), 0);
+            let totalPaid = 0;
+            for (const sid of studentIds) {
+                const payments = schoolData.payments.filter(p => p.student_id === sid && p.term === term && p.year === year);
+                totalPaid += payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+            }
+            const totalDue = Math.max(0, totalFeeExpected - totalPaid);
+            const collectionRate = totalFeeExpected === 0 ? 0 : (totalPaid / totalFeeExpected) * 100;
+            rows.push({ section, studentCount: sectionStudents.length, totalFeeExpected, totalPaid, totalDue, collectionRate: collectionRate.toFixed(1) });
+        }
+        tbody.innerHTML = rows.map(row => `<tr><td class="font-medium">${row.section}</td><td class="text-center">${row.studentCount}</td><td class="text-right">₦${row.totalFeeExpected.toLocaleString()}</td><td class="text-right">₦${row.totalPaid.toLocaleString()}</td><td class="text-right">₦${row.totalDue.toLocaleString()}</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-emerald-600 h-2.5 rounded-full" style="width: ${row.collectionRate}%"></div></div>${row.collectionRate}%</td><td><button class="viewSectionDetailsBtn bg-blue-600 text-white px-3 py-1 rounded-full text-sm" data-section="${row.section}" data-term="${term}" data-year="${year}">View Students</button></td></tr>`).join('');
+        document.querySelectorAll('.viewSectionDetailsBtn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const section = btn.dataset.section, term = btn.dataset.term, year = btn.dataset.year;
+                const sectionStudents = students.filter(s => s.section === section);
+                if (sectionStudents.length === 0) { detailArea.innerHTML = `<div class="bg-yellow-50 p-4 rounded-xl">No students in ${section}</div>`; return; }
+                let detailHtml = `<h3 class="font-bold text-lg mt-4 mb-2">${section} – Student Fee Details (${term} ${year})</h3><div class="overflow-x-auto"><table class="min-w-full border"><thead class="bg-gray-50"><tr><th>Student</th><th>Reg No</th><th>Term Fee (₦)</th><th>Paid (₦)</th><th>Due (₦)</th><th>Status</th></tr></thead><tbody>`;
+                for (const stu of sectionStudents) {
+                    const termFee = stu.term_fee || 30000;
+                    const paid = schoolData.payments.filter(p => p.student_id === stu.id && p.term === term && p.year === year).reduce((s, p) => s + (p.amount || 0), 0);
+                    const due = Math.max(0, termFee - paid);
+                    const status = due <= 0 ? 'Paid' : (paid > 0 ? 'Partial' : 'Unpaid');
+                    detailHtml += `<tr><td>${escapeHtml(stu.name)}</td><td>${stu.reg_number}</td><td class="text-right">₦${termFee.toLocaleString()}</td><td class="text-right">₦${paid.toLocaleString()}</td><td class="text-right">₦${due.toLocaleString()}</td><td><span class="status-${status.toLowerCase()} px-2 py-0.5 rounded-full text-xs">${status}</span></td></tr>`;
+                }
+                detailHtml += `</tbody></table></div>`;
+                detailArea.innerHTML = detailHtml;
+            });
+        });
+    }
+    termSelect.addEventListener('change', loadReport);
+    yearInput.addEventListener('change', loadReport);
+    document.getElementById('refreshSectionFees').addEventListener('click', async () => { await refreshData(); students = schoolData.students; loadReport(); showToast("Section fee report refreshed"); });
+    loadReport();
+}
 
 // ========== DIRECTOR ANALYSIS FUNCTIONS ==========
-async function staffPerformanceAnalysisView() { let staffTeachers = schoolData.teachers.map(t => ({ id: t.id, name: t.name, role: t.role, source: 'teacher' })); let staffProfiles = schoolData.profiles.filter(p => p.role && p.role !== 'parent').map(p => ({ id: p.id, name: p.full_name, role: p.role, source: 'profile' })); let allStaff = [...staffTeachers, ...staffProfiles]; const appraisals = schoolData.staffAppraisals; const staffPerformance = allStaff.map(staff => { const myAppraisals = appraisals.filter(a => a.staff_id === staff.id); const avgRating = myAppraisals.length ? myAppraisals.reduce((s, a) => s + (a.rating || 0), 0) / myAppraisals.length : 0; const overallScore = (avgRating / 5) * 100; return { ...staff, avgRating, overallScore: overallScore.toFixed(1), appraisalCount: myAppraisals.length }; }); let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📈 Staff Performance Analysis</h2><div class="filter-row"><select id="staffRolePerfFilter"><option value="all">All Roles</option>${[...new Set(allStaff.map(s => s.role))].map(r => `<option>${r}</option>`).join('')}</select><input type="text" id="staffPerfSearch" placeholder="🔍 Search name" class="flex-1 border rounded-xl p-2"><button id="refreshPerfBtn" class="apply-btn px-4 py-2 rounded-full">Refresh</button></div><div class="table-container overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th>Name</th><th>Role</th><th>Average Rating (1-5)</th><th>Overall Score (%)</th><th># Appraisals</th></tr></thead><tbody id="perfTableBody"></tbody>}</div><canvas id="staffPerformanceChart" class="mt-8 max-h-80"></canvas></div>`; document.getElementById('mainContent').innerHTML = html; function renderTable() { const roleFilter = document.getElementById('staffRolePerfFilter').value; const search = document.getElementById('staffPerfSearch').value.toLowerCase(); let filtered = staffPerformance.filter(s => (roleFilter === 'all' || s.role === roleFilter) && (s.name.toLowerCase().includes(search) || (s.role || '').toLowerCase().includes(search))); const tbody = document.getElementById('perfTableBody'); tbody.innerHTML = filtered.map(s => `<tr><td class="font-medium">${escapeHtml(s.name)}</td><td>${s.role}</td><td>${s.avgRating.toFixed(1)} / 5</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-emerald-600 h-2.5 rounded-full" style="width: ${s.overallScore}%"></div></div>${s.overallScore}%</td><td>${s.appraisalCount}</td></tr>`).join(''); const top10 = [...filtered].sort((a, b) => b.overallScore - a.overallScore).slice(0, 10); if (window.staffPerfChart) window.staffPerfChart.destroy(); window.staffPerfChart = new Chart(document.getElementById('staffPerformanceChart'), { type: 'bar', data: { labels: top10.map(s => s.name.split(' ')[0]), datasets: [{ label: 'Overall Performance Score (%)', data: top10.map(s => s.overallScore), backgroundColor: 'rgba(16, 185, 129, 0.6)', borderRadius: 8 }] }, options: { scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Score %' } } } } }); } document.getElementById('staffRolePerfFilter').addEventListener('change', renderTable); document.getElementById('staffPerfSearch').addEventListener('input', renderTable); document.getElementById('refreshPerfBtn').addEventListener('click', async () => { await refreshData(); staffPerformanceAnalysisView(); }); renderTable(); }
-async function academicPerformanceView() { let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold mb-4">Academic Performance by Class</h2><canvas id="perfChart" height="200"></canvas></div>`; document.getElementById('mainContent').innerHTML = html; setTimeout(() => { new Chart(document.getElementById('perfChart'), { type: 'bar', data: { labels: CLASSES, datasets: [{ label: 'Average Score', data: CLASSES.map(ac => { let avg = schoolData.results.filter(r => schoolData.students.find(s => s.id === r.student_id)?.academic_class === ac).reduce((a, b) => a + (b.ca1 + b.ca2 + b.exam), 0) / Math.max(1, schoolData.results.filter(r => schoolData.students.find(s => s.id === r.student_id)?.academic_class === ac).length); return avg || 0; }), backgroundColor: '#f59e0b' }] } }); }, 100); }
-async function sectionAnalysisView() { const sections = SECTIONS; const currentYear = new Date().getFullYear(); let html = `<div class="card p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">📊 Section‑wise Academic Analysis</h2><button id="refreshSectionAnalysis" class="apply-btn px-4 py-2 rounded-full"><i class="fas fa-sync-alt"></i> Refresh</button></div><div class="filter-row"><label>Term:</label><select id="sectionAnalysisTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select><label>Year:</label><input type="number" id="sectionAnalysisYear" value="${currentYear}" class="border rounded-xl p-2 w-28"><label>Subject:</label><select id="sectionAnalysisSubject"><option value="all">All Subjects</option>${[...new Set(schoolData.results.map(r => r.subject))].map(s => `<option>${s}</option>`).join('')}</select></div><div class="grid lg:grid-cols-2 gap-6"><div class="border rounded-2xl p-4 bg-white"><h3 class="text-lg font-bold mb-3">📋 Performance Summary</h3><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-gray-100"><tr><th>Section</th><th>Students</th><th>Avg Score (%)</th><th>Pass Rate (%)</th><th>Top Subject</th></tr></thead><tbody id="sectionSummaryBody"></tbody>}</div></div><div class="border rounded-2xl p-4 bg-white"><h3 class="text-lg font-bold mb-3">📈 Average Score by Section</h3><canvas id="sectionAvgChart" class="max-h-64"></canvas></div></div><div class="mt-6 border rounded-2xl p-4 bg-white"><h3 class="text-lg font-bold mb-3">🔍 Subject‑wise Breakdown</h3><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-gray-100"><tr><th>Section</th><th>Subject</th><th>Average Score</th><th>Highest Score</th><th>Lowest Score</th></tr></thead><tbody id="sectionSubjectDetailBody"></tbody>}</div></div></div>`; document.getElementById('mainContent').innerHTML = html; async function loadAnalysis() { const term = document.getElementById('sectionAnalysisTerm').value; const year = parseInt(document.getElementById('sectionAnalysisYear').value); const selectedSubject = document.getElementById('sectionAnalysisSubject').value; const summaryRows = []; const sectionAvgScores = []; for (const section of sections) { const studentsInSection = schoolData.students.filter(s => s.section === section); const studentIds = studentsInSection.map(s => s.id); let results = schoolData.results.filter(r => studentIds.includes(r.student_id) && r.term === term && r.year === year); if (selectedSubject !== 'all') results = results.filter(r => r.subject === selectedSubject); const studentAverages = []; for (const sid of studentIds) { const studentResults = results.filter(r => r.student_id === sid); const total = studentResults.reduce((s, r) => s + (r.total || 0), 0); const avg = studentResults.length ? total / studentResults.length : 0; studentAverages.push(avg); } const avgScore = studentAverages.length ? studentAverages.reduce((a, b) => a + b, 0) / studentAverages.length : 0; const passCount = studentAverages.filter(s => s >= 50).length; const passRate = studentAverages.length ? (passCount / studentAverages.length) * 100 : 0; let subjectScores = {}; for (const r of results) { if (!subjectScores[r.subject]) subjectScores[r.subject] = { total: 0, count: 0 }; subjectScores[r.subject].total += r.total; subjectScores[r.subject].count += 1; } let topSubject = "—", bestAvg = 0; for (const [sub, data] of Object.entries(subjectScores)) { const subAvg = data.total / data.count; if (subAvg > bestAvg) { bestAvg = subAvg; topSubject = sub; } } summaryRows.push({ section, studentCount: studentIds.length, avgScore, passRate, topSubject }); sectionAvgScores.push(avgScore); } document.getElementById('sectionSummaryBody').innerHTML = summaryRows.map(row => `<tr><td class="font-medium">${row.section}</td><td class="text-center">${row.studentCount}</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-emerald-600 h-2.5 rounded-full" style="width: ${row.avgScore}%"></div></div>${row.avgScore.toFixed(1)}%</td><td>${row.passRate.toFixed(1)}%</td><td>${escapeHtml(row.topSubject)}</td></tr>`).join(''); if (window.sectionAvgChart) window.sectionAvgChart.destroy(); window.sectionAvgChart = new Chart(document.getElementById('sectionAvgChart'), { type: 'bar', data: { labels: sections, datasets: [{ label: 'Average Score (%)', data: sectionAvgScores, backgroundColor: 'rgba(245, 158, 11, 0.7)', borderRadius: 6 }] }, options: { scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Score %' } } } } }); const detailRows = []; for (const section of sections) { const studentIds = schoolData.students.filter(s => s.section === section).map(s => s.id); let results = schoolData.results.filter(r => studentIds.includes(r.student_id) && r.term === term && r.year === year); if (selectedSubject !== 'all') results = results.filter(r => r.subject === selectedSubject); const subjectGroups = new Map(); for (const r of results) { if (!subjectGroups.has(r.subject)) subjectGroups.set(r.subject, []); subjectGroups.get(r.subject).push(r.total); } for (const [subject, scores] of subjectGroups.entries()) { const avg = scores.reduce((a, b) => a + b, 0) / scores.length; const maxScore = Math.max(...scores); const minScore = Math.min(...scores); detailRows.push({ section, subject, avg, max: maxScore, min: minScore }); } } document.getElementById('sectionSubjectDetailBody').innerHTML = detailRows.map(row => `<tr><td class="font-medium">${row.section}</td><td>${escapeHtml(row.subject)}</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-blue-500 h-2.5 rounded-full" style="width: ${row.avg}%"></div></div>${row.avg.toFixed(1)}%</td><td>${row.max.toFixed(0)}</td><td>${row.min.toFixed(0)}</td></tr>`).join(''); } document.getElementById('refreshSectionAnalysis').addEventListener('click', async () => { await refreshData(); loadAnalysis(); showToast("Analysis refreshed"); }); document.getElementById('sectionAnalysisTerm').addEventListener('change', loadAnalysis); document.getElementById('sectionAnalysisYear').addEventListener('change', loadAnalysis); document.getElementById('sectionAnalysisSubject').addEventListener('change', loadAnalysis); loadAnalysis(); }
+async function staffPerformanceAnalysisView() {
+    let staffTeachers = schoolData.teachers.map(t => ({ id: t.id, name: t.name, role: t.role, source: 'teacher' }));
+    let staffProfiles = schoolData.profiles.filter(p => p.role && p.role !== 'parent').map(p => ({ id: p.id, name: p.full_name, role: p.role, source: 'profile' }));
+    let allStaff = [...staffTeachers, ...staffProfiles];
+    const appraisals = schoolData.staffAppraisals;
+    const staffPerformance = allStaff.map(staff => {
+        const myAppraisals = appraisals.filter(a => a.staff_id === staff.id);
+        const avgRating = myAppraisals.length ? myAppraisals.reduce((s, a) => s + (a.rating || 0), 0) / myAppraisals.length : 0;
+        const overallScore = (avgRating / 5) * 100;
+        return { ...staff, avgRating, overallScore: overallScore.toFixed(1), appraisalCount: myAppraisals.length };
+    });
+    let html = `<div class="card p-6"><h2 class="text-2xl font-bold mb-4">📈 Staff Performance Analysis</h2>
+        <div class="filter-row"><select id="staffRolePerfFilter"><option value="all">All Roles</option>${[...new Set(allStaff.map(s => s.role))].map(r => `<option>${r}</option>`).join('')}</select>
+        <input type="text" id="staffPerfSearch" placeholder="🔍 Search name" class="flex-1 border rounded-xl p-2">
+        <button id="refreshPerfBtn" class="apply-btn px-4 py-2 rounded-full">Refresh</button></div>
+        <div class="table-container overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th>Name</th><th>Role</th><th>Average Rating (1-5)</th><th>Overall Score (%)</th><th># Appraisals</th></tr></thead><tbody id="perfTableBody"></tbody>}</div><canvas id="staffPerformanceChart" class="mt-8 max-h-80"></canvas></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    function renderTable() {
+        const roleFilter = document.getElementById('staffRolePerfFilter').value;
+        const search = document.getElementById('staffPerfSearch').value.toLowerCase();
+        let filtered = staffPerformance.filter(s => (roleFilter === 'all' || s.role === roleFilter) && (s.name.toLowerCase().includes(search) || (s.role || '').toLowerCase().includes(search)));
+        const tbody = document.getElementById('perfTableBody');
+        tbody.innerHTML = filtered.map(s => `<td><td class="font-medium">${escapeHtml(s.name)}</td><td>${s.role}</td><td>${s.avgRating.toFixed(1)} / 5</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-emerald-600 h-2.5 rounded-full" style="width: ${s.overallScore}%"></div></div>${s.overallScore}%</td><td>${s.appraisalCount}</td></tr>`).join('');
+        const top10 = [...filtered].sort((a, b) => b.overallScore - a.overallScore).slice(0, 10);
+        if (window.staffPerfChart) window.staffPerfChart.destroy();
+        window.staffPerfChart = new Chart(document.getElementById('staffPerformanceChart'), {
+            type: 'bar', data: { labels: top10.map(s => s.name.split(' ')[0]), datasets: [{ label: 'Overall Performance Score (%)', data: top10.map(s => s.overallScore), backgroundColor: 'rgba(16, 185, 129, 0.6)', borderRadius: 8 }] },
+            options: { scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Score %' } } } }
+        });
+    }
+    document.getElementById('staffRolePerfFilter').addEventListener('change', renderTable);
+    document.getElementById('staffPerfSearch').addEventListener('input', renderTable);
+    document.getElementById('refreshPerfBtn').addEventListener('click', async () => { await refreshData(); staffPerformanceAnalysisView(); });
+    renderTable();
+}
+
+async function academicPerformanceView() {
+    let html = `<div class="bg-white p-5 rounded-xl"><h2 class="text-2xl font-bold mb-4">Academic Performance by Class</h2><canvas id="perfChart" height="200"></canvas></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    setTimeout(() => {
+        new Chart(document.getElementById('perfChart'), {
+            type: 'bar', data: { labels: CLASSES, datasets: [{ label: 'Average Score', data: CLASSES.map(ac => { let avg = schoolData.results.filter(r => schoolData.students.find(s => s.id === r.student_id)?.academic_class === ac).reduce((a, b) => a + (b.ca1 + b.ca2 + b.exam), 0) / Math.max(1, schoolData.results.filter(r => schoolData.students.find(s => s.id === r.student_id)?.academic_class === ac).length); return avg || 0; }), backgroundColor: '#f59e0b' }] }
+        });
+    }, 100);
+}
+
+async function sectionAnalysisView() {
+    const sections = SECTIONS;
+    const currentYear = new Date().getFullYear();
+    let html = `<div class="card p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">📊 Section‑wise Academic Analysis</h2><button id="refreshSectionAnalysis" class="apply-btn px-4 py-2 rounded-full"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+        <div class="filter-row"><label>Term:</label><select id="sectionAnalysisTerm">${TERMS.map(t => `<option>${t}</option>`).join('')}</select>
+        <label>Year:</label><input type="number" id="sectionAnalysisYear" value="${currentYear}" class="border rounded-xl p-2 w-28">
+        <label>Subject:</label><select id="sectionAnalysisSubject"><option value="all">All Subjects</option>${[...new Set(schoolData.results.map(r => r.subject))].map(s => `<option>${s}</option>`).join('')}</select></div>
+        <div class="grid lg:grid-cols-2 gap-6"><div class="border rounded-2xl p-4 bg-white"><h3 class="text-lg font-bold mb-3">📋 Performance Summary</h3><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-gray-100"><tr><th>Section</th><th>Students</th><th>Avg Score (%)</th><th>Pass Rate (%)</th><th>Top Subject</th></tr></thead><tbody id="sectionSummaryBody"></tbody>}</div></div><div class="border rounded-2xl p-4 bg-white"><h3 class="text-lg font-bold mb-3">📈 Average Score by Section</h3><canvas id="sectionAvgChart" class="max-h-64"></canvas></div></div>
+        <div class="mt-6 border rounded-2xl p-4 bg-white"><h3 class="text-lg font-bold mb-3">🔍 Subject‑wise Breakdown</h3><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-gray-100"><tr><th>Section</th><th>Subject</th><th>Average Score</th><th>Highest Score</th><th>Lowest Score</th></tr></thead><tbody id="sectionSubjectDetailBody"></tbody>}</div></div></div>`;
+    document.getElementById('mainContent').innerHTML = html;
+    async function loadAnalysis() {
+        const term = document.getElementById('sectionAnalysisTerm').value;
+        const year = parseInt(document.getElementById('sectionAnalysisYear').value);
+        const selectedSubject = document.getElementById('sectionAnalysisSubject').value;
+        const summaryRows = [];
+        const sectionAvgScores = [];
+        for (const section of sections) {
+            const studentsInSection = schoolData.students.filter(s => s.section === section);
+            const studentIds = studentsInSection.map(s => s.id);
+            let results = schoolData.results.filter(r => studentIds.includes(r.student_id) && r.term === term && r.year === year);
+            if (selectedSubject !== 'all') results = results.filter(r => r.subject === selectedSubject);
+            const studentAverages = [];
+            for (const sid of studentIds) {
+                const studentResults = results.filter(r => r.student_id === sid);
+                const total = studentResults.reduce((s, r) => s + (r.total || 0), 0);
+                const avg = studentResults.length ? total / studentResults.length : 0;
+                studentAverages.push(avg);
+            }
+            const avgScore = studentAverages.length ? studentAverages.reduce((a, b) => a + b, 0) / studentAverages.length : 0;
+            const passCount = studentAverages.filter(s => s >= 50).length;
+            const passRate = studentAverages.length ? (passCount / studentAverages.length) * 100 : 0;
+            let subjectScores = {};
+            for (const r of results) {
+                if (!subjectScores[r.subject]) subjectScores[r.subject] = { total: 0, count: 0 };
+                subjectScores[r.subject].total += r.total;
+                subjectScores[r.subject].count += 1;
+            }
+            let topSubject = "—", bestAvg = 0;
+            for (const [sub, data] of Object.entries(subjectScores)) {
+                const subAvg = data.total / data.count;
+                if (subAvg > bestAvg) { bestAvg = subAvg; topSubject = sub; }
+            }
+            summaryRows.push({ section, studentCount: studentIds.length, avgScore, passRate, topSubject });
+            sectionAvgScores.push(avgScore);
+        }
+        document.getElementById('sectionSummaryBody').innerHTML = summaryRows.map(row => `<tr><td class="font-medium">${row.section}</td><td class="text-center">${row.studentCount}</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-emerald-600 h-2.5 rounded-full" style="width: ${row.avgScore}%"></div></div>${row.avgScore.toFixed(1)}%</td><td>${row.passRate.toFixed(1)}%</td><td>${escapeHtml(row.topSubject)}</td></tr>`).join('');
+        if (window.sectionAvgChart) window.sectionAvgChart.destroy();
+        window.sectionAvgChart = new Chart(document.getElementById('sectionAvgChart'), { type: 'bar', data: { labels: sections, datasets: [{ label: 'Average Score (%)', data: sectionAvgScores, backgroundColor: 'rgba(245, 158, 11, 0.7)', borderRadius: 6 }] }, options: { scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Score %' } } } } });
+        const detailRows = [];
+        for (const section of sections) {
+            const studentIds = schoolData.students.filter(s => s.section === section).map(s => s.id);
+            let results = schoolData.results.filter(r => studentIds.includes(r.student_id) && r.term === term && r.year === year);
+            if (selectedSubject !== 'all') results = results.filter(r => r.subject === selectedSubject);
+            const subjectGroups = new Map();
+            for (const r of results) {
+                if (!subjectGroups.has(r.subject)) subjectGroups.set(r.subject, []);
+                subjectGroups.get(r.subject).push(r.total);
+            }
+            for (const [subject, scores] of subjectGroups.entries()) {
+                const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+                const maxScore = Math.max(...scores);
+                const minScore = Math.min(...scores);
+                detailRows.push({ section, subject, avg, max: maxScore, min: minScore });
+            }
+        }
+        document.getElementById('sectionSubjectDetailBody').innerHTML = detailRows.map(row => `<td><td class="font-medium">${row.section}</td><td>${escapeHtml(row.subject)}</td><td><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-blue-500 h-2.5 rounded-full" style="width: ${row.avg}%"></div></div>${row.avg.toFixed(1)}%</td><td>${row.max.toFixed(0)}</td><td>${row.min.toFixed(0)}</td></tr>`).join('');
+    }
+    document.getElementById('refreshSectionAnalysis').addEventListener('click', async () => { await refreshData(); loadAnalysis(); showToast("Analysis refreshed"); });
+    document.getElementById('sectionAnalysisTerm').addEventListener('change', loadAnalysis);
+    document.getElementById('sectionAnalysisYear').addEventListener('change', loadAnalysis);
+    document.getElementById('sectionAnalysisSubject').addEventListener('change', loadAnalysis);
+    loadAnalysis();
+}
 
 // ========== EMAIL FEEDBACK MODAL HANDLER ==========
 document.getElementById('confirmAcceptBtn')?.addEventListener('click', async () => {
@@ -1444,21 +1832,21 @@ document.getElementById('confirmAcceptBtn')?.addEventListener('click', async () 
 document.addEventListener('DOMContentLoaded', async () => {
     await refreshData();
     renderLandingCarouselAndAnnouncement();
-    CLASSES.forEach(c=>{ let opt=document.createElement('option'); opt.value=c; opt.text=c; document.getElementById('appDesiredClass')?.appendChild(opt); });
-    document.getElementById('staffAdminBtn').onclick=()=>document.getElementById('loginModal').style.display='flex';
-    document.getElementById('parentBtn').onclick=()=>document.getElementById('parentModal').style.display='flex';
-    document.getElementById('adminSignupBtn').onclick=()=>document.getElementById('adminSignupModal').style.display='flex';
-    document.getElementById('publicApplyBtn').onclick=()=>document.getElementById('fullApplicationModal').style.display='flex';
-    document.getElementById('contactBtn').onclick=()=>document.getElementById('contactModal').style.display='flex';
-    document.getElementById('checkStatusBtn').onclick=()=>document.getElementById('statusCheckModal').style.display='flex';
-    document.getElementById('adminLoginForm').onsubmit=async(e)=>{ e.preventDefault(); try{ await adminLogin(adminEmail.value, adminPassword.value); }catch(err){ showToast(err.message,true); } };
-    document.getElementById('staffLoginForm').onsubmit=async(e)=>{ e.preventDefault(); try{ await staffLogin(staffUsername.value, staffPassword.value); }catch(err){ showToast(err.message,true); } };
-    document.getElementById('parentLoginForm').onsubmit=async(e)=>{ e.preventDefault(); try{ await parentLogin(studentRegNo.value, parentPwd.value); }catch(err){ showToast(err.message,true); } };
-    document.getElementById('adminSignupForm').onsubmit=async(e)=>{ e.preventDefault(); try{ await adminSignup(regCode.value, signupEmail.value, signupPassword.value, signupFullName.value, signupRole.value); }catch(err){ showToast(err.message,true); } };
-    document.getElementById('mobileMenuToggle').onclick=()=>{ document.getElementById('dynamicSidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('active'); };
-    document.getElementById('sidebarOverlay').onclick=()=>{ document.getElementById('dynamicSidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); };
-    document.getElementById('closeMobileSidebar').onclick=()=>{ document.getElementById('dynamicSidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); };
-    document.getElementById('logoutBtn').onclick=()=>logoutUser();
+    CLASSES.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; document.getElementById('appDesiredClass')?.appendChild(opt); });
+    document.getElementById('staffAdminBtn').onclick = () => document.getElementById('loginModal').style.display = 'flex';
+    document.getElementById('parentBtn').onclick = () => document.getElementById('parentModal').style.display = 'flex';
+    document.getElementById('adminSignupBtn').onclick = () => document.getElementById('adminSignupModal').style.display = 'flex';
+    document.getElementById('publicApplyBtn').onclick = () => document.getElementById('fullApplicationModal').style.display = 'flex';
+    document.getElementById('contactBtn').onclick = () => document.getElementById('contactModal').style.display = 'flex';
+    document.getElementById('checkStatusBtn').onclick = () => document.getElementById('statusCheckModal').style.display = 'flex';
+    document.getElementById('adminLoginForm').onsubmit = async (e) => { e.preventDefault(); try { await adminLogin(adminEmail.value, adminPassword.value); } catch (err) { showToast(err.message, true); } };
+    document.getElementById('staffLoginForm').onsubmit = async (e) => { e.preventDefault(); try { await staffLogin(staffUsername.value, staffPassword.value); } catch (err) { showToast(err.message, true); } };
+    document.getElementById('parentLoginForm').onsubmit = async (e) => { e.preventDefault(); try { await parentLogin(studentRegNo.value, parentPwd.value); } catch (err) { showToast(err.message, true); } };
+    document.getElementById('adminSignupForm').onsubmit = async (e) => { e.preventDefault(); try { await adminSignup(regCode.value, signupEmail.value, signupPassword.value, signupFullName.value, signupRole.value); } catch (err) { showToast(err.message, true); } };
+    document.getElementById('mobileMenuToggle').onclick = () => { document.getElementById('dynamicSidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('active'); };
+    document.getElementById('sidebarOverlay').onclick = () => { document.getElementById('dynamicSidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); };
+    document.getElementById('closeMobileSidebar').onclick = () => { document.getElementById('dynamicSidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); };
+    document.getElementById('logoutBtn').onclick = () => logoutUser();
     document.getElementById('prevSlide').addEventListener('click', prevSlide);
     document.getElementById('nextSlide').addEventListener('click', nextSlide);
     document.getElementById('checkStatusSubmit').addEventListener('click', async () => {
@@ -1470,8 +1858,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         resultDiv.innerHTML = `<div class="p-3 rounded-lg ${app.status === 'accepted' ? 'bg-green-100' : app.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100'}">Status: <strong>${app.status?.toUpperCase()}</strong><br>Full Name: ${escapeHtml(app.full_name)}<br>Desired Class: ${app.desired_class}</div>`;
     });
     document.getElementById('confirmAmountBtn').addEventListener('click', () => { closeModal('amountModal'); showToast("Payment confirmed (demo)"); });
-    setInterval(()=>{ let d=new Date(); document.getElementById('liveTime').innerText=d.toLocaleTimeString(); document.getElementById('liveDate').innerText=d.toLocaleDateString(); },1000);
+    setInterval(() => { let d = new Date(); document.getElementById('liveTime').innerText = d.toLocaleTimeString(); document.getElementById('liveDate').innerText = d.toLocaleDateString(); }, 1000);
 });
 </script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      

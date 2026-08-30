@@ -254,6 +254,19 @@
             outline: 2px solid #f59e0b;
             border-radius: 4px;
         }
+        .report-logo {
+            max-height: 60px;
+            margin-bottom: 8px;
+        }
+        .document-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .document-header img {
+            max-height: 70px;
+            display: block;
+            margin: 0 auto 5px;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -1873,7 +1886,7 @@
         }
 
         // ============================================================
-        //  PRINT RESULT SLIP
+        //  PRINT RESULT SLIP (WITH LOGO)
         // ============================================================
         async function printResultSlip(studentId, term, year) {
             var student = schoolData.students.find(function(s) { return s.id == studentId; });
@@ -1889,7 +1902,7 @@
                 'Average' : 'Needs Improvement');
             var slipHtml =
                 '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Result Slip - ' + student.name +
-                '</title><style>body{font-family:"Times New Roman",serif;margin:0;padding:0.5in;}.slip{max-width:700px;margin:0 auto;border:1px solid #000;padding:20px;}.header{text-align:center;border-bottom:2px solid #000;margin-bottom:20px;}.header h1{margin:0;font-size:24px;}.student-info{width:100%;margin-bottom:20px;}.results-table{width:100%;border-collapse:collapse;margin-top:20px;}.results-table th,.results-table td{border:1px solid #000;padding:8px;text-align:center;}.remarks{margin-top:20px;font-style:italic;}.signature{margin-top:40px;display:flex;justify-content:space-between;}.footer{margin-top:20px;text-align:center;font-size:12px;}@media print{.no-print{display:none;}}</style></head><body><div class="slip"><div class="header"><h1>Al‑Istiqaamah Flying Wings Academy</h1><h2>RESULT SLIP</h2><p>' +
+                '</title><style>body{font-family:"Times New Roman",serif;margin:0;padding:0.5in;}.slip{max-width:700px;margin:0 auto;border:1px solid #000;padding:20px;}.header{text-align:center;border-bottom:2px solid #000;margin-bottom:20px;}.header img{max-height:70px;display:block;margin:0 auto 5px;}.header h1{margin:0;font-size:24px;}.student-info{width:100%;margin-bottom:20px;}.results-table{width:100%;border-collapse:collapse;margin-top:20px;}.results-table th,.results-table td{border:1px solid #000;padding:8px;text-align:center;}.remarks{margin-top:20px;font-style:italic;}.signature{margin-top:40px;display:flex;justify-content:space-between;}.footer{margin-top:20px;text-align:center;font-size:12px;}@media print{.no-print{display:none;}}</style></head><body><div class="slip"><div class="header"><img src="logo.jpg" alt="School Logo" onerror="this.style.display=\'none\'"><h1>Al‑Istiqaamah Flying Wings Academy</h1><h2>RESULT SLIP</h2><p>' +
                 term + ' ' + year +
                 '</p></div><table class="student-info"><tr><td><strong>Name:</strong> ' + escapeHtml(student
                 .name) + '</td><td><strong>Reg No:</strong> ' + student.reg_number +
@@ -1912,7 +1925,7 @@
         }
 
         // ============================================================
-        //  ENHANCED RESULTS
+        //  ENHANCED RESULTS (with logo in report card)
         // ============================================================
         async function enhancedResultView(adminMode) {
             if (adminMode === undefined) adminMode = true;
@@ -2016,7 +2029,7 @@
                     subjectRanks[sub.subject] = rank;
                 }
                 var cardHtml =
-                    '<div class="report-card-container"><div class="text-center border-b pb-2 mb-3"><h3 class="text-xl font-bold">Al‑Istiqaamah Flying Wings Academy</h3><p class="text-gray-600">' +
+                    '<div class="report-card-container"><div class="document-header"><img src="logo.jpg" alt="School Logo" class="report-logo" onerror="this.style.display=\'none\'"><h3 class="text-xl font-bold">Al‑Istiqaamah Flying Wings Academy</h3><p class="text-gray-600">' +
                     term + ' | ' + year +
                     '</p></div><div class="grid grid-cols-2 gap-2 mb-4"><div><strong>Name:</strong> ' +
                     escapeHtml(student.name) + '</div><div><strong>Reg No:</strong> ' + student.reg_number +
@@ -2144,7 +2157,7 @@
         }
 
         // ============================================================
-        //  PRINT FEE RECEIPT
+        //  PRINT FEE RECEIPT (WITH LOGO)
         // ============================================================
         async function printFeeReceipt(studentId, term, year) {
             var student = schoolData.students.find(function(s) { return s.id == studentId; });
@@ -2157,7 +2170,7 @@
             var receiptDate = new Date().toLocaleDateString();
             var receiptHtml =
                 '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fee Receipt - ' + student.name +
-                '</title><style>body{font-family:"Times New Roman",serif;margin:0;padding:0.5in;}.receipt{max-width:700px;margin:0 auto;border:1px solid #000;padding:20px;}.header{text-align:center;border-bottom:2px solid #000;margin-bottom:20px;}.header h1{margin:0;font-size:24px;}.details{width:100%;margin:20px 0;border-collapse:collapse;}.details td,.details th{border:1px solid #000;padding:8px;text-align:left;}.total{font-weight:bold;}.signature{margin-top:40px;display:flex;justify-content:space-between;}.footer{margin-top:30px;text-align:center;font-size:12px;}@media print{.no-print{display:none;}}</style></head><body><div class="receipt"><div class="header"><h1>Al‑Istiqaamah Flying Wings Academy</h1><h2>FEE RECEIPT</h2><p>No. 10 Federal Government Layout, Samaru, Zaria</p></div><table class="details"><tr><th>Student Name:</th><td>' +
+                '</title><style>body{font-family:"Times New Roman",serif;margin:0;padding:0.5in;}.receipt{max-width:700px;margin:0 auto;border:1px solid #000;padding:20px;}.header{text-align:center;border-bottom:2px solid #000;margin-bottom:20px;}.header img{max-height:70px;display:block;margin:0 auto 5px;}.header h1{margin:0;font-size:24px;}.details{width:100%;margin:20px 0;border-collapse:collapse;}.details td,.details th{border:1px solid #000;padding:8px;text-align:left;}.total{font-weight:bold;}.signature{margin-top:40px;display:flex;justify-content:space-between;}.footer{margin-top:30px;text-align:center;font-size:12px;}@media print{.no-print{display:none;}}</style></head><body><div class="receipt"><div class="header"><img src="logo.jpg" alt="School Logo" onerror="this.style.display=\'none\'"><h1>Al‑Istiqaamah Flying Wings Academy</h1><h2>FEE RECEIPT</h2><p>No. 10 Federal Government Layout, Samaru, Zaria</p></div><table class="details"><tr><th>Student Name:</th><td>' +
                 escapeHtml(student.name) + '</td></tr><tr><th>Reg Number:</th><td>' + student.reg_number +
                 '</td></tr><tr><th>Class:</th><td>' + student.academic_class +
                 '</td></tr><tr><th>Term:</th><td>' + term + ' ' + year +
@@ -2173,7 +2186,7 @@
         }
 
         // ============================================================
-        //  FEE MANAGEMENT
+        //  FEE MANAGEMENT (unchanged – uses printFeeReceipt with logo)
         // ============================================================
         async function feeManagementEnhanced() {
             var students = schoolData.students,
@@ -2596,7 +2609,7 @@
         }
 
         // ============================================================
-        //  PRINT ADMISSION LETTER
+        //  ADMISSION LETTER (WITH LOGO)
         // ============================================================
         function printAdmissionLetter(application) {
             var official = application.official_data || {};
@@ -2613,7 +2626,7 @@
             var signatoryName = official.authorized_signature_name || 'Authorized Officer';
             var letterHtml =
                 '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Admission Letter - ' + fullName +
-                '</title><style>body{font-family:"Times New Roman",serif;margin:0;padding:0.5in;}.letter{max-width:800px;margin:0 auto;border:1px solid #ccc;padding:20px;}.header{text-align:center;margin-bottom:20px;}.header h1{font-size:24px;margin:0;}.header h2{font-size:18px;margin:5px 0;}.header p{margin:5px 0;font-size:12px;}.motto{font-style:italic;font-size:14px;}.ref{text-align:right;margin-bottom:20px;}.student-details{border:1px solid #000;padding:10px;margin:20px 0;width:70%;}.student-details td{padding:5px;}.passport-photo{float:right;width:120px;height:140px;border:1px solid #000;text-align:center;margin-left:20px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;overflow:hidden;}.passport-photo img{width:100%;height:100%;object-fit:cover;}.passport-photo .placeholder{font-size:12px;color:#999;text-align:center;}.signatures{margin-top:40px;display:flex;justify-content:space-between;}.signature-line{text-align:center;width:200px;}.signature-image{height:60px;margin-bottom:5px;}.signature-image img{max-height:60px;max-width:180px;}.footer{margin-top:30px;font-size:10px;text-align:center;}.clearfix::after{content:"";clear:both;display:table;}@media print{.no-print{display:none;}}</style></head><body><div class="letter"><div class="header"><h1>أكاديمية الاستقامة أجنحة التحليق</h1><h2>AL-ISTIQAAMAH FLYING WINGS ACADEMY</h2><p>No. 10 Federal Government Layout, Samaru, Zaria, Nigeria.</p><p class="motto">"The best of mankind is the most beneficial to humanity"</p><p>Email: alistiqaamah.fwac@gmail.com | Phone: +2348084816590, +2348067990749</p></div><div class="ref"><strong>Ref: AFWAN/AC/01/ADM NO.</strong> ' +
+                '</title><style>body{font-family:"Times New Roman",serif;margin:0;padding:0.5in;}.letter{max-width:800px;margin:0 auto;border:1px solid #ccc;padding:20px;}.header{text-align:center;margin-bottom:20px;}.header img{max-height:70px;display:block;margin:0 auto 5px;}.header h1{font-size:24px;margin:0;}.header h2{font-size:18px;margin:5px 0;}.header p{margin:5px 0;font-size:12px;}.motto{font-style:italic;font-size:14px;}.ref{text-align:right;margin-bottom:20px;}.student-details{border:1px solid #000;padding:10px;margin:20px 0;width:70%;}.student-details td{padding:5px;}.passport-photo{float:right;width:120px;height:140px;border:1px solid #000;text-align:center;margin-left:20px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;overflow:hidden;}.passport-photo img{width:100%;height:100%;object-fit:cover;}.passport-photo .placeholder{font-size:12px;color:#999;text-align:center;}.signatures{margin-top:40px;display:flex;justify-content:space-between;}.signature-line{text-align:center;width:200px;}.signature-image{height:60px;margin-bottom:5px;}.signature-image img{max-height:60px;max-width:180px;}.footer{margin-top:30px;font-size:10px;text-align:center;}.clearfix::after{content:"";clear:both;display:table;}@media print{.no-print{display:none;}}</style></head><body><div class="letter"><div class="header"><img src="logo.jpg" alt="School Logo" onerror="this.style.display=\'none\'"><h1>أكاديمية الاستقامة أجنحة التحليق</h1><h2>AL-ISTIQAAMAH FLYING WINGS ACADEMY</h2><p>No. 10 Federal Government Layout, Samaru, Zaria, Nigeria.</p><p class="motto">"The best of mankind is the most beneficial to humanity"</p><p>Email: alistiqaamah.fwac@gmail.com | Phone: +2348084816590, +2348067990749</p></div><div class="ref"><strong>Ref: AFWAN/AC/01/ADM NO.</strong> ' +
                 admissionNumber +
                 '</div><div class="content clearfix"><div class="passport-photo">' +
                 (passportPhotoUrl ?
@@ -4164,4 +4177,4 @@
         });
     </script>
 </body>
-</html>
+                                                                                                                                                                                                                           </html>

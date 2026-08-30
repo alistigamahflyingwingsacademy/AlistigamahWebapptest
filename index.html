@@ -224,13 +224,24 @@
             padding: 0.5rem;
             width: 100%;
         }
-        /* Fix for modal content overflow on small screens */
-        .modal-content {
-            max-height: 90vh;
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #f59e0b;
         }
-        .sidebar a,
-        .sidebar div {
-            cursor: pointer;
+        .profile-avatar-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #9ca3af;
+            border: 3px solid #f59e0b;
         }
     </style>
 </head>
@@ -619,7 +630,13 @@
     <div id="appContainer" class="hidden flex flex-col h-screen fixed inset-0 z-40 bg-gray-50">
         <div class="bg-white/80 backdrop-blur-md shadow-sm px-6 py-3 flex justify-between items-center border-b border-gray-100">
             <div class="flex items-center gap-3"><button id="mobileMenuToggle" class="text-2xl md:hidden text-emerald-800"><i class="fas fa-bars"></i></button><span class="font-bold text-emerald-800 text-xl">🏫 Flying Wings Portal</span></div>
-            <div class="flex items-center gap-4"><span class="text-gray-700"><i class="fas fa-user-circle mr-1"></i><span id="topUserName"></span> (<span id="topUserRole"></span>)</span><button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm transition">Logout</button></div>
+            <div class="flex items-center gap-4">
+                <button id="profileTopBtn" class="flex items-center gap-2 text-gray-700 hover:text-amber-600 transition">
+                    <img id="topAvatar" src="" alt="Avatar" class="w-8 h-8 rounded-full object-cover border-2 border-amber-500 hidden" />
+                    <span id="topUserName"></span> (<span id="topUserRole"></span>)
+                </button>
+                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm transition">Logout</button>
+            </div>
         </div>
         <div class="flex flex-1 overflow-hidden relative">
             <div id="sidebarOverlay" class="sidebar-overlay"></div>
@@ -694,29 +711,30 @@
         let directorChart = null;
 
         // ============================================================
-        //  ROLE MENUS  (moved to top-level so it's always defined)
+        //  ROLE MENUS  (added "Profile" for all non-parent roles)
         // ============================================================
         const roleMenus = {
             dg_ceo: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Payroll', 'Apps',
                 'Download Records', 'Announce', 'Slides', 'View Appraisals', 'Performance Appraisal',
-                'Director Roles', 'Appraise Directors'
+                'Director Roles', 'Appraise Directors', 'Profile'
             ],
             daf: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Payroll', 'Apps',
-                'Download Records', 'Announce', 'Slides', 'Staff Appraisal'
+                'Download Records', 'Announce', 'Slides', 'Staff Appraisal', 'Profile'
             ],
             management_committee: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Apps',
-                'Download Records', 'Announce', 'Slides', 'View Appraisals', 'Director Roles', 'Appraise Directors'
+                'Download Records', 'Announce', 'Slides', 'View Appraisals', 'Director Roles', 'Appraise Directors',
+                'Profile'
             ],
-            teacher: ['My class', 'Grade student', 'Attendance', 'Results'],
-            headteacher: ['Section student', 'Section fees', 'Enroll', 'Results', 'Students', 'Fees'],
+            teacher: ['My class', 'Grade student', 'Attendance', 'Results', 'Profile'],
+            headteacher: ['Section student', 'Section fees', 'Enroll', 'Results', 'Students', 'Fees', 'Profile'],
             do: ['Dashboard', 'Enroll', 'Fees', 'Students', 'Unified Staff', 'Staff performance analysis',
-                'Staff Appraisal', 'Announce', 'Slides'
+                'Staff Appraisal', 'Announce', 'Slides', 'Profile'
             ],
             der: ['Dashboard', 'Enroll', 'Students', 'Unified Staff', 'Academic performance', 'Sections analysis',
-                'Staff Appraisal', 'Announce', 'Slides'
+                'Staff Appraisal', 'Announce', 'Slides', 'Profile'
             ],
             dprpa: ['Dashboard', 'Enroll', 'Students', 'Academic performance', 'Section analysis',
-                'Download Records', 'Staff Appraisal', 'Announce', 'Slides'
+                'Download Records', 'Staff Appraisal', 'Announce', 'Slides', 'Profile'
             ],
             parent: ['Result', 'Fee payment', 'Payment history']
         };
@@ -791,6 +809,7 @@
                     attendance: attRes.data || []
                 };
                 updateCarouselData();
+                if (currentUser) updateTopBar();
             } catch (e) { console.error(e); } finally { showLoading(false); }
         }
 
@@ -860,13 +879,15 @@
                 if (insertError) throw new Error('Could not create profile');
                 profile = newProfile;
             }
-            currentUser = { id: profile.id, full_name: profile.full_name, role: profile.role };
+            currentUser = { id: profile.id, full_name: profile.full_name, role: profile.role, source: 'profile',
+                avatar_url: profile.avatar_url || '' };
             await refreshData();
             closeModal('loginModal');
             document.getElementById('landingPage').style.display = 'none';
             document.getElementById('appContainer').classList.remove('hidden');
             showToast('Welcome ' + currentUser.full_name);
             showDashboard();
+            updateTopBar();
         }
 
         async function staffLogin(username, pwd) {
@@ -875,26 +896,29 @@
             if (error || !staff) throw new Error('Staff not found');
             if (staff.password !== pwd) throw new Error('Wrong password');
             currentUser = { id: staff.id, full_name: staff.name, role: staff.role || 'teacher', assigned_class: staff
-                    .assigned_class };
+                    .assigned_class, source: 'teacher', avatar_url: staff.avatar_url || '' };
             await refreshData();
             closeModal('loginModal');
             document.getElementById('landingPage').style.display = 'none';
             document.getElementById('appContainer').classList.remove('hidden');
             showToast('Welcome ' + currentUser.full_name);
             showDashboard();
+            updateTopBar();
         }
 
         async function parentLogin(regNo, pwd) {
             if (pwd !== 'al123') throw new Error('Invalid password');
             let student = schoolData.students.find(function(s) { return s.reg_number === regNo; });
             if (!student) throw new Error('Student not found');
-            currentUser = { role: 'parent', full_name: 'Parent of ' + student.name, studentId: student.id };
+            currentUser = { role: 'parent', full_name: 'Parent of ' + student.name, studentId: student.id,
+            source: 'parent' };
             await refreshData();
             closeModal('parentModal');
             document.getElementById('landingPage').style.display = 'none';
             document.getElementById('appContainer').classList.remove('hidden');
             showToast('Logged in as parent of ' + student.name);
             showDashboard();
+            updateTopBar();
         }
 
         async function adminSignup(code, email, pwd, name, role) {
@@ -913,6 +937,28 @@
             document.getElementById('landingPage').style.display = 'block';
             renderLandingCarouselAndAnnouncement();
             showToast('Logged out');
+        }
+
+        // ============================================================
+        //  TOP BAR UPDATE (avatar and name)
+        // ============================================================
+        function updateTopBar() {
+            if (!currentUser) return;
+            document.getElementById('topUserName').innerText = currentUser.full_name || 'User';
+            document.getElementById('topUserRole').innerText = currentUser.role ? currentUser.role.toUpperCase() :
+                'GUEST';
+            const avatarImg = document.getElementById('topAvatar');
+            if (currentUser.avatar_url) {
+                avatarImg.src = currentUser.avatar_url;
+                avatarImg.classList.remove('hidden');
+            } else {
+                avatarImg.classList.add('hidden');
+            }
+            document.getElementById('profileTopBtn').onclick = function() {
+                const fn = window._viewMap && window._viewMap['Profile'];
+                if (fn) fn();
+                else profileSettingsView();
+            };
         }
 
         // ============================================================
@@ -935,8 +981,7 @@
 
             landingPage.style.display = 'none';
             appContainer.classList.remove('hidden');
-            topUserName.innerText = currentUser.full_name || 'User';
-            topUserRole.innerText = currentUser.role ? currentUser.role.toUpperCase() : 'GUEST';
+            updateTopBar();
 
             let menu = roleMenus[currentUser.role] || roleMenus.dg_ceo;
             let navHtml = '';
@@ -961,7 +1006,8 @@
                         label === 'Students' ? 'fa-users' :
                         label === 'Fees' ? 'fa-coins' :
                         label === 'Payroll' ? 'fa-money-bill' :
-                        label === 'Result' ? 'fa-chart-line' : 'fa-circle';
+                        label === 'Result' ? 'fa-chart-line' :
+                        label === 'Profile' ? 'fa-user-cog' : 'fa-circle';
                     return '<div class="nav-link flex items-center gap-3 px-4 py-2 rounded-xl text-slate-200 hover:bg-white/10 transition" data-view="' +
                         label + '"><i class="fas ' + icon + ' w-6"></i><span class="nav-text">' + label +
                         '</span></div>';
@@ -996,8 +1042,10 @@
                 'Section fees': sectionFeesView,
                 'Staff performance analysis': staffPerformanceAnalysisView,
                 'Academic performance': academicPerformanceView,
-                'Sections analysis': sectionAnalysisView
+                'Sections analysis': sectionAnalysisView,
+                'Profile': profileSettingsView
             };
+            window._viewMap = viewMap;
 
             document.querySelectorAll('.nav-link').forEach(function(el) {
                 el.removeEventListener('click', el._listener);
@@ -1021,7 +1069,159 @@
         }
 
         // ============================================================
-        //  DASHBOARD VIEW
+        //  PROFILE SETTINGS VIEW (NEW)
+        // ============================================================
+        async function profileSettingsView() {
+            if (!currentUser) return;
+            let userData = null;
+            let table = '';
+            if (currentUser.source === 'profile') {
+                userData = schoolData.profiles.find(p => p.id === currentUser.id);
+                table = 'profiles';
+            } else if (currentUser.source === 'teacher') {
+                userData = schoolData.teachers.find(t => t.id === currentUser.id);
+                table = 'teachers';
+            } else {
+                showToast('Profile not editable for this user type', true);
+                return;
+            }
+            if (!userData) {
+                showToast('User data not found', true);
+                return;
+            }
+
+            const avatarUrl = userData.avatar_url || '';
+            const fullName = userData.full_name || userData.name || '';
+            const email = userData.email || '';
+
+            const html = `
+                <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800"><i class="fas fa-user-cog text-amber-600 mr-2"></i>Profile Settings</h2>
+                    <div class="flex flex-col items-center mb-6">
+                        <div class="relative">
+                            ${avatarUrl ? `<img src="${avatarUrl}" alt="Profile" class="profile-avatar">` : `<div class="profile-avatar-placeholder"><i class="fas fa-user"></i></div>`}
+                            <button id="uploadAvatarBtn" class="absolute bottom-0 right-0 bg-amber-500 text-white p-2 rounded-full shadow-lg hover:bg-amber-600 transition">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <input type="file" id="avatarFileInput" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+                    <form id="profileForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input type="text" id="profileName" value="${escapeHtml(fullName)}" class="border p-3 w-full rounded-xl" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="profileEmail" value="${escapeHtml(email)}" class="border p-3 w-full rounded-xl" required>
+                        </div>
+                        <div class="border-t pt-4 mt-4">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Change Password</h3>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Current Password</label>
+                                <input type="password" id="currentPassword" class="border p-3 w-full rounded-xl" placeholder="Enter current password">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">New Password</label>
+                                <input type="password" id="newPassword" class="border p-3 w-full rounded-xl" placeholder="Enter new password">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" class="border p-3 w-full rounded-xl" placeholder="Confirm new password">
+                            </div>
+                        </div>
+                        <button type="submit" class="apply-btn w-full py-3 rounded-xl text-lg font-semibold">Save Changes</button>
+                    </form>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+
+            document.getElementById('uploadAvatarBtn').addEventListener('click', function() {
+                document.getElementById('avatarFileInput').click();
+            });
+            document.getElementById('avatarFileInput').addEventListener('change', async function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                showLoading(true);
+                try {
+                    const path = `profile-pictures/${currentUser.id}_${Date.now()}.${file.name.split('.').pop()}`;
+                    const { error: uploadError } = await supabaseClient.storage.from('profile-pictures')
+                        .upload(path, file);
+                    if (uploadError) throw uploadError;
+                    const { data: { publicUrl } } = supabaseClient.storage.from('profile-pictures')
+                        .getPublicUrl(path);
+                    const updateObj = { avatar_url: publicUrl };
+                    const { error: updateError } = await supabaseClient.from(table).update(updateObj)
+                        .eq('id', currentUser.id);
+                    if (updateError) throw updateError;
+                    currentUser.avatar_url = publicUrl;
+                    await refreshData();
+                    showToast('Profile picture updated');
+                    profileSettingsView();
+                } catch (err) { showToast(err.message, true); } finally { showLoading(false); }
+            });
+
+            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const name = document.getElementById('profileName').value.trim();
+                const email = document.getElementById('profileEmail').value.trim();
+                const currentPwd = document.getElementById('currentPassword').value;
+                const newPwd = document.getElementById('newPassword').value;
+                const confirmPwd = document.getElementById('confirmPassword').value;
+
+                if (!name) { showToast('Name is required', true); return; }
+                if (!email) { showToast('Email is required', true); return; }
+
+                const updateObj = {};
+                if (currentUser.source === 'profile') {
+                    updateObj.full_name = name;
+                    updateObj.email = email;
+                } else if (currentUser.source === 'teacher') {
+                    updateObj.name = name;
+                    updateObj.email = email;
+                }
+
+                if (newPwd || confirmPwd || currentPwd) {
+                    if (!currentPwd) { showToast('Current password required to change password', true); return; }
+                    if (newPwd !== confirmPwd) { showToast('New passwords do not match', true); return; }
+                    if (newPwd.length < 6) { showToast('New password must be at least 6 characters', true); return; }
+                    if (currentUser.source === 'profile') {
+                        try {
+                            await supabaseClient.auth.signInWithPassword({ email: email, password: currentPwd });
+                        } catch (err) {
+                            showToast('Current password is incorrect', true);
+                            return;
+                        }
+                        const { error: pwdError } = await supabaseClient.auth.updateUser({ password: newPwd });
+                        if (pwdError) { showToast(pwdError.message, true); return; }
+                    } else if (currentUser.source === 'teacher') {
+                        const teacher = schoolData.teachers.find(t => t.id === currentUser.id);
+                        if (!teacher || teacher.password !== currentPwd) {
+                            showToast('Current password is incorrect', true);
+                            return;
+                        }
+                        updateObj.password = newPwd;
+                    }
+                }
+
+                showLoading(true);
+                try {
+                    const { error } = await supabaseClient.from(table).update(updateObj).eq('id', currentUser.id);
+                    if (error) throw error;
+                    if (currentUser.source === 'profile') {
+                        currentUser.full_name = name;
+                    } else {
+                        currentUser.full_name = name;
+                    }
+                    await refreshData();
+                    showToast('Profile updated successfully');
+                    profileSettingsView();
+                } catch (err) { showToast(err.message, true); } finally { showLoading(false); }
+            });
+        }
+
+        // ============================================================
+        //  DASHBOARD VIEW (original)
         // ============================================================
         async function dashboardView() {
             document.getElementById('mainContent').innerHTML =
@@ -1036,181 +1236,7 @@
         }
 
         // ============================================================
-        //  PARENT FUNCTIONS
-        // ============================================================
-        async function parentResultViewSimple() {
-            var studentId = currentUser.studentId;
-            if (!studentId) {
-                showToast('No student linked to this parent account', true);
-                document.getElementById('mainContent').innerHTML =
-                    '<div class="card p-6 text-center text-red-600">No student linked. Please contact school admin.</div>';
-                return;
-            }
-            var student = schoolData.students.find(function(s) { return s.id == studentId; });
-            if (!student) { showToast('Student data missing', true); return; }
-            var currentYear = new Date().getFullYear();
-            var html =
-                '<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Result for ' + escapeHtml(student.name) +
-                ' (' + student.reg_number +
-                ')</h2><div class="flex gap-2 mb-4 flex-wrap"><select id="parentTermSelect" class="border p-2 rounded">' +
-                TERMS.map(function(t) { return '<option>' + t + '</option>'; }).join('') +
-                '</select><input type="number" id="parentYearSelect" value="' + currentYear +
-                '" class="border p-2 rounded w-28"><button id="parentLoadResultBtn" class="apply-btn px-4 py-2 rounded">Load Result</button><button id="parentPrintResultBtn" class="apply-btn px-4 py-2 rounded bg-emerald-600">Print Result Slip</button></div><div id="parentResultContainer"></div></div>';
-            document.getElementById('mainContent').innerHTML = html;
-
-            async function loadResult() {
-                var term = document.getElementById('parentTermSelect').value;
-                var year = parseInt(document.getElementById('parentYearSelect').value);
-                var subjectsResults = schoolData.results.filter(function(r) { return r.student_id == studentId && r
-                        .term === term && r.year === year; });
-                var extra = schoolData.resultExtras.find(function(e) { return e.student_id == studentId && e.term ===
-                        term && e.year === year; }) || { remarks: '' };
-                var totalMarks = subjectsResults.reduce(function(s, sub) { return s + (sub.total || 0); }, 0);
-                var avg = subjectsResults.length ? (totalMarks / subjectsResults.length).toFixed(1) : 0;
-                var grade = avg >= 80 ? 'A' : avg >= 70 ? 'B' : avg >= 60 ? 'C' : avg >= 50 ? 'D' : 'F';
-                var remarks = extra.remarks || (grade === 'A' ? 'Excellent' : grade === 'B' ? 'Good' : grade === 'C' ?
-                    'Average' : 'Needs Improvement');
-                var resultHtml =
-                    '<div class="bg-white p-4 rounded shadow"><h3 class="font-bold text-lg">' + term + ' ' + year +
-                    '</h3><table class="min-w-full border mt-2"><thead class="bg-gray-100"><tr><th>Subject</th><th>CA1</th><th>CA2</th><th>Exam</th><th>Total</th><th>Grade</th></tr></thead><tbody>' +
-                    subjectsResults.map(function(sub) {
-                        var total = (sub.ca1 || 0) + (sub.ca2 || 0) + (sub.exam || 0);
-                        var grd = total >= 80 ? 'A' : total >= 70 ? 'B' : total >= 60 ? 'C' : total >= 50 ?
-                            'D' : 'F';
-                        return '<tr><td>' + escapeHtml(sub.subject) + '</td><td class="text-center">' + (sub
-                            .ca1 || 0) + '</td><td class="text-center">' + (sub.ca2 || 0) +
-                            '</td><td class="text-center">' + (sub.exam || 0) +
-                            '</td><td class="text-center font-bold">' + total +
-                            '</td><td class="text-center">' + grd + '</td></tr>';
-                    }).join('') +
-                    '</tbody></table><p class="mt-3"><strong>Average:</strong> ' + avg + '% (' + grade +
-                    ')</p><p><strong>Remarks:</strong> ' + escapeHtml(remarks) + '</p></div>';
-                if (subjectsResults.length === 0) resultHtml =
-                    '<div class="bg-yellow-50 p-4 rounded">No results found for this term.</div>';
-                document.getElementById('parentResultContainer').innerHTML = resultHtml;
-                window.parentCurrentResult = { student: student, term: term, year: year, subjectsResults: subjectsResults,
-                    remarks: remarks, avg: avg, grade: grade };
-            }
-            document.getElementById('parentLoadResultBtn').addEventListener('click', loadResult);
-            document.getElementById('parentPrintResultBtn').addEventListener('click', function() {
-                if (window.parentCurrentResult) {
-                    printResultSlip(window.parentCurrentResult.student.id, window.parentCurrentResult.term, window
-                        .parentCurrentResult.year);
-                } else { showToast('Load a result first', true); }
-            });
-            loadResult();
-        }
-
-        async function parentPaymentPortalView() {
-            var studentId = currentUser.studentId,
-                student = schoolData.students.find(function(s) { return s.id == studentId; });
-            if (!student) { showToast('Student not found', true); return; }
-            var currentYear = new Date().getFullYear(),
-                term = '1st Term';
-            var termFee = student.term_fee || 30000;
-            var paid = schoolData.payments.filter(function(p) { return p.student_id == studentId && p.term === term && p
-                    .year == currentYear; }).reduce(function(a, b) { return a + (b.amount || 0); }, 0);
-            var due = Math.max(0, termFee - paid);
-            var pendingTransfer = schoolData.bankTransfers.find(function(bt) { return bt.student_id == studentId && bt
-                    .term === term && bt.year == currentYear && bt.status === 'pending'; });
-            var proofUploaded = !!pendingTransfer;
-            var proofUrl = pendingTransfer ? pendingTransfer.proof_url : null;
-            var html =
-                '<div class="card p-6 max-w-2xl mx-auto"><h2 class="text-2xl font-bold text-emerald-800 mb-4">Fee Payment Portal</h2><div class="bg-gray-50 p-5 rounded-2xl mb-6"><p><strong>Student:</strong> ' +
-                escapeHtml(student.name) + ' (' + student.reg_number +
-                ')</p><p><strong>Class:</strong> ' + (student.academic_class || 'N/A') +
-                '</p><p><strong>Term:</strong> ' + term + ' ' + currentYear +
-                '</p><hr class="my-3"><p><strong>Term Fee:</strong> ₦' + termFee.toLocaleString() +
-                '</p><p><strong>Paid:</strong> ₦' + paid.toLocaleString() +
-                '</p><p><strong>Outstanding Balance:</strong> ₦' + due.toLocaleString() +
-                '</p><p><span class="status-' + (due <= 0 ? 'paid' : paid > 0 ? 'partial' : 'unpaid') + '">' + (due <=
-                    0 ? 'Paid' : paid > 0 ? 'Partial' : 'Unpaid') +
-                '</span></p></div>';
-            if (due > 0) {
-                html +=
-                    '<div class="mb-6 border rounded-xl p-4 bg-white"><h3 class="font-bold text-lg mb-2">💳 Pay Online with Card</h3><button id="parentPayNowBtn" class="apply-btn px-6 py-2 rounded-full">Pay ₦' +
-                    due.toLocaleString() +
-                    ' Now</button></div><div class="border rounded-xl p-4 bg-white"><h3 class="font-bold text-lg mb-2">🏦 Upload Bank Transfer Proof</h3><p class="text-sm text-gray-600 mb-2">Make a transfer to the school bank account and upload the receipt here. Admin will verify.</p>';
-                if (proofUploaded) {
-                    html +=
-                        '<div class="mb-3"><a href="' + proofUrl +
-                        '" target="_blank" class="text-blue-600 underline">View uploaded proof</a><br><span class="text-yellow-700">Status: Pending verification</span></div>';
-                }
-                html +=
-                    '<input type="file" id="parentBankProof" accept="image/*" class="mb-2"><button id="submitParentProofBtn" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm">Upload Proof</button></div>';
-            } else {
-                html +=
-                    '<div class="bg-green-100 text-green-800 p-4 rounded-xl text-center">No outstanding fees. Thank you!</div>';
-            }
-            html += '</div>';
-            document.getElementById('mainContent').innerHTML = html;
-            if (due > 0) {
-                document.getElementById('parentPayNowBtn')?.addEventListener('click', function() {
-                    var handler = PaystackPop.setup({
-                        key: PAYSTACK_PUBLIC_KEY,
-                        email: student.parent_email || student.reg_number + '@school.com',
-                        amount: due * 100,
-                        callback: async function(response) {
-                            await supabaseClient.from('payments').insert([{
-                                student_id: studentId,
-                                amount: due,
-                                term: term,
-                                year: currentYear,
-                                payment_method: 'paystack_online',
-                                payment_reference: response.reference,
-                                payment_status: 'success'
-                            }]);
-                            await refreshData();
-                            parentPaymentPortalView();
-                            showToast('Payment of ₦' + due + ' successful');
-                        }
-                    });
-                    handler.openIframe();
-                });
-                document.getElementById('submitParentProofBtn')?.addEventListener('click', async function() {
-                    var file = document.getElementById('parentBankProof').files[0];
-                    if (!file) { showToast('Please select an image file', true); return; }
-                    showLoading(true);
-                    try {
-                        var path = 'parent-proofs/' + Date.now() + '_' + file.name;
-                        await supabaseClient.storage.from('school-bank-proofs').upload(path, file);
-                        var { data: { publicUrl } } = supabaseClient.storage.from(
-                            'school-bank-proofs').getPublicUrl(path);
-                        if (pendingTransfer) {
-                            await supabaseClient.from('bank_transfers').update({ proof_url: publicUrl })
-                                .eq('id', pendingTransfer.id);
-                        } else {
-                            await supabaseClient.from('bank_transfers').insert([{
-                                student_id: studentId,
-                                proof_url: publicUrl,
-                                status: 'pending',
-                                amount: termFee,
-                                term: term,
-                                year: currentYear
-                            }]);
-                        }
-                        await refreshData();
-                        showToast('Bank proof uploaded. Admin will verify.');
-                        parentPaymentPortalView();
-                    } catch (err) { showToast(err.message, true); } finally { showLoading(false); }
-                });
-            }
-        }
-
-        async function parentPaymentHistoryView() {
-            var payments = schoolData.payments.filter(function(p) { return p.student_id === currentUser.studentId; });
-            var html =
-                '<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Payment History</h2><ul class="space-y-2">' +
-                payments.map(function(p) { return '<li class="border-b pb-2">₦' + p.amount.toLocaleString() + ' - ' +
-                        p.term + ' ' + p.year + ' - ' + p.payment_method + ' (Ref: ' + (p.payment_reference ||
-                            'N/A') + ')</li>'; }).join('') +
-                '</ul>' + (payments.length === 0 ? '<p class="text-gray-500">No payments recorded.</p>' : '') +
-                '</div>';
-            document.getElementById('mainContent').innerHTML = html;
-        }
-
-        // ============================================================
-        //  ENROLLMENT
+        //  ENROLLMENT (original)
         // ============================================================
         async function enrollViewModern() {
             var html =
@@ -1245,7 +1271,7 @@
         }
 
         // ============================================================
-        //  STUDENTS (editable)
+        //  STUDENTS (editable) - original
         // ============================================================
         async function studentsViewEditable() {
             var students = schoolData.students;
@@ -1346,7 +1372,7 @@
         }
 
         // ============================================================
-        //  UNIFIED STAFF
+        //  UNIFIED STAFF (original)
         // ============================================================
         async function unifiedStaffList() {
             var staffTeachers = schoolData.teachers.map(function(t) {
@@ -1481,7 +1507,7 @@
         }
 
         // ============================================================
-        //  PAYROLL
+        //  PAYROLL (original - abbreviated)
         // ============================================================
         async function payrollModule() {
             var staffList = schoolData.teachers.map(function(t) {
@@ -1726,7 +1752,7 @@
         }
 
         // ============================================================
-        //  PRINT RESULT SLIP
+        //  PRINT RESULT SLIP (original)
         // ============================================================
         async function printResultSlip(studentId, term, year) {
             var student = schoolData.students.find(function(s) { return s.id == studentId; });
@@ -1765,7 +1791,7 @@
         }
 
         // ============================================================
-        //  ENHANCED RESULTS
+        //  ENHANCED RESULTS (original - abbreviated)
         // ============================================================
         async function enhancedResultView(adminMode) {
             if (adminMode === undefined) adminMode = true;
@@ -1997,7 +2023,7 @@
         }
 
         // ============================================================
-        //  PRINT FEE RECEIPT
+        //  PRINT FEE RECEIPT (original)
         // ============================================================
         async function printFeeReceipt(studentId, term, year) {
             var student = schoolData.students.find(function(s) { return s.id == studentId; });
@@ -2026,7 +2052,7 @@
         }
 
         // ============================================================
-        //  FEE MANAGEMENT
+        //  FEE MANAGEMENT (original - abbreviated)
         // ============================================================
         async function feeManagementEnhanced() {
             var students = schoolData.students,
@@ -2235,7 +2261,7 @@
         });
 
         // ============================================================
-        //  APPLICATIONS
+        //  APPLICATIONS (original - abbreviated)
         // ============================================================
         async function applicationsViewEnhanced() {
             var apps = schoolData.applications;
@@ -2449,7 +2475,7 @@
         }
 
         // ============================================================
-        //  PRINT ADMISSION LETTER
+        //  PRINT ADMISSION LETTER (original)
         // ============================================================
         function printAdmissionLetter(application) {
             var official = application.official_data || {};
@@ -2593,7 +2619,7 @@
         });
 
         // ============================================================
-        //  DOWNLOAD, ANNOUNCE, SLIDES
+        //  DOWNLOAD, ANNOUNCE, SLIDES (original - abbreviated)
         // ============================================================
         async function downloadRecordsView() {
             document.getElementById('mainContent').innerHTML =
@@ -2654,7 +2680,7 @@
         }
 
         // ============================================================
-        //  STAFF APPRAISAL
+        //  STAFF APPRAISAL (original)
         // ============================================================
         async function staffAppraisalView() {
             if (!['daf', 'do', 'der', 'dprpa'].includes(currentUser.role)) {
@@ -2728,7 +2754,7 @@
         });
 
         // ============================================================
-        //  VIEW APPRAISALS
+        //  VIEW APPRAISALS (original)
         // ============================================================
         async function viewAppraisalsView() {
             if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
@@ -2775,7 +2801,7 @@
         }
 
         // ============================================================
-        //  PERFORMANCE APPRAISAL (DG/CEO)
+        //  PERFORMANCE APPRAISAL (DG/CEO) - original
         // ============================================================
         async function performanceAppraisalView() {
             if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
@@ -2832,7 +2858,7 @@
         }
 
         // ============================================================
-        //  DIRECTOR ROLES & KPIs
+        //  DIRECTOR ROLES & KPIs (original - abbreviated)
         // ============================================================
         async function directorRolesView() {
             if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
@@ -2968,7 +2994,7 @@
         }
 
         // ============================================================
-        //  APPRAISE DIRECTORS
+        //  APPRAISE DIRECTORS (original)
         // ============================================================
         async function directorAppraisalView() {
             if (!['dg_ceo', 'management_committee'].includes(currentUser.role)) {
@@ -3002,7 +3028,7 @@
         }
 
         // ============================================================
-        //  TEACHER FUNCTIONS
+        //  TEACHER FUNCTIONS (original)
         // ============================================================
         async function myClassView() {
             var teacherClass = currentUser.assigned_class || (schoolData.teachers.find(function(t) { return t
@@ -3164,7 +3190,7 @@
         }
 
         // ============================================================
-        //  ATTENDANCE
+        //  ATTENDANCE (original)
         // ============================================================
         async function attendanceView() {
             var teacherClass = currentUser.assigned_class || (schoolData.teachers.find(function(t) { return t
@@ -3246,7 +3272,7 @@
         }
 
         // ============================================================
-        //  HEADTEACHER FUNCTIONS
+        //  HEADTEACHER FUNCTIONS (original)
         // ============================================================
         async function sectionStudentsView() {
             var students = schoolData.students;
@@ -3455,7 +3481,7 @@
         }
 
         // ============================================================
-        //  DIRECTOR ANALYSIS FUNCTIONS
+        //  DIRECTOR ANALYSIS FUNCTIONS (original)
         // ============================================================
         async function staffPerformanceAnalysisView() {
             var staffTeachers = schoolData.teachers.map(function(t) {
@@ -3689,6 +3715,180 @@
         }
 
         // ============================================================
+        //  PARENT FUNCTIONS (original - abbreviated)
+        // ============================================================
+        async function parentResultViewSimple() {
+            var studentId = currentUser.studentId;
+            if (!studentId) {
+                showToast('No student linked to this parent account', true);
+                document.getElementById('mainContent').innerHTML =
+                    '<div class="card p-6 text-center text-red-600">No student linked. Please contact school admin.</div>';
+                return;
+            }
+            var student = schoolData.students.find(function(s) { return s.id == studentId; });
+            if (!student) { showToast('Student data missing', true); return; }
+            var currentYear = new Date().getFullYear();
+            var html =
+                '<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Result for ' + escapeHtml(student.name) +
+                ' (' + student.reg_number +
+                ')</h2><div class="flex gap-2 mb-4 flex-wrap"><select id="parentTermSelect" class="border p-2 rounded">' +
+                TERMS.map(function(t) { return '<option>' + t + '</option>'; }).join('') +
+                '</select><input type="number" id="parentYearSelect" value="' + currentYear +
+                '" class="border p-2 rounded w-28"><button id="parentLoadResultBtn" class="apply-btn px-4 py-2 rounded">Load Result</button><button id="parentPrintResultBtn" class="apply-btn px-4 py-2 rounded bg-emerald-600">Print Result Slip</button></div><div id="parentResultContainer"></div></div>';
+            document.getElementById('mainContent').innerHTML = html;
+
+            async function loadResult() {
+                var term = document.getElementById('parentTermSelect').value;
+                var year = parseInt(document.getElementById('parentYearSelect').value);
+                var subjectsResults = schoolData.results.filter(function(r) { return r.student_id == studentId && r
+                        .term === term && r.year === year; });
+                var extra = schoolData.resultExtras.find(function(e) { return e.student_id == studentId && e.term ===
+                        term && e.year === year; }) || { remarks: '' };
+                var totalMarks = subjectsResults.reduce(function(s, sub) { return s + (sub.total || 0); }, 0);
+                var avg = subjectsResults.length ? (totalMarks / subjectsResults.length).toFixed(1) : 0;
+                var grade = avg >= 80 ? 'A' : avg >= 70 ? 'B' : avg >= 60 ? 'C' : avg >= 50 ? 'D' : 'F';
+                var remarks = extra.remarks || (grade === 'A' ? 'Excellent' : grade === 'B' ? 'Good' : grade === 'C' ?
+                    'Average' : 'Needs Improvement');
+                var resultHtml =
+                    '<div class="bg-white p-4 rounded shadow"><h3 class="font-bold text-lg">' + term + ' ' + year +
+                    '</h3><table class="min-w-full border mt-2"><thead class="bg-gray-100"><tr><th>Subject</th><th>CA1</th><th>CA2</th><th>Exam</th><th>Total</th><th>Grade</th></tr></thead><tbody>' +
+                    subjectsResults.map(function(sub) {
+                        var total = (sub.ca1 || 0) + (sub.ca2 || 0) + (sub.exam || 0);
+                        var grd = total >= 80 ? 'A' : total >= 70 ? 'B' : total >= 60 ? 'C' : total >= 50 ?
+                            'D' : 'F';
+                        return '<tr><td>' + escapeHtml(sub.subject) + '</td><td class="text-center">' + (sub
+                            .ca1 || 0) + '</td><td class="text-center">' + (sub.ca2 || 0) +
+                            '</td><td class="text-center">' + (sub.exam || 0) +
+                            '</td><td class="text-center font-bold">' + total +
+                            '</td><td class="text-center">' + grd + '</td></tr>';
+                    }).join('') +
+                    '</tbody></table><p class="mt-3"><strong>Average:</strong> ' + avg + '% (' + grade +
+                    ')</p><p><strong>Remarks:</strong> ' + escapeHtml(remarks) + '</p></div>';
+                if (subjectsResults.length === 0) resultHtml =
+                    '<div class="bg-yellow-50 p-4 rounded">No results found for this term.</div>';
+                document.getElementById('parentResultContainer').innerHTML = resultHtml;
+                window.parentCurrentResult = { student: student, term: term, year: year, subjectsResults: subjectsResults,
+                    remarks: remarks, avg: avg, grade: grade };
+            }
+            document.getElementById('parentLoadResultBtn').addEventListener('click', loadResult);
+            document.getElementById('parentPrintResultBtn').addEventListener('click', function() {
+                if (window.parentCurrentResult) {
+                    printResultSlip(window.parentCurrentResult.student.id, window.parentCurrentResult.term, window
+                        .parentCurrentResult.year);
+                } else { showToast('Load a result first', true); }
+            });
+            loadResult();
+        }
+
+        async function parentPaymentPortalView() {
+            var studentId = currentUser.studentId,
+                student = schoolData.students.find(function(s) { return s.id == studentId; });
+            if (!student) { showToast('Student not found', true); return; }
+            var currentYear = new Date().getFullYear(),
+                term = '1st Term';
+            var termFee = student.term_fee || 30000;
+            var paid = schoolData.payments.filter(function(p) { return p.student_id == studentId && p.term === term && p
+                    .year == currentYear; }).reduce(function(a, b) { return a + (b.amount || 0); }, 0);
+            var due = Math.max(0, termFee - paid);
+            var pendingTransfer = schoolData.bankTransfers.find(function(bt) { return bt.student_id == studentId && bt
+                    .term === term && bt.year == currentYear && bt.status === 'pending'; });
+            var proofUploaded = !!pendingTransfer;
+            var proofUrl = pendingTransfer ? pendingTransfer.proof_url : null;
+            var html =
+                '<div class="card p-6 max-w-2xl mx-auto"><h2 class="text-2xl font-bold text-emerald-800 mb-4">Fee Payment Portal</h2><div class="bg-gray-50 p-5 rounded-2xl mb-6"><p><strong>Student:</strong> ' +
+                escapeHtml(student.name) + ' (' + student.reg_number +
+                ')</p><p><strong>Class:</strong> ' + (student.academic_class || 'N/A') +
+                '</p><p><strong>Term:</strong> ' + term + ' ' + currentYear +
+                '</p><hr class="my-3"><p><strong>Term Fee:</strong> ₦' + termFee.toLocaleString() +
+                '</p><p><strong>Paid:</strong> ₦' + paid.toLocaleString() +
+                '</p><p><strong>Outstanding Balance:</strong> ₦' + due.toLocaleString() +
+                '</p><p><span class="status-' + (due <= 0 ? 'paid' : paid > 0 ? 'partial' : 'unpaid') + '">' + (due <=
+                    0 ? 'Paid' : paid > 0 ? 'Partial' : 'Unpaid') +
+                '</span></p></div>';
+            if (due > 0) {
+                html +=
+                    '<div class="mb-6 border rounded-xl p-4 bg-white"><h3 class="font-bold text-lg mb-2">💳 Pay Online with Card</h3><button id="parentPayNowBtn" class="apply-btn px-6 py-2 rounded-full">Pay ₦' +
+                    due.toLocaleString() +
+                    ' Now</button></div><div class="border rounded-xl p-4 bg-white"><h3 class="font-bold text-lg mb-2">🏦 Upload Bank Transfer Proof</h3><p class="text-sm text-gray-600 mb-2">Make a transfer to the school bank account and upload the receipt here. Admin will verify.</p>';
+                if (proofUploaded) {
+                    html +=
+                        '<div class="mb-3"><a href="' + proofUrl +
+                        '" target="_blank" class="text-blue-600 underline">View uploaded proof</a><br><span class="text-yellow-700">Status: Pending verification</span></div>';
+                }
+                html +=
+                    '<input type="file" id="parentBankProof" accept="image/*" class="mb-2"><button id="submitParentProofBtn" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm">Upload Proof</button></div>';
+            } else {
+                html +=
+                    '<div class="bg-green-100 text-green-800 p-4 rounded-xl text-center">No outstanding fees. Thank you!</div>';
+            }
+            html += '</div>';
+            document.getElementById('mainContent').innerHTML = html;
+            if (due > 0) {
+                document.getElementById('parentPayNowBtn')?.addEventListener('click', function() {
+                    var handler = PaystackPop.setup({
+                        key: PAYSTACK_PUBLIC_KEY,
+                        email: student.parent_email || student.reg_number + '@school.com',
+                        amount: due * 100,
+                        callback: async function(response) {
+                            await supabaseClient.from('payments').insert([{
+                                student_id: studentId,
+                                amount: due,
+                                term: term,
+                                year: currentYear,
+                                payment_method: 'paystack_online',
+                                payment_reference: response.reference,
+                                payment_status: 'success'
+                            }]);
+                            await refreshData();
+                            parentPaymentPortalView();
+                            showToast('Payment of ₦' + due + ' successful');
+                        }
+                    });
+                    handler.openIframe();
+                });
+                document.getElementById('submitParentProofBtn')?.addEventListener('click', async function() {
+                    var file = document.getElementById('parentBankProof').files[0];
+                    if (!file) { showToast('Please select an image file', true); return; }
+                    showLoading(true);
+                    try {
+                        var path = 'parent-proofs/' + Date.now() + '_' + file.name;
+                        await supabaseClient.storage.from('school-bank-proofs').upload(path, file);
+                        var { data: { publicUrl } } = supabaseClient.storage.from(
+                            'school-bank-proofs').getPublicUrl(path);
+                        if (pendingTransfer) {
+                            await supabaseClient.from('bank_transfers').update({ proof_url: publicUrl })
+                                .eq('id', pendingTransfer.id);
+                        } else {
+                            await supabaseClient.from('bank_transfers').insert([{
+                                student_id: studentId,
+                                proof_url: publicUrl,
+                                status: 'pending',
+                                amount: termFee,
+                                term: term,
+                                year: currentYear
+                            }]);
+                        }
+                        await refreshData();
+                        showToast('Bank proof uploaded. Admin will verify.');
+                        parentPaymentPortalView();
+                    } catch (err) { showToast(err.message, true); } finally { showLoading(false); }
+                });
+            }
+        }
+
+        async function parentPaymentHistoryView() {
+            var payments = schoolData.payments.filter(function(p) { return p.student_id === currentUser.studentId; });
+            var html =
+                '<div class="card p-6"><h2 class="text-2xl font-bold mb-4">Payment History</h2><ul class="space-y-2">' +
+                payments.map(function(p) { return '<li class="border-b pb-2">₦' + p.amount.toLocaleString() + ' - ' +
+                        p.term + ' ' + p.year + ' - ' + p.payment_method + ' (Ref: ' + (p.payment_reference ||
+                            'N/A') + ')</li>'; }).join('') +
+                '</ul>' + (payments.length === 0 ? '<p class="text-gray-500">No payments recorded.</p>' : '') +
+                '</div>';
+            document.getElementById('mainContent').innerHTML = html;
+        }
+
+        // ============================================================
         //  EMAIL FEEDBACK MODAL
         // ============================================================
         document.getElementById('confirmAcceptBtn')?.addEventListener('click', async function() {
@@ -3697,99 +3897,6 @@
             showToast('Acceptance message sent to applicant (demo)', false);
             closeModal('emailFeedbackModal');
             document.getElementById('feedbackMessage').value = '';
-        });
-
-        // ============================================================
-        //  DOMContentLoaded
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', async function() {
-            await refreshData();
-            renderLandingCarouselAndAnnouncement();
-
-            // Populate class dropdown in application form
-            CLASSES.forEach(function(c) {
-                var opt = document.createElement('option');
-                opt.value = c;
-                opt.text = c;
-                var el = document.getElementById('appDesiredClass');
-                if (el) el.appendChild(opt);
-            });
-
-            // Landing page button handlers
-            document.getElementById('staffAdminBtn').onclick = function() { document.getElementById(
-                    'loginModal').style.display = 'flex'; };
-            document.getElementById('parentBtn').onclick = function() { document.getElementById('parentModal')
-                    .style.display = 'flex'; };
-            document.getElementById('adminSignupBtn').onclick = function() { document.getElementById(
-                    'adminSignupModal').style.display = 'flex'; };
-            document.getElementById('publicApplyBtn').onclick = function() { document.getElementById(
-                    'fullApplicationModal').style.display = 'flex'; };
-            document.getElementById('contactBtn').onclick = function() { document.getElementById('contactModal')
-                    .style.display = 'flex'; };
-            document.getElementById('checkStatusBtn').onclick = function() { document.getElementById(
-                    'statusCheckModal').style.display = 'flex'; };
-
-            // Login forms
-            document.getElementById('adminLoginForm').onsubmit = async function(e) {
-                e.preventDefault();
-                try { await adminLogin(adminEmail.value, adminPassword.value); } catch (err) { showToast(
-                        err.message, true); }
-            };
-            document.getElementById('staffLoginForm').onsubmit = async function(e) {
-                e.preventDefault();
-                try { await staffLogin(staffUsername.value, staffPassword.value); } catch (err) { showToast(
-                        err.message, true); }
-            };
-            document.getElementById('parentLoginForm').onsubmit = async function(e) {
-                e.preventDefault();
-                try { await parentLogin(studentRegNo.value, parentPwd.value); } catch (err) { showToast(
-                        err.message, true); }
-            };
-            document.getElementById('adminSignupForm').onsubmit = async function(e) {
-                e.preventDefault();
-                try { await adminSignup(regCode.value, signupEmail.value, signupPassword.value,
-                        signupFullName.value, signupRole.value); } catch (err) { showToast(err.message,
-                        true); }
-            };
-
-            // Mobile sidebar toggles
-            document.getElementById('mobileMenuToggle').onclick = function() {
-                document.getElementById('dynamicSidebar').classList.add('open');
-                document.getElementById('sidebarOverlay').classList.add('active');
-            };
-            document.getElementById('sidebarOverlay').onclick = function() {
-                document.getElementById('dynamicSidebar').classList.remove('open');
-                document.getElementById('sidebarOverlay').classList.remove('active');
-            };
-            document.getElementById('closeMobileSidebar').onclick = function() {
-                document.getElementById('dynamicSidebar').classList.remove('open');
-                document.getElementById('sidebarOverlay').classList.remove('active');
-            };
-
-            document.getElementById('logoutBtn').onclick = function() { logoutUser(); };
-            document.getElementById('prevSlide').addEventListener('click', prevSlide);
-            document.getElementById('nextSlide').addEventListener('click', nextSlide);
-
-            document.getElementById('checkStatusSubmit').addEventListener('click', async function() {
-                var email = document.getElementById('statusEmail').value.trim();
-                if (!email) { showToast('Enter email', true); return; }
-                var app = schoolData.applications.find(function(a) { return a.email === email; });
-                var resultDiv = document.getElementById('statusResult');
-                if (!app) { resultDiv.innerHTML =
-                        '<span class="text-red-600">No application found with this email.</span>'; return; }
-                resultDiv.innerHTML = '<div class="p-3 rounded-lg ' + (app.status === 'accepted' ?
-                    'bg-green-100' : app.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100') +
-                    '">Status: <strong>' + (app.status?.toUpperCase() || 'PENDING') +
-                    '</strong><br>Full Name: ' + escapeHtml(app.full_name) +
-                    '<br>Desired Class: ' + app.desired_class + '</div>';
-            });
-
-            // Live clock
-            setInterval(function() {
-                var d = new Date();
-                document.getElementById('liveTime').innerText = d.toLocaleTimeString();
-                document.getElementById('liveDate').innerText = d.toLocaleDateString();
-            }, 1000);
         });
 
         // ============================================================
@@ -3868,7 +3975,7 @@
         });
 
         // ============================================================
-        //  FIX FOR STAFF TAB TOGGLE
+        //  STAFF TAB TOGGLE
         // ============================================================
         document.getElementById('adminTab')?.addEventListener('click', function() {
             document.getElementById('adminLoginForm').style.display = 'block';
@@ -3885,6 +3992,94 @@
             this.classList.remove('bg-gray-200');
             document.getElementById('adminTab').classList.add('bg-gray-200');
             document.getElementById('adminTab').classList.remove('bg-amber-500', 'text-white');
+        });
+
+        // ============================================================
+        //  DOMContentLoaded
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            await refreshData();
+            renderLandingCarouselAndAnnouncement();
+
+            CLASSES.forEach(function(c) {
+                var opt = document.createElement('option');
+                opt.value = c;
+                opt.text = c;
+                var el = document.getElementById('appDesiredClass');
+                if (el) el.appendChild(opt);
+            });
+
+            document.getElementById('staffAdminBtn').onclick = function() { document.getElementById(
+                    'loginModal').style.display = 'flex'; };
+            document.getElementById('parentBtn').onclick = function() { document.getElementById('parentModal')
+                    .style.display = 'flex'; };
+            document.getElementById('adminSignupBtn').onclick = function() { document.getElementById(
+                    'adminSignupModal').style.display = 'flex'; };
+            document.getElementById('publicApplyBtn').onclick = function() { document.getElementById(
+                    'fullApplicationModal').style.display = 'flex'; };
+            document.getElementById('contactBtn').onclick = function() { document.getElementById('contactModal')
+                    .style.display = 'flex'; };
+            document.getElementById('checkStatusBtn').onclick = function() { document.getElementById(
+                    'statusCheckModal').style.display = 'flex'; };
+
+            document.getElementById('adminLoginForm').onsubmit = async function(e) {
+                e.preventDefault();
+                try { await adminLogin(adminEmail.value, adminPassword.value); } catch (err) { showToast(
+                        err.message, true); }
+            };
+            document.getElementById('staffLoginForm').onsubmit = async function(e) {
+                e.preventDefault();
+                try { await staffLogin(staffUsername.value, staffPassword.value); } catch (err) { showToast(
+                        err.message, true); }
+            };
+            document.getElementById('parentLoginForm').onsubmit = async function(e) {
+                e.preventDefault();
+                try { await parentLogin(studentRegNo.value, parentPwd.value); } catch (err) { showToast(
+                        err.message, true); }
+            };
+            document.getElementById('adminSignupForm').onsubmit = async function(e) {
+                e.preventDefault();
+                try { await adminSignup(regCode.value, signupEmail.value, signupPassword.value,
+                        signupFullName.value, signupRole.value); } catch (err) { showToast(err.message,
+                        true); }
+            };
+
+            document.getElementById('mobileMenuToggle').onclick = function() {
+                document.getElementById('dynamicSidebar').classList.add('open');
+                document.getElementById('sidebarOverlay').classList.add('active');
+            };
+            document.getElementById('sidebarOverlay').onclick = function() {
+                document.getElementById('dynamicSidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            };
+            document.getElementById('closeMobileSidebar').onclick = function() {
+                document.getElementById('dynamicSidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            };
+
+            document.getElementById('logoutBtn').onclick = function() { logoutUser(); };
+            document.getElementById('prevSlide').addEventListener('click', prevSlide);
+            document.getElementById('nextSlide').addEventListener('click', nextSlide);
+
+            document.getElementById('checkStatusSubmit').addEventListener('click', async function() {
+                var email = document.getElementById('statusEmail').value.trim();
+                if (!email) { showToast('Enter email', true); return; }
+                var app = schoolData.applications.find(function(a) { return a.email === email; });
+                var resultDiv = document.getElementById('statusResult');
+                if (!app) { resultDiv.innerHTML =
+                        '<span class="text-red-600">No application found with this email.</span>'; return; }
+                resultDiv.innerHTML = '<div class="p-3 rounded-lg ' + (app.status === 'accepted' ?
+                    'bg-green-100' : app.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100') +
+                    '">Status: <strong>' + (app.status?.toUpperCase() || 'PENDING') +
+                    '</strong><br>Full Name: ' + escapeHtml(app.full_name) +
+                    '<br>Desired Class: ' + app.desired_class + '</div>';
+            });
+
+            setInterval(function() {
+                var d = new Date();
+                document.getElementById('liveTime').innerText = d.toLocaleTimeString();
+                document.getElementById('liveDate').innerText = d.toLocaleDateString();
+            }, 1000);
         });
     </script>
 </body>

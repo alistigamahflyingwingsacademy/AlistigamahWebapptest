@@ -318,7 +318,7 @@
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-2xl shadow border-t-8 border-amber-500"><i class="fas fa-bullhorn text-amber-500 text-3xl"></i>
                     <h2 class="text-2xl font-bold mt-2">Mission</h2>
-                    <p> Al-Istiqaamah strives to develop an enriched learning environment that promotes academic achievement, leadership and Islamic values, nurturing learners who live by the Qur’an and the Sunnah while contributing positively to society.</p>
+                    <p> Al-Istiqaamah strives to develop an enriched learning environment that promotes academic achievement, leadership and Islamic values, nurturing learners who live by the Qur'an and the Sunnah while contributing positively to society.</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow border-t-8 border-emerald-600"><i class="fas fa-eye text-emerald-600 text-3xl"></i>
                     <h2 class="text-2xl font-bold mt-2">Vision</h2>
@@ -742,17 +742,17 @@
         let directorChart = null;
 
         // ============================================================
-        //  ROLE MENUS
+        //  ROLE MENUS — "Apps" changed to "Applicant"
         // ============================================================
         const roleMenus = {
-            dg_ceo: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Payroll', 'Apps',
+            dg_ceo: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Payroll', 'Applicant',
                 'Download Records', 'Announce', 'Slides', 'View Appraisals', 'Performance Appraisal',
                 'Director Roles', 'Appraise Directors', 'Profile'
             ],
-            daf: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Payroll', 'Apps',
+            daf: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Payroll', 'Applicant',
                 'Download Records', 'Announce', 'Slides', 'Staff Appraisal', 'Profile'
             ],
-            management_committee: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Apps',
+            management_committee: ['Dashboard', 'Students', 'Enroll', 'Results', 'Fees', 'Unified Staff', 'Applicant',
                 'Download Records', 'Announce', 'Slides', 'View Appraisals', 'Director Roles', 'Appraise Directors',
                 'Profile'
             ],
@@ -993,7 +993,7 @@
         }
 
         // ============================================================
-        //  DASHBOARD & MENU
+        //  DASHBOARD & MENU — viewMap key 'Apps' → 'Applicant'
         // ============================================================
         function showDashboard() {
             const appContainer = document.getElementById('appContainer');
@@ -1046,6 +1046,7 @@
             }
             dynamicNav.innerHTML = navHtml;
 
+            // viewMap: key 'Applicant' now points to applicationsViewEnhanced
             var viewMap = {
                 'Dashboard': dashboardView,
                 'Students': studentsViewEditable,
@@ -1054,7 +1055,7 @@
                 'Fees': feeManagementEnhanced,
                 'Unified Staff': unifiedStaffList,
                 'Payroll': payrollModule,
-                'Apps': applicationsViewEnhanced,
+                'Applicant': applicationsViewEnhanced,
                 'Download Records': downloadRecordsView,
                 'Announce': announceView,
                 'Slides': slidesManageView,
@@ -4177,4 +4178,4 @@
         });
     </script>
 </body>
-                                                                                                                                                                                                                           </html>
+                        </html>

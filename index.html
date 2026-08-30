@@ -657,6 +657,36 @@
         </div>
     </div>
 
+    <!-- ===== NEW MODAL: Edit Grade ===== -->
+    <div id="editGradeModal" class="modal">
+        <div class="modal-content relative" style="max-width:500px;">
+            <span class="close-modal-x" onclick="closeModal('editGradeModal')">&times;</span>
+            <h3 class="text-xl font-bold mb-3">Edit Subject Grade</h3>
+            <form id="editGradeForm">
+                <input type="hidden" id="editGradeId" />
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium">Subject</label>
+                        <input type="text" id="editSubject" class="border p-2 w-full rounded" disabled />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">CA1 (0-20)</label>
+                        <input type="number" id="editCa1" min="0" max="20" class="border p-2 w-full rounded" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">CA2 (0-20)</label>
+                        <input type="number" id="editCa2" min="0" max="20" class="border p-2 w-full rounded" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Exam (0-60)</label>
+                        <input type="number" id="editExam" min="0" max="60" class="border p-2 w-full rounded" required />
+                    </div>
+                    <button type="submit" class="apply-btn w-full py-2 rounded">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ===== DASHBOARD CONTAINER ===== -->
     <div id="appContainer" class="hidden flex flex-col h-screen fixed inset-0 z-40 bg-gray-50">
         <div class="bg-white/80 backdrop-blur-md shadow-sm px-6 py-3 flex justify-between items-center border-b border-gray-100">
@@ -3213,7 +3243,7 @@
         }
 
         // ============================================================
-        //  TEACHER RESULT ENTRY – FIX: remove 'total' from INSERT
+        //  TEACHER RESULT ENTRY – FIX: remove 'total' from INSERT + EDIT functionality
         // ============================================================
         async function teacherResultEntry() {
             var students = schoolData.students,
@@ -3261,9 +3291,13 @@
                             '</span><span>CA1:' + r.ca1 + ' CA2:' + r.ca2 + ' Exam:' + r.exam +
                             ' Total:' + r.total +
                             '</span><button class="delete-subject-btn text-red-500" data-id="' +
-                            r.id + '">✕</button></div>';
+                            r.id + '">✕</button> <button class="edit-subject-btn text-blue-500 hover:text-blue-700" data-id="' +
+                            r.id + '" data-subject="' + escapeHtml(r.subject) + '" data-ca1="' +
+                            r.ca1 + '" data-ca2="' + r.ca2 + '" data-exam="' + r.exam +
+                            '">📝 Edit</button></div>';
                     }).join('');
                 }
+                // Attach delete events
                 document.querySelectorAll('.delete-subject-btn').forEach(function(btn) {
                     btn.addEventListener('click', async function() {
                         await supabaseClient.from('results').delete().eq('id', this.dataset
@@ -3271,6 +3305,18 @@
                         await refreshData();
                         loadSubjects(sid);
                         showToast('Subject deleted');
+                    });
+                });
+                // Attach edit events
+                document.querySelectorAll('.edit-subject-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        // Populate the edit modal with current values
+                        document.getElementById('editGradeId').value = this.dataset.id;
+                        document.getElementById('editSubject').value = this.dataset.subject;
+                        document.getElementById('editCa1').value = this.dataset.ca1;
+                        document.getElementById('editCa2').value = this.dataset.ca2;
+                        document.getElementById('editExam').value = this.dataset.exam;
+                        document.getElementById('editGradeModal').style.display = 'flex';
                     });
                 });
             }
@@ -3288,14 +3334,11 @@
                 }
                 var term = document.getElementById('teacherTerm').value;
                 var year = parseInt(document.getElementById('teacherYear').value);
-                // total is computed by the database – DO NOT include it
-                // var total = ca1 + ca2 + exam;  // no longer needed
                 showLoading(true);
                 try {
                     var existing = schoolData.results.find(function(r) { return r.student_id == sid &&
                             r.term === term && r.year === year && r.subject === subject; });
                     if (existing) { showToast('Subject already entered for this term.', true); return; }
-                    // INSERT without 'total'
                     var { error } = await supabaseClient.from('results').insert([{
                         student_id: sid,
                         term: term,
@@ -3304,7 +3347,6 @@
                         ca1: ca1,
                         ca2: ca2,
                         exam: exam
-                        // 'total' is generated by the DB – not inserted
                     }]);
                     if (error) throw error;
                     await refreshData();
@@ -3327,6 +3369,35 @@
             document.getElementById('teacherClassFilter').addEventListener('change', filterStudents);
             document.getElementById('teacherSearch').addEventListener('input', filterStudents);
             filterStudents();
+
+            // ========== Edit grade form submission ==========
+            document.getElementById('editGradeForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                var id = document.getElementById('editGradeId').value;
+                var ca1 = parseInt(document.getElementById('editCa1').value) || 0;
+                var ca2 = parseInt(document.getElementById('editCa2').value) || 0;
+                var exam = parseInt(document.getElementById('editExam').value) || 0;
+                if (ca1 < 0 || ca1 > 20 || ca2 < 0 || ca2 > 20 || exam < 0 || exam > 60) {
+                    showToast('Invalid marks: CA (0-20), Exam (0-60)', true);
+                    return;
+                }
+                showLoading(true);
+                try {
+                    // Update only ca1, ca2, exam – total will auto-update
+                    var { error } = await supabaseClient.from('results').update({
+                        ca1: ca1,
+                        ca2: ca2,
+                        exam: exam
+                    }).eq('id', id);
+                    if (error) throw error;
+                    await refreshData();
+                    showToast('Grade updated successfully');
+                    closeModal('editGradeModal');
+                    // Reload the current student's subjects
+                    var sid = document.getElementById('teacherStudentSelect').value;
+                    if (sid) loadSubjects(sid);
+                } catch (err) { showToast(err.message, true); } finally { showLoading(false); }
+            });
         }
 
         // ============================================================
@@ -4183,4 +4254,4 @@
         });
     </script>
 </body>
-    </html>
+</html>

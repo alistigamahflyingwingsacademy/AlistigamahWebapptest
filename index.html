@@ -34,8 +34,8 @@
         .filter-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; align-items: center; }
         .close-modal-x { cursor: pointer; font-size: 28px; font-weight: bold; position: absolute; top: 10px; right: 15px; color: #aaa; }
         .close-modal-x:hover { color: black; }
-        .dot { height: 12px; width: 12px; background: #bbb; border-radius: 50%; display: inline-block; margin: 0 4px; cursor: pointer; transition: 0.2s; }
-        .dot.active { background: #f59e0b; transform: scale(1.2); }
+        .dot { height: 12px; width: 12px; background: rgba(255,255,255,0.5); border-radius: 50%; display: inline-block; margin: 0 4px; cursor: pointer; transition: 0.2s; }
+        .dot.active { background: #f59e0b; transform: scale(1.3); }
         @media print { .no-print { display: none !important; } }
         .status-paid, .status-partial, .status-unpaid {
             padding: 2px 10px; border-radius: 999px; font-size: 0.8rem; display: inline-block; white-space: nowrap;
@@ -62,7 +62,7 @@
         .sig-canvas { border: 1px solid #ccc; background: white; width: 100%; height: 120px; }
         table.min-w-full th { text-align: left; padding: 8px; background: #f9fafb; font-weight: 600; }
         table.min-w-full td { padding: 8px; border-top: 1px solid #f1f5f9; }
-        .hero-overlay { background: linear-gradient(to right, rgba(10,46,44,0.95) 0%, rgba(10,46,44,0.75) 50%, rgba(10,46,44,0.35) 100%); }
+        .hero-overlay { background: linear-gradient(to right, rgba(10,46,44,0.92) 0%, rgba(10,46,44,0.7) 45%, rgba(10,46,44,0.35) 100%); }
         .arabic-text { font-family: 'Amiri', serif; }
     </style>
 </head>
@@ -74,9 +74,13 @@
 
     <!-- ===== LANDING PAGE ===== -->
     <div id="landingPage" class="min-h-screen flex flex-col bg-white">
+
+        <!-- Announcement Bar -->
         <div class="bg-amber-500 text-gray-900 px-4 py-2 text-xs font-bold text-center">
             Welcome to Al-Istiqaamah Flying Wings Academy — Nurturing Knowledge, Faith &amp; Leadership
         </div>
+
+        <!-- Header -->
         <header class="bg-[#0a2e2c] text-white shadow-lg sticky top-0 z-30">
             <div class="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between flex-wrap gap-3">
                 <div class="flex items-center gap-3">
@@ -103,21 +107,37 @@
             </div>
         </header>
 
-        <section class="relative h-[500px] md:h-[600px] bg-cover bg-center flex items-center" style="background-image: url('https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1920&q=80');">
-            <div class="absolute inset-0 hero-overlay"></div>
-            <div class="relative max-w-7xl mx-auto px-6 w-full">
-                <div class="max-w-2xl text-white">
-                    <span class="bg-amber-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-md uppercase tracking-wider mb-4 inline-block">Excellence in Education</span>
-                    <h2 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">Integrating Islamic Morals with Modern Academic Rigor</h2>
-                    <p class="text-base md:text-lg text-gray-200 mb-8 max-w-lg">Empowering the next generation of leaders with faith, sound knowledge, and moral integrity.</p>
-                    <div class="flex gap-3 flex-wrap">
-                        <button id="heroApplyBtn" class="bg-amber-500 hover:bg-amber-600 text-gray-900 px-6 py-3 rounded-xl font-bold text-sm transition shadow-lg">Start Application</button>
-                        <button id="heroStatusBtn" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 px-6 py-3 rounded-xl font-bold text-sm transition shadow-lg">Check Status</button>
+        <!-- ===== DYNAMIC SLIDES CAROUSEL (replaces hero) ===== -->
+        <section class="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-[#0a2e2c]">
+            <div id="slidesContainer" class="w-full h-full relative"></div>
+
+            <div class="absolute inset-0 hero-overlay pointer-events-none z-10"></div>
+
+            <div class="absolute inset-0 z-20 flex items-center pointer-events-none">
+                <div class="max-w-7xl mx-auto px-6 w-full">
+                    <div class="max-w-2xl text-white pointer-events-auto">
+                        <span class="bg-amber-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-md uppercase tracking-wider mb-4 inline-block">Excellence in Education</span>
+                        <h2 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">Integrating Islamic Morals with Modern Academic Rigor</h2>
+                        <p class="text-base md:text-lg text-gray-200 mb-8 max-w-lg">Empowering the next generation of leaders with faith, sound knowledge, and moral integrity.</p>
+                        <div class="flex gap-3 flex-wrap">
+                            <button id="heroApplyBtn" class="bg-amber-500 hover:bg-amber-600 text-gray-900 px-6 py-3 rounded-xl font-bold text-sm transition shadow-lg">Start Application</button>
+                            <button id="heroStatusBtn" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 px-6 py-3 rounded-xl font-bold text-sm transition shadow-lg">Check Status</button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <button id="prevSlide" class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition shadow-lg">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="nextSlide" class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition shadow-lg">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <div id="dotsContainer" class="absolute bottom-6 left-0 right-0 z-30 flex justify-center gap-2"></div>
         </section>
 
+        <!-- Quran Quote Section -->
         <section class="bg-[#0a2e2c] py-16 px-4 text-center text-white">
             <div class="max-w-4xl mx-auto space-y-4">
                 <p class="text-amber-400 text-3xl md:text-4xl arabic-text">"رَبِّ زِدْنِي عِلْمًا"</p>
@@ -128,6 +148,80 @@
             </div>
         </section>
 
+        <!-- ===== MISSION & VISION ===== -->
+        <section class="max-w-7xl mx-auto px-6 py-20">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-3xl font-extrabold text-gray-800">Our Purpose &amp; Direction</h3>
+                <p class="text-gray-500 mt-2 text-sm md:text-base">The foundation upon which Al-Istiqaamah Flying Wings Academy is built.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 md:p-10 rounded-3xl shadow-lg border-t-4 border-amber-500 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full -mr-16 -mt-16"></div>
+                    <div class="relative">
+                        <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 text-3xl mb-6 shadow-sm">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h4 class="text-2xl font-extrabold text-gray-800 mb-4">Our Mission</h4>
+                        <p class="text-sm md:text-base text-gray-600 leading-relaxed">
+                            Al-Istiqaamah strives to develop an enriched learning environment that promotes academic achievement, leadership, and Islamic values — nurturing learners who live by the Qur'an and the Sunnah while contributing positively to society.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 md:p-10 rounded-3xl shadow-lg border-t-4 border-emerald-600 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16"></div>
+                    <div class="relative">
+                        <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-700 text-3xl mb-6 shadow-sm">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h4 class="text-2xl font-extrabold text-gray-800 mb-4">Our Vision</h4>
+                        <p class="text-sm md:text-base text-gray-600 leading-relaxed">
+                            To cultivate a community of believers and learners who embody faith, knowledge, and inspiration — becoming beacons of guidance, excellence, and service to humanity.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CORE OBJECTIVES ===== -->
+        <section class="bg-gray-50 py-20 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12">
+                    <span class="bg-[#0a2e2c] text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 inline-block">📌 What We Stand For</span>
+                    <h3 class="text-2xl md:text-3xl font-extrabold text-gray-800">Core Objectives</h3>
+                    <p class="text-gray-500 mt-2 text-sm md:text-base">Three pillars that define our educational philosophy.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 text-center">
+                        <div class="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center text-teal-700 text-2xl mx-auto mb-5">
+                            <i class="fas fa-book-quran"></i>
+                        </div>
+                        <h4 class="font-bold text-lg text-gray-800 mb-2">Qur'anic &amp; Prophetic Knowledge</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed">Grounding every learner in the authentic teachings of the Qur'an and the Sunnah of the Prophet ﷺ.</p>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 text-center">
+                        <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 text-2xl mx-auto mb-5">
+                            <i class="fas fa-book-open-reader"></i>
+                        </div>
+                        <h4 class="font-bold text-lg text-gray-800 mb-2">Joyful Memorization</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed">Fostering a love for memorization of the Qur'an through engaging, structured, and inspiring methods.</p>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 text-center">
+                        <div class="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center text-teal-700 text-2xl mx-auto mb-5">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <h4 class="font-bold text-lg text-gray-800 mb-2">Principled Leadership</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed">Raising confident leaders who exemplify integrity, responsibility, and service to their community.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us Cards -->
         <section class="max-w-7xl mx-auto px-6 py-20">
             <div class="text-center mb-12">
                 <h3 class="text-2xl md:text-3xl font-extrabold text-gray-800">Why Choose Al-Istiqaamah?</h3>
@@ -152,6 +246,7 @@
             </div>
         </section>
 
+        <!-- CTA Banner -->
         <section class="max-w-7xl mx-auto px-6 pb-20">
             <div class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row justify-between items-center gap-6 shadow-2xl">
                 <div class="text-center md:text-left">
@@ -165,12 +260,45 @@
             </div>
         </section>
 
+        <!-- ===== RULES & REGULATIONS ===== -->
+        <section class="max-w-7xl mx-auto px-6 pb-20">
+            <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="bg-amber-50 px-8 py-6 border-b border-amber-100">
+                    <h3 class="text-2xl font-extrabold text-gray-800 flex items-center gap-3">
+                        <i class="fas fa-gavel text-amber-600"></i> Rules and Regulations
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1">Please read carefully before applying.</p>
+                </div>
+                <div class="p-8">
+                    <ol class="list-decimal pl-6 space-y-3 text-sm md:text-base text-gray-700">
+                        <li>Adherence to regular payment of fees and forms dues.</li>
+                        <li>Parents/Guardians should be vigilant to their children/wards concerning punctuality.</li>
+                        <li>Obtain the school uniform for the section as prescribed.</li>
+                        <li>No applicant would be allowed to attend classes without being duly registered.</li>
+                        <li>Cell-Phones and lunch money are not allowed; food should be provided before stepping into the school premises.</li>
+                        <li>No student should leave the school before closing without a genuine reason from the parent/guardian.</li>
+                    </ol>
+
+                    <div class="mt-8 bg-gray-50 p-6 rounded-2xl border-l-4 border-amber-500">
+                        <p class="font-bold text-gray-800 mb-2">NB:</p>
+                        <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                            <li>School uniform should be obtained from the school.</li>
+                            <li>Class placement is based on performance and age.</li>
+                            <li>Returning this form means accepting the above rules.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
         <footer class="bg-slate-900 text-white text-center py-4 mt-auto">
             <p class="text-xs md:text-sm">© 2026 Al‑Istiqaamah Flying Wings Academy | No. 10 Federal Government Layout, Samaru, Zaria | <i class="fas fa-microchip"></i> Powered by Arrahmahtelecommunications</p>
         </footer>
     </div>
 
     <!-- ===== MODALS ===== -->
+
     <div id="loginModal" class="modal">
         <div class="modal-content relative" style="max-width:450px;">
             <span class="close-modal-x" onclick="closeModal('loginModal')">&times;</span>
@@ -746,27 +874,43 @@
         //  CAROUSEL
         // ============================================================
         function updateCarouselData() {
-            carouselSlides = schoolData.slides.length ? schoolData.slides : [{ image_url: 'https://placehold.co/1200x500?text=Al-Istiqaamah+Flying+Wings',
-                caption: 'Empowering Minds & Souls' }];
+            carouselSlides = schoolData.slides.length
+                ? schoolData.slides
+                : [{ image_url: 'https://placehold.co/1920x800/0a2e2c/f59e0b?text=Al-Istiqaamah+Flying+Wings+Academy',
+                     caption: 'Empowering Minds & Souls' }];
             if (currentSlideIdx >= carouselSlides.length) currentSlideIdx = 0;
             renderCarousel();
             if (carouselInterval) clearInterval(carouselInterval);
-            if (carouselSlides.length > 1) carouselInterval = setInterval(nextSlide, 5000);
+            if (carouselSlides.length > 1) carouselInterval = setInterval(nextSlide, 6000);
         }
 
         function renderCarousel() {
             const container = document.getElementById('slidesContainer');
             const dotsContainer = document.getElementById('dotsContainer');
             if (!container) return;
-            const slide = carouselSlides[currentSlideIdx] || carouselSlides[0];
-            container.innerHTML =
-                `<img src="${slide.image_url}" class="w-full h-full object-cover" alt="slide" onerror="this.src='https://placehold.co/1200x500?text=Image+Not+Found'"><div class="absolute bottom-4 left-0 right-0 text-center text-white bg-black/50 p-2">${escapeHtml(slide.caption||'')}</div>`;
+
+            // Build all slides, show only the active one with fade transition
+            container.innerHTML = carouselSlides.map(function(slide, i) {
+                const isActive = i === currentSlideIdx;
+                return `
+                    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-[5]' : 'opacity-0 z-0'}">
+                        <img src="${slide.image_url}"
+                             class="w-full h-full object-cover"
+                             alt="${escapeHtml(slide.caption || 'School Slide')}"
+                             onerror="this.src='https://placehold.co/1920x800/0a2e2c/f59e0b?text=Al-Istiqaamah+Flying+Wings'">
+                    </div>`;
+            }).join('');
+
+            // Dots
             if (dotsContainer) {
                 dotsContainer.innerHTML = carouselSlides.map(function(_, i) {
                     return `<span class="dot ${i===currentSlideIdx?'active':''}"></span>`;
                 }).join('');
-                document.querySelectorAll('.dot').forEach(function(dot, i) {
-                    dot.addEventListener('click', function() { currentSlideIdx = i; renderCarousel(); });
+                document.querySelectorAll('#dotsContainer .dot').forEach(function(dot, i) {
+                    dot.addEventListener('click', function() {
+                        currentSlideIdx = i;
+                        renderCarousel();
+                    });
                 });
             }
         }
@@ -3220,4 +3364,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
